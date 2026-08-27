@@ -91,6 +91,8 @@ class CoreHktIntegrationTests(unittest.IsolatedAsyncioTestCase):
             except subprocess.TimeoutExpired:
                 process.kill()
                 process.wait(timeout=2)
+            if process.stdout is not None:
+                process.stdout.close()
         self.temp.cleanup()
 
     async def test_hot_hkt_is_legacy_only_not_b_or_persistence(self) -> None:
@@ -132,13 +134,27 @@ class CoreHktIntegrationTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(overlap_status["unique_pinned_symbols"], 2)
             self.assertEqual(overlap_status["active_upstream_symbols"], 2)
 
+            # Moving the most recent monitored symbol into hot-only service
+            # must make its old diagnostic raw frame unavailable to 8421.
+            await ws.send(json.dumps({"op": "set_watchlist", "symbols": ["513520.SH"]}))
+            watch_ack: dict[str, object] = {}
+            while watch_ack.get("type") != "watchlist_ack":
+                watch_ack = json.loads(await asyncio.wait_for(ws.recv(), 2))
+            self.assertTrue(watch_ack["accepted"])
+            await ws.send(json.dumps({"op": "raw_snapshot"}))
+            raw: dict[str, object] = {}
+            while raw.get("type") != "raw_snapshot":
+                raw = json.loads(await asyncio.wait_for(ws.recv(), 2))
+            if raw.get("available"):
+                self.assertEqual(raw.get("routed_symbol"), "513520.SH")
+
         self.assertIn("159866.SZ", summary_symbols)
         self.assertNotIn("02800.HK", summary_symbols)
         self.assertGreaterEqual(int(overlap_status.get("l1_hot_ready", 0)), 1)
 
         reader, writer = await asyncio.open_connection("127.0.0.1", self.legacy_port)
         hello = json.loads(await reader.readline())
-        self.assertEqual(hello["defaults"], ["159866.SZ"])
+        self.assertEqual(hello["defaults"], ["513520.SH"])
         writer.write(json.dumps({"v": 1, "t": "subscribe", "id": "hkt",
                                  "symbols": ["02800.HK"], "interval_ms": 0}).encode() + b"\n")
         await writer.drain()
@@ -160,6 +176,8 @@ class CoreHktIntegrationTests(unittest.IsolatedAsyncioTestCase):
         for process in (self.adapter, self.core):
             process.terminate()
             process.wait(timeout=4)
+            if process.stdout is not None:
+                process.stdout.close()
         persisted_lines: list[bytes] = []
         for path in (self.root / "data").glob("*.zst"):
             persisted_lines.extend(

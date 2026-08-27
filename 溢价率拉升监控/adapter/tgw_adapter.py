@@ -393,8 +393,9 @@ class Adapter:
             # Stable sub-second spread prevents a large rejected universe from
             # retrying on one exact timer edge while remaining deterministic.
             jitter = (sum(symbol.encode("ascii", errors="ignore")) % 1000) / 1000.0
-            self.symbol_retries[symbol] = (now + delay + jitter, delay, failures, str(result))
-            maximum_delay = max(maximum_delay, delay + jitter)
+            effective_delay = min(MAX_RECONCILE_RETRY_SEC, delay + jitter)
+            self.symbol_retries[symbol] = (now + effective_delay, delay, failures, str(result))
+            maximum_delay = max(maximum_delay, effective_delay)
             maximum_failures = max(maximum_failures, failures)
         self._status("subscribe_batch_backoff", {
             "symbols": len(symbols), "result": result, "max_failures": maximum_failures,

@@ -238,6 +238,27 @@ private Q_SLOTS:
         QCOMPARE(legacy.value(QStringLiteral("o")).toDouble(), 0.0);
         QCOMPARE(legacy.value(QStringLiteral("bp")).toArray().size(), 5);
 
+        const QJsonObject backwards{{"2", "02800"}, {"3", 20'260'827'154'935'000LL},
+                                    {"11", 1'000}};
+        const auto rejectedBackwards = parser.consume(
+            hktFrameFor(QStringLiteral("hkt-live"), true, backwards));
+        QVERIFY(!rejectedBackwards.snapshot.has_value());
+        QVERIFY(rejectedBackwards.issues.contains(QStringLiteral("hkt_orig_time_backwards")));
+
+        const QJsonObject volumeBackwards{{"2", "02800"}, {"3", 20'260'827'154'937'000LL},
+                                          {"5", 1}};
+        const auto rejectedVolume = parser.consume(
+            hktFrameFor(QStringLiteral("hkt-live"), true, volumeBackwards));
+        QVERIFY(!rejectedVolume.snapshot.has_value());
+        QVERIFY(rejectedVolume.issues.contains(QStringLiteral("hkt_total_volume_backwards")));
+
+        const QJsonObject malformedDelta{{"2", "02800"}, {"3", 20'260'827'154'938'000LL},
+                                         {"12", "26090000|0|0|0"}};
+        const auto rejectedMalformed = parser.consume(
+            hktFrameFor(QStringLiteral("hkt-live"), true, malformedDelta));
+        QVERIFY(!rejectedMalformed.snapshot.has_value());
+        QVERIFY(rejectedMalformed.issues.contains(QStringLiteral("bid_price_length_4")));
+
         const QJsonObject delta{{"2", "02800"}, {"3", 20'260'827'155'001'000LL},
                                 {"5", 74'787'091'300LL}, {"11", 26'090'000},
                                 {"12", "26090000|0|0|0|0"},
@@ -269,6 +290,18 @@ private Q_SLOTS:
         result = parser.consume(hktFrameFor(QStringLiteral("bad-book"), false, wrongBook));
         QVERIFY(!result.snapshot.has_value());
         QVERIFY(result.issues.contains(QStringLiteral("bid_price_length_4")));
+        const auto deltaAfterInvalidFull = parser.consume(
+            hktFrameFor(QStringLiteral("bad-book"), true,
+                        QJsonObject{{"2", "02800"}, {"3", 20'260'827'154'937'000LL},
+                                    {"11", 26'090'000}}));
+        QVERIFY(!deltaAfterInvalidFull.snapshot.has_value());
+        QVERIFY(deltaAfterInvalidFull.waitingForFull);
+
+        QJsonObject wrongVariety = hktFullData();
+        wrongVariety.insert(QStringLiteral("23"), QStringLiteral("six"));
+        result = parser.consume(hktFrameFor(QStringLiteral("bad-variety"), false, wrongVariety));
+        QVERIFY(!result.snapshot.has_value());
+        QVERIFY(result.issues.contains(QStringLiteral("variety_category_not_int64")));
     }
 
     void lofWithoutIopvStillProducesSnapshotButNeverSignals()

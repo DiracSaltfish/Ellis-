@@ -259,7 +259,7 @@ void LegacyL1Server::flushPending()
         Client &client = it.value();
         const auto pending = client.pendingSymbols.values();
         for (const QString &symbol : pending) {
-            if (!client.symbols.contains(symbol) || !cache_.contains(symbol)) {
+            if (!client.symbols.contains(symbol) || !ready_.contains(symbol) || !cache_.contains(symbol)) {
                 client.pendingSymbols.remove(symbol);
                 continue;
             }
@@ -276,7 +276,7 @@ void LegacyL1Server::flushPending()
 void LegacyL1Server::sendInitial(Client &client, const QStringList &symbols)
 {
     for (const QString &symbol : symbols) {
-        if (cache_.contains(symbol)) {
+        if (ready_.contains(symbol) && cache_.contains(symbol)) {
             sendJson(client.socket, {{"v", 1}, {"t", "l1"}, {"seq", static_cast<qint64>(++sequence_)},
                                      {"ts", QDateTime::currentMSecsSinceEpoch()},
                                      {"books", QJsonArray{cache_.value(symbol).toLegacyBookJson()}}});
@@ -386,7 +386,15 @@ QStringList LegacyL1Server::normalizedSymbols(const QJsonValue &value, QStringLi
 void LegacyL1Server::setMarketOnline(bool online)
 {
     marketOnline_ = online;
-    if (!online) ready_.clear();
+    if (!online) {
+        ready_.clear();
+        cache_.clear();
+        pendingTimer_.stop();
+        for (auto it = clients_.begin(); it != clients_.end(); ++it) {
+            it->pendingSymbols.clear();
+            it->lastSentMs.clear();
+        }
+    }
 }
 
 bool LegacyL1Server::replaceDefaultSymbols(const QStringList &symbols, QString *error)

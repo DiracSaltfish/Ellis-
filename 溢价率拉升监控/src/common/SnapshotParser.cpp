@@ -118,21 +118,56 @@ ParseResult SnapshotParser::consume(const BridgeFrame &frame, bool replay)
     if (activeSession_.isEmpty()) activeSession_ = frame.sessionId;
 
     const QString key = identityKey(frame.sessionId, symbol, frame.tag);
-    RawState &state = states_[key];
+    const auto existing = states_.constFind(key);
+    RawState candidate;
     if (!frame.isDelta) {
-        state.data = incoming;
-        state.sessionId = frame.sessionId;
-        state.symbol = symbol;
-        state.hasFull = true;
+        candidate.data = incoming;
+        candidate.sessionId = frame.sessionId;
+        candidate.symbol = symbol;
+        candidate.hasFull = true;
     } else {
-        if (!state.hasFull || state.sessionId != frame.sessionId) {
+        if (existing == states_.cend() || !existing->hasFull || existing->sessionId != frame.sessionId) {
             result.waitingForFull = true;
             result.issues.append(QStringLiteral("delta_before_full"));
             return result;
         }
-        state.data = mergedObject(state.data, incoming);
+        candidate = existing.value();
+        if (frame.tag == QStringLiteral("16")) {
+            qint64 previousOrigTime = 0;
+            qint64 incomingOrigTime = 0;
+            if (integerValue(candidate.data, QStringLiteral("orig_time"), QString::fromLatin1(HOrigTime),
+                             &previousOrigTime)
+                && integerValue(incoming, QStringLiteral("orig_time"), QString::fromLatin1(HOrigTime),
+                                &incomingOrigTime)
+                && incomingOrigTime < previousOrigTime) {
+                result.issues.append(QStringLiteral("hkt_orig_time_backwards"));
+                return result;
+            }
+            auto rejectsBackwardCounter = [&](const char *numericKey, const QString &issue) {
+                if (!incoming.contains(QString::fromLatin1(numericKey))) return false;
+                qint64 previous = 0;
+                qint64 current = 0;
+                if (!integerValue(candidate.data, {}, QString::fromLatin1(numericKey), &previous)
+                    || !integerValue(incoming, {}, QString::fromLatin1(numericKey), &current)
+                    || current >= previous) {
+                    return false;
+                }
+                result.issues.append(issue);
+                return true;
+            };
+            if (rejectsBackwardCounter(HTotalVolume, QStringLiteral("hkt_total_volume_backwards"))
+                || rejectsBackwardCounter(HTotalAmount, QStringLiteral("hkt_total_amount_backwards"))) {
+                return result;
+            }
+        }
+        candidate.data = mergedObject(candidate.data, incoming);
     }
-    return mapSnapshot(frame, state.data, replay);
+    ParseResult mapped = mapSnapshot(frame, candidate.data, replay);
+    // A malformed frame is quarantined as one frame.  In particular, HKT
+    // structural validation happens after full/delta merging, so the candidate
+    // must not replace the last known-good state until mapping succeeds.
+    if (mapped.snapshot.has_value()) states_.insert(key, std::move(candidate));
+    return mapped;
 }
 
 void SnapshotParser::resetSession(const QString &sessionId)
@@ -390,6 +425,10 @@ ParseResult SnapshotParser::mapHktSnapshot(const BridgeFrame &frame, const QJson
         structureValid = false;
     }
     required(QStringLiteral("orig_time"), HOrigTime, &quote.origTime);
+    if (quote.origTime < 20'000'101'000'000'000LL || quote.origTime > 29'991'231'235'959'999LL) {
+        quote.qualityIssues.append(QStringLiteral("hkt_orig_time_format_invalid"));
+        structureValid = false;
+    }
     required(QStringLiteral("total_volume_trade"), HTotalVolume, &quote.totalVolumeE2);
     required(QStringLiteral("total_value_trade"), HTotalAmount, &quote.totalAmountE5);
     required(QStringLiteral("pre_close_price"), HPreClose, &quote.preClosePriceE6);
@@ -400,6 +439,16 @@ ParseResult SnapshotParser::mapHktSnapshot(const BridgeFrame &frame, const QJson
     required(QStringLiteral("ref_price"), HReference, &quote.referencePriceE6);
     required(QStringLiteral("high_limited"), HHighLimit, &quote.highLimitE6);
     required(QStringLiteral("low_limited"), HLowLimit, &quote.lowLimitE6);
+    qint64 ignoredRestriction19 = 0;
+    qint64 ignoredRestriction20 = 0;
+    qint64 ignoredRestriction21 = 0;
+    qint64 ignoredRestriction22 = 0;
+    qint64 ignoredVariety = 0;
+    required(QStringLiteral("hkt_field_19"), "19", &ignoredRestriction19);
+    required(QStringLiteral("hkt_field_20"), "20", &ignoredRestriction20);
+    required(QStringLiteral("hkt_field_21"), "21", &ignoredRestriction21);
+    required(QStringLiteral("hkt_field_22"), "22", &ignoredRestriction22);
+    required(QStringLiteral("variety_category"), "23", &ignoredVariety);
     structureValid = integerArray(data, QStringLiteral("bid_price"), QString::fromLatin1(HBidPrice),
                                   &quote.bidPricesE6, &quote.qualityIssues, 5) && structureValid;
     structureValid = integerArray(data, QStringLiteral("offer_price"), QString::fromLatin1(HAskPrice),
@@ -423,7 +472,8 @@ ParseResult SnapshotParser::mapHktSnapshot(const BridgeFrame &frame, const QJson
     auto invalidPrice = [](qint64 price) { return price < 0 || (price > 0 && price % 1'000 != 0); };
     bool priceInvalid = invalidPrice(quote.lastPriceE6) || invalidPrice(quote.nominalPriceE6)
                      || invalidPrice(quote.preClosePriceE6) || invalidPrice(quote.highPriceE6)
-                     || invalidPrice(quote.lowPriceE6);
+                     || invalidPrice(quote.lowPriceE6) || invalidPrice(quote.referencePriceE6)
+                     || invalidPrice(quote.highLimitE6) || invalidPrice(quote.lowLimitE6);
     for (int i = 0; i < 5; ++i) {
         priceInvalid = priceInvalid || invalidPrice(quote.bidPricesE6[static_cast<size_t>(i)])
                                     || invalidPrice(quote.askPricesE6[static_cast<size_t>(i)]);

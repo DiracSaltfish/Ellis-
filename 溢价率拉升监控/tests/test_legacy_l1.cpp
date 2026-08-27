@@ -178,6 +178,54 @@ private Q_SLOTS:
         if (client.state() != QAbstractSocket::UnconnectedState) client.waitForDisconnected(1'000);
         QCoreApplication::processEvents();
     }
+
+    void reconnectInvalidationNeverServesAnOldInitialFrame()
+    {
+        LegacyL1Server::Limits limits;
+        limits.maxClients = 3;
+        limits.maxSymbolsPerClient = 4;
+        limits.maxMaintainedSymbols = 4;
+        LegacyL1Server server({QStringLiteral("159866.SZ")}, {}, limits);
+        QString error;
+        QVERIFY2(server.listen(QHostAddress::LocalHost, 0, &error), qPrintable(error));
+
+        QuoteSnapshot oldSnapshot;
+        oldSnapshot.symbol = QStringLiteral("159866.SZ");
+        oldSnapshot.lastPriceE6 = 1'000'000;
+        oldSnapshot.bidPricesE6[0] = 999'000;
+        oldSnapshot.askPricesE6[0] = 1'001'000;
+        oldSnapshot.levelCount = 5;
+        server.setMarketOnline(true);
+        server.publish(oldSnapshot);
+        server.setMarketOnline(false);
+
+        QTcpSocket client;
+        client.connectToHost(QHostAddress::LocalHost, server.listeningPort());
+        QVERIFY(client.waitForConnected(2'000));
+        QByteArray buffer;
+        QVERIFY(!readType(client, buffer, QStringLiteral("hello")).isEmpty());
+        client.write(QByteArrayLiteral(
+            "{\"v\":1,\"t\":\"subscribe\",\"symbols\":[\"159866.SZ\"],\"interval_ms\":60000}\n"));
+        client.flush();
+        QVERIFY(!readType(client, buffer, QStringLiteral("ack")).isEmpty());
+        const QJsonObject staleInitial = readType(client, buffer, QStringLiteral("l1"));
+        QVERIFY(staleInitial.value(QStringLiteral("books")).toArray().isEmpty());
+        QVERIFY(staleInitial.value(QStringLiteral("missing")).toArray().contains(QStringLiteral("159866.SZ")));
+
+        QuoteSnapshot freshSnapshot = oldSnapshot;
+        freshSnapshot.lastPriceE6 = 1'100'000;
+        freshSnapshot.bidPricesE6[0] = 1'099'000;
+        freshSnapshot.askPricesE6[0] = 1'101'000;
+        server.setMarketOnline(true);
+        server.publish(freshSnapshot);
+        const QJsonObject fresh = readType(client, buffer, QStringLiteral("l1"));
+        QCOMPARE(fresh.value(QStringLiteral("books")).toArray().first().toObject()
+                     .value(QStringLiteral("lp")).toDouble(), 1.1);
+
+        client.disconnectFromHost();
+        if (client.state() != QAbstractSocket::UnconnectedState) client.waitForDisconnected(1'000);
+        QCoreApplication::processEvents();
+    }
 };
 
 QTEST_MAIN(LegacyL1Tests)

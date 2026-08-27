@@ -238,7 +238,11 @@ bool CoreServer::loadHotlist(QString *error)
             if (error) *error = QStringLiteral("HKT symbol %1 requires enable_hkt_l1=true").arg(symbol);
             return false;
         }
-        if (!hotSymbols_.contains(symbol)) hotSymbols_.append(symbol);
+        if (hotSymbols_.contains(symbol)) {
+            if (error) *error = QStringLiteral("duplicate L1 hot-list symbol: %1").arg(symbol);
+            return false;
+        }
+        hotSymbols_.append(symbol);
     }
     QSet<QString> unique(fixedSymbols_.begin(), fixedSymbols_.end());
     unique.unite(QSet<QString>(hotSymbols_.begin(), hotSymbols_.end()));
@@ -365,6 +369,7 @@ void CoreServer::acceptAdapter()
     lastAdapterSymbols_.clear();
     lastAdapterQuotesDesired_ = false;
     cache_.clear();
+    latestRawRecord_ = {};
     for (QuoteWorker *worker : workers_) {
         QMetaObject::invokeMethod(worker, [worker] { worker->reset(); }, Qt::QueuedConnection);
     }
@@ -381,6 +386,7 @@ void CoreServer::acceptAdapter()
         lastAdapterSequence_ = 0;
         adapterSession_.clear();
         cache_.clear();
+        latestRawRecord_ = {};
         for (QuoteWorker *worker : workers_) QMetaObject::invokeMethod(worker, [worker] { worker->reset(); }, Qt::QueuedConnection);
         legacy_->setMarketOnline(false);
         broadcastSummary(statusObject());
@@ -412,6 +418,7 @@ void CoreServer::handleFrame(const BridgeFrame &frame)
         ++adapterGapCount_;
         ++publicationGeneration_;
         cache_.clear();
+        latestRawRecord_ = {};
         const QString session = frame.sessionId;
         for (QuoteWorker *worker : workers_) {
             QMetaObject::invokeMethod(worker, [worker, session] { worker->reset(session); }, Qt::QueuedConnection);
@@ -428,22 +435,25 @@ void CoreServer::handleFrame(const BridgeFrame &frame)
     if (!adapterSession_.isEmpty() && frame.sessionId != adapterSession_) {
         ++publicationGeneration_;
         cache_.clear();
+        latestRawRecord_ = {};
         for (QuoteWorker *worker : workers_) {
             const QString session = frame.sessionId;
             QMetaObject::invokeMethod(worker, [worker, session] { worker->reset(session); }, Qt::QueuedConnection);
         }
+        if (legacy_) legacy_->setMarketOnline(false);
     }
     adapterSession_ = frame.sessionId;
     if (frame.kind == BridgeFrame::Kind::MarketEvent) {
         const QString routedSymbol = symbolHint(frame);
         const bool retainMarketEvent = shouldPersistMarketEvent(routedSymbol);
         QJsonObject rawRecord{{"adapter_seq", static_cast<qint64>(frame.sequence)}, {"session", frame.sessionId},
+                              {"routed_symbol", routedSymbol},
                               {"receive_wall_ns", frame.receiveWallNs}, {"receive_monotonic_ns", frame.receiveMonotonicNs},
                               {"full", !frame.isDelta}, {"delta", frame.isDelta}, {"tag", frame.tag},
                               {"sdk_queue_depth", static_cast<int>(frame.sdkQueueDepth)},
                               {"core_observed_adapter_gaps", static_cast<qint64>(adapterGapCount_)},
                               {"event", QJsonDocument::fromJson(frame.payloadJson).object()}};
-        latestRawRecord_ = rawRecord;
+        if (retainMarketEvent) latestRawRecord_ = rawRecord;
         if (retainMarketEvent && !historicalWritesStopped_ && persistencePending_.load() < 10'000) {
             const int pending = persistencePending_.fetch_add(1) + 1;
             persistencePeak_.store(std::max(persistencePeak_.load(), pending));
@@ -569,9 +579,11 @@ void CoreServer::handleSummaryMessage(QWebSocket *socket, const QString &message
     if (request.value(QStringLiteral("op")).toString() == QStringLiteral("sync")) sendSummarySync(socket);
     else if (request.value(QStringLiteral("op")).toString() == QStringLiteral("status")) sendJson(socket, statusObject());
     else if (request.value(QStringLiteral("op")).toString() == QStringLiteral("raw_snapshot")) {
-        QJsonObject response = latestRawRecord_;
+        const QString routedSymbol = latestRawRecord_.value(QStringLiteral("routed_symbol")).toString();
+        const bool available = !routedSymbol.isEmpty() && shouldPersistMarketEvent(routedSymbol);
+        QJsonObject response = available ? latestRawRecord_ : QJsonObject{};
         response.insert(QStringLiteral("type"), QStringLiteral("raw_snapshot"));
-        response.insert(QStringLiteral("available"), !latestRawRecord_.isEmpty());
+        response.insert(QStringLiteral("available"), available);
         sendJson(socket, response);
     } else if (request.value(QStringLiteral("op")).toString() == QStringLiteral("set_watchlist")) {
         replaceWatchlist(socket, request.value(QStringLiteral("symbols")).toArray());
@@ -654,6 +666,8 @@ void CoreServer::replaceWatchlist(QWebSocket *socket, const QJsonArray &symbols)
     const QSet<QString> removed = oldSet - newSet;
     if (oldSet != newSet) ++publicationGeneration_;
     fixedSymbols_ = replacement;
+    const QString latestRawSymbol = latestRawRecord_.value(QStringLiteral("routed_symbol")).toString();
+    if (!latestRawSymbol.isEmpty() && !shouldPersistMarketEvent(latestRawSymbol)) latestRawRecord_ = {};
     for (const QString &symbol : fixedSymbols_) {
         if (names_.value(symbol).isEmpty()) names_.insert(symbol, symbol.left(6));
     }
@@ -737,6 +751,8 @@ void CoreServer::replaceHotlist(QWebSocket *socket, const QJsonArray &symbols)
     }
     const QSet<QString> oldSet(hotSymbols_.begin(), hotSymbols_.end());
     hotSymbols_ = replacement;
+    const QString latestRawSymbol = latestRawRecord_.value(QStringLiteral("routed_symbol")).toString();
+    if (!latestRawSymbol.isEmpty() && !shouldPersistMarketEvent(latestRawSymbol)) latestRawRecord_ = {};
     for (const QString &symbol : hotSymbols_) {
         if (names_.value(symbol).isEmpty()) names_.insert(symbol, symbol.left(symbol.indexOf(u'.')));
     }
@@ -919,6 +935,9 @@ void CoreServer::sendAdapterControl(const QStringList &symbols)
 
     const QSet<QString> released = lastAdapterSymbols_ - active;
     if (!released.isEmpty()) ++publicationGeneration_;
+    if (released.contains(latestRawRecord_.value(QStringLiteral("routed_symbol")).toString())) {
+        latestRawRecord_ = {};
+    }
     for (const QString &symbol : released) {
         cache_.remove(symbol);
         for (QuoteWorker *worker : workers_) {
