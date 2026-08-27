@@ -18,6 +18,8 @@ struct ScheduleState {
     };
 
     Phase phase = Phase::Offline;
+    bool cnQuotesDesired = false;
+    bool hkQuotesDesired = false;
     bool quotesDesired = false;
     bool allow30SecondSignal = false;
     bool allow300SecondSignal = false;
@@ -32,4 +34,3 @@ public:
 };
 
 } // namespace premium
-

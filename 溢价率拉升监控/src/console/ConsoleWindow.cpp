@@ -87,6 +87,7 @@ ConsoleWindow::ConsoleWindow(QString projectRoot, bool autoStart, QWidget *paren
 {
     buildUi();
     loadWatchlistEditor();
+    loadHotlistEditor();
     auto bind = [this](QProcess &process, const QString &name) {
         connect(&process, &QProcess::readyReadStandardOutput, this, [&process, this, name] { appendLog(name, process.readAllStandardOutput()); });
         connect(&process, &QProcess::readyReadStandardError, this, [&process, this, name] { appendLog(name, process.readAllStandardError()); });
@@ -108,6 +109,7 @@ ConsoleWindow::ConsoleWindow(QString projectRoot, bool autoStart, QWidget *paren
     connect(&metrics_, &QWebSocket::connected, this, [this] {
         metrics_.sendTextMessage(QStringLiteral("{\"op\":\"status\"}"));
         sendWatchlistToCore();
+        sendHotlistToCore();
     });
     signalSoundTimer_.setInterval(350);
     connect(&signalSoundTimer_, &QTimer::timeout, this, [this] {
@@ -382,6 +384,56 @@ void ConsoleWindow::buildUi()
     watchPageLayout->addWidget(watchBox);
     workspaceTabs_->addTab(watchPage, QStringLiteral("观察标的管理"));
 
+    auto *hotPage = new QWidget(workspaceTabs_);
+    auto *hotPageLayout = new QVBoxLayout(hotPage);
+    auto *hotBox = new QGroupBox(QStringLiteral("额外L1行情维护标的 · 只预热内存快照与19195转发 · 不计算信号、不落盘"), hotPage);
+    auto *hotLayout = new QVBoxLayout(hotBox);
+    auto *hotControls = new QHBoxLayout;
+    hotControls->addWidget(new QLabel(QStringLiteral("证券代码")));
+    hotCode_ = new QLineEdit;
+    hotCode_->setObjectName(QStringLiteral("hotCode"));
+    hotCode_->setPlaceholderText(QStringLiteral("SH/SZ 6位；HK 5位，例如 02800"));
+    hotCode_->setMaxLength(6);
+    hotCode_->setValidator(new QRegularExpressionValidator(QRegularExpression(QStringLiteral("[0-9]{0,6}")), hotCode_));
+    hotMarket_ = new QComboBox;
+    hotMarket_->setObjectName(QStringLiteral("hotMarket"));
+    hotMarket_->addItem(QStringLiteral("上海 SH"), QStringLiteral("SH"));
+    hotMarket_->addItem(QStringLiteral("深圳 SZ"), QStringLiteral("SZ"));
+    hotMarket_->addItem(QStringLiteral("港股通 HK（固定深股通路由）"), QStringLiteral("HK"));
+    auto *addHot = new QPushButton(QStringLiteral("添加"));
+    auto *removeHot = new QPushButton(QStringLiteral("移除选中"));
+    hotControls->addWidget(hotCode_);
+    hotControls->addWidget(hotMarket_);
+    hotControls->addWidget(addHot);
+    hotControls->addWidget(removeHot);
+    hotControls->addStretch();
+    hotLayout->addLayout(hotControls);
+    hotTable_ = new QTableWidget(0, 4);
+    hotTable_->setObjectName(QStringLiteral("hotL1Table"));
+    hotTable_->setHorizontalHeaderLabels({QStringLiteral("标的"), QStringLiteral("业务市场 / 路由"),
+                                          QStringLiteral("角色"), QStringLiteral("名称")});
+    hotTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
+    hotTable_->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    hotTable_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    hotTable_->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    hotTable_->horizontalHeader()->setStretchLastSection(true);
+    hotTable_->verticalHeader()->setVisible(false);
+    hotTable_->verticalHeader()->setDefaultSectionSize(32);
+    hotTable_->setAlternatingRowColors(true);
+    hotLayout->addWidget(hotTable_);
+    hotPageLayout->addWidget(hotBox);
+    workspaceTabs_->addTab(hotPage, QStringLiteral("额外L1行情维护标的"));
+    connect(addHot, &QPushButton::clicked, this, &ConsoleWindow::addHotSymbol);
+    connect(hotCode_, &QLineEdit::returnPressed, this, &ConsoleWindow::addHotSymbol);
+    connect(removeHot, &QPushButton::clicked, this, &ConsoleWindow::removeSelectedHotSymbols);
+    connect(hotMarket_, &QComboBox::currentIndexChanged, this, [this] {
+        const bool hk = hotMarket_->currentData().toString() == QStringLiteral("HK");
+        hotCode_->setMaxLength(hk ? 5 : 6);
+        hotCode_->setPlaceholderText(hk ? QStringLiteral("5位港股代码，例如 02800")
+                                        : QStringLiteral("6位沪深代码，例如 513100"));
+        hotCode_->clear();
+    });
+
     log_ = new QPlainTextEdit(workspaceTabs_);
     log_->setObjectName(QStringLiteral("operationLog"));
     log_->setReadOnly(true);
@@ -410,12 +462,12 @@ void ConsoleWindow::buildUi()
         QTabBar::tab { color:#526074; background:#eaf0f7; border:1px solid #dce3ec;
                        padding:9px 18px; min-width:120px; font-weight:700; }
         QTabBar::tab:selected { color:white; background:#2f6feb; border-color:#2f6feb; }
-        QTableWidget#monitorTable, QTableWidget#signalTable, QTableWidget#signalHistoryTable {
+        QTableWidget#monitorTable, QTableWidget#hotL1Table, QTableWidget#signalTable, QTableWidget#signalHistoryTable {
                       color:#172033; background:white; alternate-background-color:#f8fafc;
                       border:1px solid #dce3ec; border-radius:9px; gridline-color:#e2e8f0; }
-        QTableWidget#monitorTable::item, QTableWidget#signalTable::item,
+        QTableWidget#monitorTable::item, QTableWidget#hotL1Table::item, QTableWidget#signalTable::item,
         QTableWidget#signalHistoryTable::item { padding:6px; }
-        QTableWidget#monitorTable::item:selected, QTableWidget#signalTable::item:selected,
+        QTableWidget#monitorTable::item:selected, QTableWidget#hotL1Table::item:selected, QTableWidget#signalTable::item:selected,
         QTableWidget#signalHistoryTable::item:selected { background:#dce9ff; color:#172033; }
         QHeaderView::section { background:#eef2f7; color:#526074; border:none;
                       border-right:1px solid #dce3ec; border-bottom:1px solid #dce3ec;
@@ -467,20 +519,45 @@ void ConsoleWindow::handleMetricsMessage(const QString &message)
     } else if (type == QStringLiteral("raw_snapshot")) {
         appendLog(QStringLiteral("RAW"), QJsonDocument(object).toJson(QJsonDocument::Indented));
     } else if (type == QStringLiteral("watchlist_ack")) {
+        const QJsonArray authoritative = object.value(QStringLiteral("symbols")).toArray();
+        if (!authoritative.isEmpty()) {
+            watchSymbols_.clear();
+            for (const QJsonValue &value : authoritative) watchSymbols_.append(value.toString());
+            refreshWatchlistTable();
+            refreshHotlistTable();
+        }
         if (object.value(QStringLiteral("accepted")).toBool()) {
             appendLog(QStringLiteral("WATCHLIST"),
                       QStringLiteral("A-core 已应用 %1 个观察标的\n")
                           .arg(object.value(QStringLiteral("count")).toInt()).toUtf8());
         } else {
             appendLog(QStringLiteral("WATCHLIST"),
-                      QStringLiteral("严重：配置已保存，但 A-core 拒绝运行时更新：%1\n")
+                      QStringLiteral("A-core 拒绝观察列表更新，UI已回滚为服务端权威列表：%1\n")
+                          .arg(object.value(QStringLiteral("error")).toString()).toUtf8());
+        }
+    } else if (type == QStringLiteral("l1_hotlist_ack")) {
+        hotSymbols_.clear();
+        for (const QJsonValue &value : object.value(QStringLiteral("symbols")).toArray()) {
+            hotSymbols_.append(value.toString());
+        }
+        refreshHotlistTable();
+        if (object.value(QStringLiteral("accepted")).toBool()) {
+            appendLog(QStringLiteral("L1-HOT"),
+                      QStringLiteral("A-core 已原子保存并应用 %1 个额外 L1 热维护标的\n")
+                          .arg(object.value(QStringLiteral("count")).toInt()).toUtf8());
+        } else {
+            appendLog(QStringLiteral("L1-HOT"),
+                      QStringLiteral("A-core 拒绝 L1 热维护列表，UI已回滚：%1\n")
                           .arg(object.value(QStringLiteral("error")).toString()).toUtf8());
         }
     } else if (type == QStringLiteral("status")) {
         const double diskGiB = object.value(QStringLiteral("disk_available_bytes")).toInteger() / 1073741824.0;
-        metricsState_->setText(QStringLiteral("阶段 %1 · 就绪 %2 · SDK队列 %3 · 计算 %4 · 落盘 %5 · 隔离 %6 · 核心延迟 %7 ms · 磁盘 %8 GiB%9")
+        metricsState_->setText(QStringLiteral("阶段 %1 · 观察就绪 %2 · L1热维护 %3/%4 · 上游活跃 %5 · SDK队列 %6 · 计算 %7 · 落盘 %8 · 隔离 %9 · 延迟 %10 ms · 磁盘 %11 GiB%12")
                                .arg(object.value(QStringLiteral("phase")).toString())
                                .arg(object.value(QStringLiteral("ready_symbols")).toInt())
+                               .arg(object.value(QStringLiteral("l1_hot_ready")).toInt())
+                               .arg(object.value(QStringLiteral("l1_hot_symbols")).toInt())
+                               .arg(object.value(QStringLiteral("active_upstream_symbols")).toInt())
                                .arg(object.value(QStringLiteral("sdk_queue_depth")).toInt())
                                .arg(QString::fromUtf8(QJsonDocument(object.value(QStringLiteral("worker_queue_depths")).toArray()).toJson(QJsonDocument::Compact)))
                                .arg(object.value(QStringLiteral("persistence_queue_depth")).toInt())
@@ -790,6 +867,23 @@ void ConsoleWindow::loadWatchlistEditor()
     refreshWatchlistTable();
 }
 
+void ConsoleWindow::loadHotlistEditor()
+{
+    hotSymbols_.clear();
+    QFile file(QDir(root_).filePath(QStringLiteral("config/l1_hotlist.json")));
+    if (file.open(QIODevice::ReadOnly)) {
+        const QJsonDocument document = QJsonDocument::fromJson(file.readAll());
+        const QJsonArray values = document.isArray() ? document.array()
+                                                     : document.object().value(QStringLiteral("symbols")).toArray();
+        for (const QJsonValue &value : values) {
+            const QString symbol = value.isString() ? value.toString().trimmed().toUpper()
+                                                    : value.toObject().value(QStringLiteral("symbol")).toString().trimmed().toUpper();
+            if (!symbol.isEmpty() && !hotSymbols_.contains(symbol)) hotSymbols_.append(symbol);
+        }
+    }
+    refreshHotlistTable();
+}
+
 void ConsoleWindow::refreshWatchlistTable()
 {
     if (!watchTable_) return;
@@ -808,21 +902,50 @@ void ConsoleWindow::refreshWatchlistTable()
     }
 }
 
+void ConsoleWindow::refreshHotlistTable()
+{
+    if (!hotTable_) return;
+    hotTable_->setRowCount(0);
+    for (const QString &symbol : hotSymbols_) {
+        const int row = hotTable_->rowCount();
+        hotTable_->insertRow(row);
+        QString market;
+        if (symbol.endsWith(QStringLiteral(".HK"))) market = QStringLiteral("香港 / 深股通");
+        else if (symbol.endsWith(QStringLiteral(".SH"))) market = QStringLiteral("上海 / 普通L1");
+        else market = QStringLiteral("深圳 / 普通L1");
+        hotTable_->setItem(row, 0, new QTableWidgetItem(symbol));
+        hotTable_->setItem(row, 1, new QTableWidgetItem(market));
+        hotTable_->setItem(row, 2, new QTableWidgetItem(watchSymbols_.contains(symbol)
+                                                           ? QStringLiteral("与观察列表重叠 · 上游单流")
+                                                           : QStringLiteral("仅L1热维护")));
+        const int dot = symbol.indexOf(u'.');
+        hotTable_->setItem(row, 3, new QTableWidgetItem(watchNames_.value(symbol, symbol.left(dot))));
+    }
+    if (auto *box = qobject_cast<QGroupBox *>(hotTable_->parentWidget())) {
+        box->setTitle(QStringLiteral("额外L1行情维护标的 · 当前 %1 个 · 与观察列表重叠时上游仅一流 · 不计算信号、不落盘")
+                          .arg(hotSymbols_.size()));
+    }
+}
+
 bool ConsoleWindow::persistWatchlist()
 {
-    QSaveFile file(QDir(root_).filePath(QStringLiteral("config/watchlist.json")));
-    if (!file.open(QIODevice::WriteOnly)) {
-        QMessageBox::critical(this, QStringLiteral("保存失败"), file.errorString());
-        return false;
-    }
-    QJsonArray symbols;
-    for (const QString &symbol : watchSymbols_) symbols.append(symbol);
-    const QByteArray payload = QJsonDocument(QJsonObject{{"version", 1}, {"symbols", symbols}}).toJson(QJsonDocument::Indented);
-    if (file.write(payload) != payload.size() || !file.commit()) {
-        QMessageBox::critical(this, QStringLiteral("保存失败"), file.errorString());
+    if (metrics_.state() != QAbstractSocket::ConnectedState) {
+        QMessageBox::warning(this, QStringLiteral("A-core 未连接"),
+                             QStringLiteral("列表未保存。请先连接 A-core，再修改观察标的。"));
         return false;
     }
     sendWatchlistToCore();
+    return true;
+}
+
+bool ConsoleWindow::persistHotlist()
+{
+    if (metrics_.state() != QAbstractSocket::ConnectedState) {
+        QMessageBox::warning(this, QStringLiteral("A-core 未连接"),
+                             QStringLiteral("列表未保存。请先连接 A-core，再修改 L1 热维护标的。"));
+        return false;
+    }
+    sendHotlistToCore();
     return true;
 }
 
@@ -833,6 +956,15 @@ void ConsoleWindow::sendWatchlistToCore()
     for (const QString &symbol : watchSymbols_) symbols.append(symbol);
     metrics_.sendTextMessage(QString::fromUtf8(
         QJsonDocument(QJsonObject{{"op", "set_watchlist"}, {"symbols", symbols}}).toJson(QJsonDocument::Compact)));
+}
+
+void ConsoleWindow::sendHotlistToCore()
+{
+    if (metrics_.state() != QAbstractSocket::ConnectedState) return;
+    QJsonArray symbols;
+    for (const QString &symbol : hotSymbols_) symbols.append(symbol);
+    metrics_.sendTextMessage(QString::fromUtf8(
+        QJsonDocument(QJsonObject{{"op", "set_l1_hotlist"}, {"symbols", symbols}}).toJson(QJsonDocument::Compact)));
 }
 
 void ConsoleWindow::addWatchSymbol()
@@ -847,14 +979,49 @@ void ConsoleWindow::addWatchSymbol()
         QMessageBox::information(this, QStringLiteral("已存在"), symbol + QStringLiteral(" 已在观察列表中。"));
         return;
     }
-    if (watchSymbols_.size() >= 1000) {
-        QMessageBox::warning(this, QStringLiteral("容量已满"), QStringLiteral("观察列表最多1000个标的。"));
+    QSet<QString> combined(watchSymbols_.begin(), watchSymbols_.end());
+    combined.unite(QSet<QString>(hotSymbols_.begin(), hotSymbols_.end()));
+    combined.insert(symbol);
+    if (combined.size() > 1000) {
+        QMessageBox::warning(this, QStringLiteral("容量已满"),
+                             QStringLiteral("观察列表与 L1 热维护列表去重后最多1000个标的。"));
         return;
     }
     watchSymbols_.append(symbol);
     if (!persistWatchlist()) watchSymbols_.removeAll(symbol);
     refreshWatchlistTable();
+    refreshHotlistTable();
     watchCode_->clear();
+}
+
+void ConsoleWindow::addHotSymbol()
+{
+    const QString code = hotCode_->text().trimmed();
+    const QString market = hotMarket_->currentData().toString();
+    const int requiredLength = market == QStringLiteral("HK") ? 5 : 6;
+    if (code.size() != requiredLength || !QRegularExpression(QStringLiteral("^[0-9]+$")).match(code).hasMatch()) {
+        QMessageBox::warning(this, QStringLiteral("代码无效"),
+                             market == QStringLiteral("HK")
+                                 ? QStringLiteral("请输入保留前导零的5位港股代码，例如 02800。")
+                                 : QStringLiteral("请输入6位沪深证券代码。"));
+        return;
+    }
+    const QString symbol = code + u'.' + market;
+    if (hotSymbols_.contains(symbol)) {
+        QMessageBox::information(this, QStringLiteral("已存在"), symbol + QStringLiteral(" 已在 L1 热维护列表中。"));
+        return;
+    }
+    QSet<QString> combined(watchSymbols_.begin(), watchSymbols_.end());
+    combined.unite(QSet<QString>(hotSymbols_.begin(), hotSymbols_.end()));
+    combined.insert(symbol);
+    if (combined.size() > 1000) {
+        QMessageBox::warning(this, QStringLiteral("容量已满"), QStringLiteral("观察列表与 L1 热维护列表去重后最多1000个标的。"));
+        return;
+    }
+    hotSymbols_.append(symbol);
+    if (!persistHotlist()) hotSymbols_.removeAll(symbol);
+    refreshHotlistTable();
+    hotCode_->clear();
 }
 
 void ConsoleWindow::removeSelectedWatchSymbols()
@@ -875,6 +1042,23 @@ void ConsoleWindow::removeSelectedWatchSymbols()
     for (int row : rows) watchSymbols_.removeAt(row);
     if (!persistWatchlist()) watchSymbols_ = before;
     refreshWatchlistTable();
+    refreshHotlistTable();
+}
+
+void ConsoleWindow::removeSelectedHotSymbols()
+{
+    QSet<int> selectedRows;
+    for (const QModelIndex &index : hotTable_->selectionModel()->selectedRows()) selectedRows.insert(index.row());
+    if (selectedRows.isEmpty()) {
+        QMessageBox::information(this, QStringLiteral("未选择"), QStringLiteral("请先选中需要移除的 L1 热维护标的。"));
+        return;
+    }
+    const QStringList before = hotSymbols_;
+    QList<int> rows = selectedRows.values();
+    std::sort(rows.begin(), rows.end(), std::greater<int>());
+    for (int row : rows) hotSymbols_.removeAt(row);
+    if (!persistHotlist()) hotSymbols_ = before;
+    refreshHotlistTable();
 }
 
 void ConsoleWindow::validateConfiguration()
@@ -894,16 +1078,32 @@ void ConsoleWindow::validateConfiguration()
     }
     const QJsonObject config = document.object();
     const QString watchlistPath = QDir(root_).filePath(config.value(QStringLiteral("watchlist")).toString(QStringLiteral("config/watchlist.json")));
+    const QString hotlistPath = QDir(root_).filePath(config.value(QStringLiteral("l1_hotlist")).toString(QStringLiteral("config/l1_hotlist.json")));
     const QString namesPath = QDir(root_).filePath(config.value(QStringLiteral("security_names")).toString(QStringLiteral("config/security_names.tsv")));
     QFile watchlistFile(watchlistPath);
+    QFile hotlistFile(hotlistPath);
     QFile namesFile(namesPath);
-    if (!watchlistFile.open(QIODevice::ReadOnly) || !namesFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        appendLog(QStringLiteral("CONFIG"), QByteArrayLiteral("失败：watchlist 或 security_names 无法读取\n"));
+    if (!watchlistFile.open(QIODevice::ReadOnly) || !hotlistFile.open(QIODevice::ReadOnly)
+        || !namesFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        appendLog(QStringLiteral("CONFIG"), QByteArrayLiteral("失败：watchlist、l1_hotlist 或 security_names 无法读取\n"));
         return;
     }
     const QJsonDocument watchlist = QJsonDocument::fromJson(watchlistFile.readAll());
     const QJsonArray symbols = watchlist.isArray() ? watchlist.array()
                                                    : watchlist.object().value(QStringLiteral("symbols")).toArray();
+    const QJsonDocument hotlist = QJsonDocument::fromJson(hotlistFile.readAll());
+    const QJsonArray hotSymbols = hotlist.isArray() ? hotlist.array()
+                                                    : hotlist.object().value(QStringLiteral("symbols")).toArray();
+    QSet<QString> uniqueSymbols;
+    bool hotValid = true;
+    for (const QJsonValue &value : symbols) uniqueSymbols.insert(value.toString().trimmed().toUpper());
+    for (const QJsonValue &value : hotSymbols) {
+        const QString symbol = value.toString().trimmed().toUpper();
+        const bool domestic = QRegularExpression(QStringLiteral("^[0-9]{6}\\.(SH|SZ)$")).match(symbol).hasMatch();
+        const bool hkt = QRegularExpression(QStringLiteral("^[0-9]{5}\\.HK$")).match(symbol).hasMatch();
+        hotValid = hotValid && (domestic || hkt);
+        uniqueSymbols.insert(symbol);
+    }
     int nameCount = 0;
     while (!namesFile.atEnd()) if (!namesFile.readLine().trimmed().isEmpty()) ++nameCount;
     const int monitorPort = config.value(QStringLiteral("monitor_port")).toInt();
@@ -912,19 +1112,21 @@ void ConsoleWindow::validateConfiguration()
     const QString accountPath = QDir(root_).filePath(QStringLiteral("config/tgw_account.ini"));
     const QString privatePython = QDir(root_).filePath(QStringLiteral(".venv/bin/python"));
     const int maximum = config.value(QStringLiteral("max_upstream_symbols")).toInt(1000);
-    if (symbols.isEmpty() || symbols.size() > maximum || nameCount < 1 || monitorPort <= 0 || monitorPort > 65535
+    if (symbols.isEmpty() || uniqueSymbols.size() > maximum || !hotValid || nameCount < 1 || monitorPort <= 0 || monitorPort > 65535
         || legacyPort <= 0 || legacyPort > 65535 || monitorPort == legacyPort
         || (mode == QStringLiteral("live")
             && (!QFileInfo::exists(accountPath) || !QFileInfo::exists(privatePython)))) {
         appendLog(QStringLiteral("CONFIG"),
-                  QStringLiteral("失败：symbols=%1 (limit=%2) names=%3 monitor_port=%4 legacy_port=%5 mode=%6 account=%7 private_python=%8\n")
-                      .arg(symbols.size()).arg(maximum).arg(nameCount).arg(monitorPort).arg(legacyPort).arg(mode)
+                  QStringLiteral("失败：monitors=%1 hot=%2 unique=%3 (limit=%4) hot_valid=%5 names=%6 monitor_port=%7 legacy_port=%8 mode=%9 account=%10 private_python=%11\n")
+                      .arg(symbols.size()).arg(hotSymbols.size()).arg(uniqueSymbols.size()).arg(maximum).arg(hotValid)
+                      .arg(nameCount).arg(monitorPort).arg(legacyPort).arg(mode)
                       .arg(QFileInfo::exists(accountPath)).arg(QFileInfo::exists(privatePython)).toUtf8());
         return;
     }
     appendLog(QStringLiteral("CONFIG"),
-              QStringLiteral("通过：%1 · %2 个观察标的 · %3 条名称 · 8421=%4 · 19195=%5 · mode=%6\n")
-                  .arg(configPath).arg(symbols.size()).arg(nameCount).arg(monitorPort).arg(legacyPort)
+              QStringLiteral("通过：%1 · %2 个观察标的 · %3 个L1热维护 · 去重%4 · %5 条名称 · 8421=%6 · 19195=%7 · mode=%8\n")
+                  .arg(configPath).arg(symbols.size()).arg(hotSymbols.size()).arg(uniqueSymbols.size())
+                  .arg(nameCount).arg(monitorPort).arg(legacyPort)
                   .arg(config.value(QStringLiteral("mode")).toString()).toUtf8());
 }
 

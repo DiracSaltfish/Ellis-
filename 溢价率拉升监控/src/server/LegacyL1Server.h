@@ -22,13 +22,18 @@ public:
         int unsubscribeGraceSeconds = 60;
     };
 
-    explicit LegacyL1Server(QStringList defaults, Limits limits, QObject *parent = nullptr);
+    explicit LegacyL1Server(QStringList defaults, QStringList hotSymbols, Limits limits,
+                            QObject *parent = nullptr);
+    ~LegacyL1Server() override;
     bool listen(const QHostAddress &address, quint16 port, QString *error = nullptr);
     void publish(const QuoteSnapshot &snapshot);
     void setMarketOnline(bool online);
     bool replaceDefaultSymbols(const QStringList &symbols, QString *error = nullptr);
+    bool replacePinnedSymbols(const QStringList &defaults, const QStringList &hotSymbols,
+                              QString *error = nullptr);
     [[nodiscard]] QStringList maintainedSymbols() const;
     [[nodiscard]] int clientCount() const;
+    [[nodiscard]] quint16 listeningPort() const { return port_; }
 
 Q_SIGNALS:
     void desiredSymbolsChanged(const QStringList &symbols);
@@ -66,6 +71,8 @@ private:
     QHash<QString, QuoteSnapshot> cache_;
     QSet<QString> ready_;
     QSet<QString> defaults_;
+    QSet<QString> hotSymbols_;
+    QSet<QString> pinned_;
     QSet<QString> maintained_;
     QHash<QString, qint64> releaseAtMs_;
     Limits limits_;

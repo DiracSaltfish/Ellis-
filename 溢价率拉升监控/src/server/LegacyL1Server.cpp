@@ -25,9 +25,12 @@ QJsonArray stringArray(const auto &values)
 
 } // namespace
 
-LegacyL1Server::LegacyL1Server(QStringList defaults, Limits limits, QObject *parent)
-    : QObject(parent), defaults_(defaults.begin(), defaults.end()), maintained_(defaults_), limits_(limits)
+LegacyL1Server::LegacyL1Server(QStringList defaults, QStringList hotSymbols, Limits limits, QObject *parent)
+    : QObject(parent), defaults_(defaults.begin(), defaults.end()),
+      hotSymbols_(hotSymbols.begin(), hotSymbols.end()), pinned_(defaults_), limits_(limits)
 {
+    pinned_.unite(hotSymbols_);
+    maintained_ = pinned_;
     connect(&server_, &QTcpServer::newConnection, this, &LegacyL1Server::acceptPending);
     housekeeping_.setInterval(1000);
     connect(&housekeeping_, &QTimer::timeout, this, [this] {
@@ -39,7 +42,10 @@ LegacyL1Server::LegacyL1Server(QStringList defaults, Limits limits, QObject *par
         bool changed = false;
         for (auto it = releaseAtMs_.begin(); it != releaseAtMs_.end();) {
             if (it.value() <= now) {
-                maintained_.remove(it.key());
+                const QString symbol = it.key();
+                maintained_.remove(symbol);
+                ready_.remove(symbol);
+                cache_.remove(symbol);
                 it = releaseAtMs_.erase(it);
                 changed = true;
             } else ++it;
@@ -49,6 +55,19 @@ LegacyL1Server::LegacyL1Server(QStringList defaults, Limits limits, QObject *par
     housekeeping_.start();
     pendingTimer_.setSingleShot(true);
     connect(&pendingTimer_, &QTimer::timeout, this, &LegacyL1Server::flushPending);
+}
+
+LegacyL1Server::~LegacyL1Server()
+{
+    housekeeping_.stop();
+    pendingTimer_.stop();
+    const auto sockets = clients_.keys();
+    for (QTcpSocket *socket : sockets) {
+        disconnect(socket, nullptr, this, nullptr);
+        socket->abort();
+    }
+    clients_.clear();
+    server_.close();
 }
 
 bool LegacyL1Server::listen(const QHostAddress &address, quint16 port, QString *error)
@@ -165,7 +184,7 @@ void LegacyL1Server::handleSubscribe(Client &client, const QJsonObject &request)
             client.symbols.insert(symbol);
             accepted.append(symbol);
         }
-        if (!defaults_.contains(symbol)) temporary.append(symbol);
+        if (!pinned_.contains(symbol)) temporary.append(symbol);
         releaseAtMs_.remove(symbol);
         maintained_.insert(symbol);
     }
@@ -281,7 +300,7 @@ void LegacyL1Server::closeClient(QTcpSocket *socket, const QString &reason)
 
 void LegacyL1Server::refreshReferences()
 {
-    QSet<QString> referenced = defaults_;
+    QSet<QString> referenced = pinned_;
     for (const auto &client : clients_) referenced.unite(client.symbols);
     const qint64 releaseAt = QDateTime::currentMSecsSinceEpoch() + limits_.unsubscribeGraceSeconds * 1000LL;
     for (const QString &symbol : maintained_) {
@@ -297,11 +316,12 @@ void LegacyL1Server::refreshReferences()
 QJsonObject LegacyL1Server::statusFor(const Client &client, const QJsonValue &id) const
 {
     QSet<QString> temporary = maintained_;
-    temporary.subtract(defaults_);
+    temporary.subtract(pinned_);
     QJsonObject drops;
     for (auto it = dropCounts_.begin(); it != dropCounts_.end(); ++it) drops.insert(it.key(), static_cast<qint64>(it.value()));
     QJsonObject result{{"v", 1}, {"t", "status"}, {"symbols", stringArray(client.symbols)},
-                       {"defaults", stringArray(defaults_)}, {"temporary", stringArray(temporary)},
+                       {"defaults", stringArray(defaults_)}, {"hot", stringArray(hotSymbols_)},
+                       {"pinned", stringArray(pinned_)}, {"temporary", stringArray(temporary)},
                        {"maintained", stringArray(maintained_)}, {"ready", stringArray(ready_)},
                        {"active_clients", clients_.size()}, {"max_clients", limits_.maxClients},
                        {"rejected_clients", static_cast<qint64>(rejectedClients_)}, {"client_drop_counts", drops},
@@ -346,12 +366,19 @@ QStringList LegacyL1Server::normalizedSymbols(const QJsonValue &value, QStringLi
     for (const QJsonValue &item : value.toArray()) {
         const QString raw = item.toString().trimmed().toUpper();
         const QString normalized = normalizeSymbol(raw);
-        const bool valid = normalized.size() == 9 && normalized.at(6) == u'.'
-                        && (normalized.endsWith(QStringLiteral(".SH")) || normalized.endsWith(QStringLiteral(".SZ")));
+        const bool domestic = normalized.size() == 9 && normalized.at(6) == u'.'
+                           && (normalized.endsWith(QStringLiteral(".SH")) || normalized.endsWith(QStringLiteral(".SZ")));
+        const bool hkt = raw.size() == 8 && raw.at(5) == u'.' && raw.endsWith(QStringLiteral(".HK"));
+        bool hktDigits = hkt;
+        for (int index = 0; hktDigits && index < 5; ++index) hktDigits = raw.at(index).isDigit();
+        const bool valid = domestic || hktDigits;
         if (!valid) {
             invalid->append(raw);
             result.append(raw);
-        } else if (!result.contains(normalized)) result.append(normalized);
+        } else {
+            const QString canonical = hktDigits ? raw : normalized;
+            if (!result.contains(canonical)) result.append(canonical);
+        }
     }
     return result;
 }
@@ -364,37 +391,51 @@ void LegacyL1Server::setMarketOnline(bool online)
 
 bool LegacyL1Server::replaceDefaultSymbols(const QStringList &symbols, QString *error)
 {
+    return replacePinnedSymbols(symbols, QStringList(hotSymbols_.begin(), hotSymbols_.end()), error);
+}
+
+bool LegacyL1Server::replacePinnedSymbols(const QStringList &symbols, const QStringList &hotSymbols,
+                                          QString *error)
+{
     const QSet<QString> replacement(symbols.begin(), symbols.end());
+    const QSet<QString> hotReplacement(hotSymbols.begin(), hotSymbols.end());
+    QSet<QString> pinnedReplacement = replacement;
+    pinnedReplacement.unite(hotReplacement);
     QSet<QString> clientReferences;
     for (const auto &client : clients_) clientReferences.unite(client.symbols);
 
     QSet<QString> prospective = maintained_;
-    for (const QString &oldDefault : defaults_) {
-        if (!replacement.contains(oldDefault) && !clientReferences.contains(oldDefault)) {
-            prospective.remove(oldDefault);
+    for (const QString &oldPinned : pinned_) {
+        if (!pinnedReplacement.contains(oldPinned) && !clientReferences.contains(oldPinned)) {
+            prospective.remove(oldPinned);
         }
     }
-    prospective.unite(replacement);
+    prospective.unite(pinnedReplacement);
     prospective.unite(clientReferences);
     if (prospective.size() > limits_.maxMaintainedSymbols) {
         if (error) {
-            *error = QStringLiteral("watchlist plus active L1 subscriptions would maintain %1 symbols; limit is %2")
+            *error = QStringLiteral("watchlist, L1 hot list and active clients would maintain %1 symbols; limit is %2")
                          .arg(prospective.size()).arg(limits_.maxMaintainedSymbols);
         }
         return false;
     }
 
-    const QSet<QString> removed = defaults_ - replacement;
+    const QSet<QString> removed = pinned_ - pinnedReplacement;
     defaults_ = replacement;
+    hotSymbols_ = hotReplacement;
+    pinned_ = pinnedReplacement;
     maintained_ = prospective;
     for (const QString &symbol : removed) {
         releaseAtMs_.remove(symbol);
-        if (!clientReferences.contains(symbol)) ready_.remove(symbol);
+        if (!clientReferences.contains(symbol)) {
+            ready_.remove(symbol);
+            cache_.remove(symbol);
+        }
     }
-    for (const QString &symbol : defaults_) releaseAtMs_.remove(symbol);
+    for (const QString &symbol : pinned_) releaseAtMs_.remove(symbol);
     Q_EMIT desiredSymbolsChanged(maintainedSymbols());
-    Q_EMIT operationalEvent(QStringLiteral("fixed watchlist replaced: %1 symbols, maintained %2")
-                                .arg(defaults_.size()).arg(maintained_.size()));
+    Q_EMIT operationalEvent(QStringLiteral("pinned lists replaced: monitor %1, hot %2, unique pinned %3, maintained %4")
+                                .arg(defaults_.size()).arg(hotSymbols_.size()).arg(pinned_.size()).arg(maintained_.size()));
     return true;
 }
 

@@ -57,6 +57,8 @@ QJsonObject QuoteSnapshot::toDetailJson() const
 {
     QJsonObject object = toSummaryJson();
     object.insert(QStringLiteral("pre_close_price_e6"), preClosePriceE6);
+    object.insert(QStringLiteral("nominal_price_e6"), nominalPriceE6);
+    object.insert(QStringLiteral("reference_price_e6"), referencePriceE6);
     object.insert(QStringLiteral("open_price_e6"), openPriceE6);
     object.insert(QStringLiteral("high_price_e6"), highPriceE6);
     object.insert(QStringLiteral("low_price_e6"), lowPriceE6);
@@ -67,6 +69,7 @@ QJsonObject QuoteSnapshot::toDetailJson() const
     object.insert(QStringLiteral("total_volume_e2"), totalVolumeE2);
     object.insert(QStringLiteral("total_amount_e5"), totalAmountE5);
     object.insert(QStringLiteral("num_trades"), numTrades);
+    object.insert(QStringLiteral("level_count"), levelCount);
     object.insert(QStringLiteral("high_limit_price_e6"), highLimitE6);
     object.insert(QStringLiteral("low_limit_price_e6"), lowLimitE6);
     object.insert(QStringLiteral("trading_phase"), tradingPhase);

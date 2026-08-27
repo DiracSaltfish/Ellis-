@@ -31,13 +31,16 @@ class QuoteWorker final : public QObject {
     Q_OBJECT
 public:
     explicit QuoteWorker(QObject *parent = nullptr);
-    void process(const BridgeFrame &frame, const QDateTime &now, bool allow30, bool allow300, bool replay);
+    void process(const BridgeFrame &frame, const QDateTime &now, bool allow30, bool allow300,
+                 bool replay, bool signalEligible, quint64 publicationGeneration);
     void reset(const QString &session = {});
+    void resetSignals();
     void resetSymbol(const QString &symbol);
+    void resetSignalSymbol(const QString &symbol);
 
 Q_SIGNALS:
     void resultReady(const premium::QuoteSnapshot &snapshot, const QJsonObject &signal, bool hasSignal,
-                     qint64 rise30sPpm, qint64 rise300sPpm);
+                     qint64 rise30sPpm, qint64 rise300sPpm, quint64 publicationGeneration);
     void rejected(const QString &symbol, const QStringList &issues, bool waitingForFull);
 
 private:
@@ -65,6 +68,7 @@ private:
 
     bool loadConfiguration(QString *error);
     bool loadWatchlist(QString *error);
+    bool loadHotlist(QString *error);
     void acceptAdapter();
     void readAdapter();
     void handleFrame(const BridgeFrame &frame);
@@ -74,8 +78,12 @@ private:
     void handleSummaryMessage(QWebSocket *socket, const QString &message);
     void handleDetailMessage(QWebSocket *socket, const QString &message);
     void replaceWatchlist(QWebSocket *socket, const QJsonArray &symbols);
+    void replaceHotlist(QWebSocket *socket, const QJsonArray &symbols);
+    bool persistSymbolList(const QString &configKey, const QString &fallbackPath,
+                           const QStringList &symbols, QString *error) const;
+    [[nodiscard]] bool shouldPersistMarketEvent(const QString &symbol) const;
     void publishSnapshot(const QuoteSnapshot &snapshot, const QJsonObject &signal, bool hasSignal,
-                         qint64 rise30sPpm, qint64 rise300sPpm);
+                         qint64 rise30sPpm, qint64 rise300sPpm, quint64 publicationGeneration);
     void sendSummarySync(QWebSocket *socket);
     void sendJson(QWebSocket *socket, const QJsonObject &object);
     void broadcastSummary(const QJsonObject &object);
@@ -90,7 +98,11 @@ private:
     QString dataDirectory_;
     QJsonObject config_;
     QStringList fixedSymbols_;
+    QStringList hotSymbols_;
+    QSet<QString> lastAdapterSymbols_;
+    bool lastAdapterQuotesDesired_ = false;
     QHash<QString, QString> names_;
+    bool hktEnabled_ = true;
     bool simulation_ = false;
     bool replay_ = false;
     bool forceQuotes_ = false;
@@ -100,6 +112,7 @@ private:
     QByteArray adapterBuffer_;
     QString adapterSession_;
     quint64 lastAdapterSequence_ = 0;
+    quint64 publicationGeneration_ = 1;
     quint64 adapterGapCount_ = 0;
     quint64 rejectedFrameCount_ = 0;
     quint64 monitorSlowClientDrops_ = 0;

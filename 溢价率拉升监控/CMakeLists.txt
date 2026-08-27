@@ -4,7 +4,7 @@ if(APPLE AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "26.0" CACHE STRING "Minimum supported macOS version" FORCE)
 endif()
 
-project(EtfPremiumMonitor VERSION 0.1.0 LANGUAGES CXX)
+project(EtfPremiumMonitor VERSION 0.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -138,6 +138,15 @@ if(PREMIUM_BUILD_TESTS)
     target_include_directories(premium-console-ui-tests PRIVATE src)
     target_link_libraries(premium-console-ui-tests PRIVATE Qt6::Test Qt6::Widgets Qt6::Network Qt6::WebSockets Qt6::Concurrent)
     add_test(NAME premium-console-ui-tests COMMAND premium-console-ui-tests)
+
+    add_executable(premium-legacy-l1-tests
+        src/server/LegacyL1Server.h
+        src/server/LegacyL1Server.cpp
+        tests/test_legacy_l1.cpp
+    )
+    target_include_directories(premium-legacy-l1-tests PRIVATE src)
+    target_link_libraries(premium-legacy-l1-tests PRIVATE premium_common Qt6::Test Qt6::Network)
+    add_test(NAME premium-legacy-l1-tests COMMAND premium-legacy-l1-tests)
 endif()
 
 install(TARGETS etf-premium-core etf-premium-console etf-premium-client

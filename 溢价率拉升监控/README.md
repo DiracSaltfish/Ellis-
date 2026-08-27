@@ -1,12 +1,13 @@
 # ETF 溢价率拉升监控
 
-已实现第一阶段可编译版本：Qt6/C++20 服务端 A（可视化控制台 + 后台核心）、Python TGW 适配器、macOS/Windows 共用 C++ 源码的客户端 B、以 202 标的为初始观察清单且可在 A 界面增删沪深代码、8421 WebSocket、19195 L1 兼容网关、QMT 人工交易界面、仿真/压测/回放/数据质量工具。
+已实现第一阶段可编译版本：Qt6/C++20 服务端 A（可视化控制台 + 后台核心）、Python TGW 适配器、macOS/Windows 共用 C++ 源码的客户端 B、以 202 标的为初始观察清单、独立「额外 L1 行情维护标的」热维护列表、深港通 `02800.HK` 路由、8421 WebSocket、19195 L1 兼容网关、QMT 人工交易界面、仿真/压测/回放/数据质量工具。
 
 ## 当前状态
 
 已通过 C++ 域测试、Python 桥接测试、8421/19195 端到端冒烟、假 QMT 的申购/赎回/卖出/撤单测试，以及 1000 标的短时仿真运行。第一阶段未发送任何真实 QMT 委托。
 
 TGW 1–21 数字键和 202 标的短时批量/追加/精确移除已于 2026-08-27 盘中验证。11:28–11:29 生产链路复验中，159866/164824/164701 的 TGW 最新价、五档价格和数量与 Sina L1 近时样本逐项一致；完整证据见 `docs/13_20260827_盘中生产联调记录.md`。
+`02800 + kSZSE(102) + kHKTSnapshot(12)` 已收到 tag 16 full/delta，并与厂商 `MDHKTSnapshot` 23 个字段顺序对齐。实现只接受保留前导零的 `02800.HK`，不接受 `2800.HK`；该流只进内存快照和 19195，不进 B、不计算信号、不写 raw/normalized 分区。
 真实 500/1000 标的容量、全日长跑、重连恢复与 IOPV 独立质量仍为 **待盘中验证**，
 不得因短时成功而标记全面生产通过。
 
@@ -18,6 +19,10 @@ cmake --preset macos-arm64-debug
 cmake --build --preset macos-arm64-debug -j4
 ctest --test-dir build/macos-arm64-debug-make --output-on-failure
 /Users/ellis/miniconda3/envs/ag/bin/python -m unittest discover -s tests -p 'test_*.py' -v
+PYTHONPATH="$PWD/.venv/lib/python3.10/site-packages" \
+  /Users/ellis/miniconda3/envs/ag/bin/python -m pytest -q \
+  tests/test_adapter.py tests/test_proto_wire.py tests/test_tgw_sdk_batch_frame.py \
+  tests/test_sina_l1.py tests/test_core_hkt_integration.py
 ```
 
 从 `database for armmac` 临时副本构建 wheel，以 Conda `ag` 的 arm64 Python 3.10.19 创建项目私有环境：
@@ -55,6 +60,8 @@ B 默认开放人工申购、赎回、快速卖出和撤单。`--read-only` 仅�
 2. 复制 `config/tgw_account.example.ini` 为不入库的 `config/tgw_account.ini`并填写账户。
 3. 核对 QMT1/QMT2 主机、端口和 A 内网地址。
 4. 仅在 500/1000 容量验收时将 `capture_dynamic_market_data=true`。
+
+`config/l1_hotlist.json` 保存 L1 热维护列表：沪深为六位 `.SH/.SZ`，港股通为五位 `.HK`。沪深上游窗口为 09:15–15:00，深港通为 09:30–16:00，中午不反复退订。单标的订阅失败独立指数退避到最大 300 秒，不阻断其他标的。
 
 8421、19195 和 QMT JSONL 均为无 TLS/无认证明文，只能用于可信内网。
 

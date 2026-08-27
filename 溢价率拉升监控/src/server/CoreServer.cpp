@@ -12,6 +12,7 @@
 #include <QLocalSocket>
 #include <QNetworkRequest>
 #include <QRegularExpression>
+#include <QSaveFile>
 #include <QStorageInfo>
 #include <QWebSocket>
 
@@ -27,21 +28,46 @@ QString absoluteFrom(const QString &root, const QString &path)
     return QFileInfo(path).isAbsolute() ? path : QDir(root).absoluteFilePath(path);
 }
 
+bool isDomesticSymbol(const QString &symbol)
+{
+    static const QRegularExpression pattern(QStringLiteral("^[0-9]{6}\\.(SH|SZ)$"));
+    return pattern.match(symbol).hasMatch();
+}
+
+bool isExactHktSymbol(const QString &symbol)
+{
+    static const QRegularExpression pattern(QStringLiteral("^[0-9]{5}\\.HK$"));
+    return pattern.match(symbol).hasMatch();
+}
+
+QString normalizedHotSymbol(const QString &raw)
+{
+    const QString upper = raw.trimmed().toUpper();
+    if (isExactHktSymbol(upper)) return upper;
+    return normalizeSymbol(upper);
+}
+
 } // namespace
 
 QuoteWorker::QuoteWorker(QObject *parent) : QObject(parent) {}
 
-void QuoteWorker::process(const BridgeFrame &frame, const QDateTime &now, bool allow30, bool allow300, bool replay)
+void QuoteWorker::process(const BridgeFrame &frame, const QDateTime &now, bool allow30, bool allow300,
+                          bool replay, bool signalEligible, quint64 publicationGeneration)
 {
     ParseResult parsed = parser_.consume(frame, replay);
     if (!parsed.snapshot) {
         Q_EMIT rejected(parsed.symbol, parsed.issues, parsed.waitingForFull);
         return;
     }
+    if (!signalEligible) {
+        Q_EMIT resultReady(*parsed.snapshot, {}, false, 0, 0, publicationGeneration);
+        return;
+    }
     SignalDecision decision = signalEngine_.evaluate(std::move(*parsed.snapshot), now, allow30, allow300);
     QJsonObject signal;
     if (decision.event) signal = decision.event->toJson(false);
-    Q_EMIT resultReady(decision.snapshot, signal, decision.event.has_value(), decision.rise30sPpm, decision.rise300sPpm);
+    Q_EMIT resultReady(decision.snapshot, signal, decision.event.has_value(), decision.rise30sPpm,
+                       decision.rise300sPpm, publicationGeneration);
 }
 
 void QuoteWorker::reset(const QString &session)
@@ -50,9 +76,19 @@ void QuoteWorker::reset(const QString &session)
     signalEngine_.resetAll();
 }
 
+void QuoteWorker::resetSignals()
+{
+    signalEngine_.resetAll();
+}
+
 void QuoteWorker::resetSymbol(const QString &symbol)
 {
     parser_.resetSymbol(symbol);
+    signalEngine_.resetSymbol(symbol);
+}
+
+void QuoteWorker::resetSignalSymbol(const QString &symbol)
+{
     signalEngine_.resetSymbol(symbol);
 }
 
@@ -68,6 +104,27 @@ CoreServer::CoreServer(QString configPath, bool simulationOverride, bool replayO
 
 CoreServer::~CoreServer()
 {
+    scheduleTimer_.stop();
+    statusTimer_.stop();
+    if (adapterSocket_) {
+        disconnect(adapterSocket_, nullptr, this, nullptr);
+        adapterSocket_->abort();
+        adapterSocket_.clear();
+    }
+    adapterServer_.close();
+    const auto summarySockets = summaryClients_.values();
+    for (QWebSocket *socket : summarySockets) {
+        disconnect(socket, nullptr, this, nullptr);
+        socket->close();
+    }
+    const auto detailSockets = detailClients_.keys();
+    for (QWebSocket *socket : detailSockets) {
+        disconnect(socket, nullptr, this, nullptr);
+        socket->close();
+    }
+    summaryClients_.clear();
+    detailClients_.clear();
+    monitorServer_.close();
     for (QThread *thread : workerThreads_) thread->quit();
     for (QThread *thread : workerThreads_) thread->wait(3000);
     persistenceThread_.quit();
@@ -93,6 +150,7 @@ bool CoreServer::loadConfiguration(QString *error)
     rootDirectory_ = QDir(rootDirectory_).canonicalPath();
     if (!simulation_) simulation_ = config_.value(QStringLiteral("mode")).toString() == QStringLiteral("simulation");
     replay_ = replay_ || config_.value(QStringLiteral("mode")).toString() == QStringLiteral("replay");
+    hktEnabled_ = config_.value(QStringLiteral("enable_hkt_l1")).toBool(true);
     return true;
 }
 
@@ -150,9 +208,55 @@ bool CoreServer::loadWatchlist(QString *error)
     return true;
 }
 
+bool CoreServer::loadHotlist(QString *error)
+{
+    const QString path = absoluteFrom(rootDirectory_, config_.value(QStringLiteral("l1_hotlist"))
+                                                        .toString(QStringLiteral("config/l1_hotlist.json")));
+    QFile file(path);
+    if (!file.exists()) return true;
+    if (!file.open(QIODevice::ReadOnly)) {
+        if (error) *error = QStringLiteral("cannot open L1 hot list %1: %2").arg(path, file.errorString());
+        return false;
+    }
+    QJsonParseError parseError;
+    const QJsonDocument document = QJsonDocument::fromJson(file.readAll(), &parseError);
+    if (parseError.error != QJsonParseError::NoError || (!document.isArray() && !document.isObject())) {
+        if (error) *error = QStringLiteral("invalid L1 hot list %1: %2").arg(path, parseError.errorString());
+        return false;
+    }
+    const QJsonArray entries = document.isArray() ? document.array()
+                                                  : document.object().value(QStringLiteral("symbols")).toArray();
+    for (const QJsonValue &value : entries) {
+        const QString raw = value.isString() ? value.toString()
+                                             : value.toObject().value(QStringLiteral("symbol")).toString();
+        const QString symbol = normalizedHotSymbol(raw);
+        if (!isDomesticSymbol(symbol) && !isExactHktSymbol(symbol)) {
+            if (error) *error = QStringLiteral("invalid L1 hot-list symbol: %1").arg(raw);
+            return false;
+        }
+        if (isExactHktSymbol(symbol) && !hktEnabled_) {
+            if (error) *error = QStringLiteral("HKT symbol %1 requires enable_hkt_l1=true").arg(symbol);
+            return false;
+        }
+        if (!hotSymbols_.contains(symbol)) hotSymbols_.append(symbol);
+    }
+    QSet<QString> unique(fixedSymbols_.begin(), fixedSymbols_.end());
+    unique.unite(QSet<QString>(hotSymbols_.begin(), hotSymbols_.end()));
+    const int maximum = config_.value(QStringLiteral("max_upstream_symbols")).toInt(1000);
+    if (unique.size() > maximum) {
+        if (error) *error = QStringLiteral("watchlist plus L1 hot list has %1 unique symbols; limit is %2")
+                                .arg(unique.size()).arg(maximum);
+        return false;
+    }
+    for (const QString &symbol : hotSymbols_) {
+        if (names_.value(symbol).isEmpty()) names_.insert(symbol, symbol.left(symbol.indexOf(u'.')));
+    }
+    return true;
+}
+
 bool CoreServer::start(QString *error)
 {
-    if (!loadConfiguration(error) || !loadWatchlist(error)) return false;
+    if (!loadConfiguration(error) || !loadWatchlist(error) || !loadHotlist(error)) return false;
 
     const QString logDir = absoluteFrom(rootDirectory_, config_.value(QStringLiteral("log_dir")).toString(QStringLiteral("logs")));
     const QString dataDir = absoluteFrom(rootDirectory_, config_.value(QStringLiteral("data_dir")).toString(QStringLiteral("data")));
@@ -229,7 +333,7 @@ bool CoreServer::start(QString *error)
     limits.maxSymbolsPerClient = config_.value(QStringLiteral("max_l1_symbols_per_client")).toInt(256);
     limits.maxMaintainedSymbols = config_.value(QStringLiteral("max_upstream_symbols")).toInt(1000);
     limits.unsubscribeGraceSeconds = config_.value(QStringLiteral("dynamic_unsubscribe_grace_sec")).toInt(60);
-    legacy_ = new LegacyL1Server(fixedSymbols_, limits, this);
+    legacy_ = new LegacyL1Server(fixedSymbols_, hotSymbols_, limits, this);
     connect(legacy_, &LegacyL1Server::desiredSymbolsChanged, this, &CoreServer::sendAdapterControl);
     connect(legacy_, &LegacyL1Server::operationalEvent, this, [this](const QString &message) {
         writeOperational(QStringLiteral("INFO"), QStringLiteral("legacy"), message);
@@ -244,7 +348,8 @@ bool CoreServer::start(QString *error)
     statusTimer_.start();
     updateSchedule();
     writeOperational(QStringLiteral("INFO"), QStringLiteral("core"), QStringLiteral("started"),
-                     {{"fixed_symbols", fixedSymbols_.size()}, {"simulation", simulation_}, {"replay", replay_}});
+                     {{"fixed_symbols", fixedSymbols_.size()}, {"l1_hot_symbols", hotSymbols_.size()},
+                      {"hkt_enabled", hktEnabled_}, {"simulation", simulation_}, {"replay", replay_}});
     return true;
 }
 
@@ -252,12 +357,28 @@ void CoreServer::acceptAdapter()
 {
     QLocalSocket *incoming = adapterServer_.nextPendingConnection();
     if (adapterSocket_) adapterSocket_->disconnectFromServer();
+    ++publicationGeneration_;
     adapterSocket_ = incoming;
     adapterBuffer_.clear();
+    adapterSession_.clear();
+    lastAdapterSequence_ = 0;
+    lastAdapterSymbols_.clear();
+    lastAdapterQuotesDesired_ = false;
+    cache_.clear();
+    for (QuoteWorker *worker : workers_) {
+        QMetaObject::invokeMethod(worker, [worker] { worker->reset(); }, Qt::QueuedConnection);
+    }
+    if (legacy_) legacy_->setMarketOnline(false);
     connect(incoming, &QLocalSocket::readyRead, this, &CoreServer::readAdapter);
-    connect(incoming, &QLocalSocket::disconnected, this, [this] {
+    connect(incoming, &QLocalSocket::disconnected, this, [this, incoming] {
+        incoming->deleteLater();
+        if (adapterSocket_ != incoming) return;
         writeOperational(QStringLiteral("WARN"), QStringLiteral("adapter"), QStringLiteral("disconnected"));
+        ++publicationGeneration_;
         adapterSocket_.clear();
+        lastAdapterSymbols_.clear();
+        lastAdapterQuotesDesired_ = false;
+        lastAdapterSequence_ = 0;
         adapterSession_.clear();
         cache_.clear();
         for (QuoteWorker *worker : workers_) QMetaObject::invokeMethod(worker, [worker] { worker->reset(); }, Qt::QueuedConnection);
@@ -289,6 +410,7 @@ void CoreServer::handleFrame(const BridgeFrame &frame)
 {
     if (lastAdapterSequence_ && frame.sequence != lastAdapterSequence_ + 1) {
         ++adapterGapCount_;
+        ++publicationGeneration_;
         cache_.clear();
         const QString session = frame.sessionId;
         for (QuoteWorker *worker : workers_) {
@@ -304,6 +426,7 @@ void CoreServer::handleFrame(const BridgeFrame &frame)
     lastAdapterSequence_ = frame.sequence;
     lastSdkQueueDepth_ = frame.sdkQueueDepth;
     if (!adapterSession_.isEmpty() && frame.sessionId != adapterSession_) {
+        ++publicationGeneration_;
         cache_.clear();
         for (QuoteWorker *worker : workers_) {
             const QString session = frame.sessionId;
@@ -313,8 +436,7 @@ void CoreServer::handleFrame(const BridgeFrame &frame)
     adapterSession_ = frame.sessionId;
     if (frame.kind == BridgeFrame::Kind::MarketEvent) {
         const QString routedSymbol = symbolHint(frame);
-        const bool retainMarketEvent = fixedSymbols_.contains(routedSymbol)
-                                    || config_.value(QStringLiteral("capture_dynamic_market_data")).toBool(false);
+        const bool retainMarketEvent = shouldPersistMarketEvent(routedSymbol);
         QJsonObject rawRecord{{"adapter_seq", static_cast<qint64>(frame.sequence)}, {"session", frame.sessionId},
                               {"receive_wall_ns", frame.receiveWallNs}, {"receive_monotonic_ns", frame.receiveMonotonicNs},
                               {"full", !frame.isDelta}, {"delta", frame.isDelta}, {"tag", frame.tag},
@@ -343,10 +465,28 @@ QString CoreServer::symbolHint(const BridgeFrame &frame) const
     const QJsonObject envelope = QJsonDocument::fromJson(frame.payloadJson).object();
     const QJsonObject data = envelope.value(QStringLiteral("data")).toObject();
     QString code = data.value(QStringLiteral("security_code")).toString();
-    if (code.isEmpty()) code = data.value(QStringLiteral("1")).toString();
-    if (code.isEmpty() && data.value(QStringLiteral("1")).isDouble()) code = QString::number(static_cast<qint64>(data.value(QStringLiteral("1")).toDouble()));
+    if (code.isEmpty()) code = data.value(QStringLiteral("2")).toString();
+    if (code.isEmpty() && data.value(QStringLiteral("2")).isDouble()) {
+        code = QString::number(data.value(QStringLiteral("2")).toInteger());
+    }
     if (code.isEmpty()) code = envelope.value(QStringLiteral("symbol")).toString();
+    if (frame.tag == QStringLiteral("16")) {
+        const QString upper = code.trimmed().toUpper();
+        if (isExactHktSymbol(upper)) return upper;
+        if (upper.size() == 5) {
+            for (const QChar character : upper) if (!character.isDigit()) return {};
+            return upper + QStringLiteral(".HK");
+        }
+        return {};
+    }
     return normalizeSymbol(code);
+}
+
+bool CoreServer::shouldPersistMarketEvent(const QString &symbol) const
+{
+    if (fixedSymbols_.contains(symbol)) return true;
+    if (hotSymbols_.contains(symbol)) return false;
+    return config_.value(QStringLiteral("capture_dynamic_market_data")).toBool(false);
 }
 
 void CoreServer::routeMarketFrame(const BridgeFrame &frame)
@@ -366,6 +506,7 @@ void CoreServer::routeMarketFrame(const BridgeFrame &frame)
         workerPending_[workerIndex].fetch_sub(1);
         const quint64 drops = workerDropCount_.fetch_add(1) + 1;
         ++rejectedFrameCount_;
+        ++publicationGeneration_;
         QMetaObject::invokeMethod(worker, [worker] { worker->reset(); }, Qt::QueuedConnection);
         if (drops == 1 || drops % 100 == 0) {
             writeOperational(QStringLiteral("CRITICAL"), QStringLiteral("compute_queue"),
@@ -378,8 +519,11 @@ void CoreServer::routeMarketFrame(const BridgeFrame &frame)
     const QDateTime now = QDateTime::currentDateTime();
     const bool allow30 = (simulation_ || replay_) ? true : scheduleState_.allow30SecondSignal;
     const bool allow300 = (simulation_ || replay_) ? true : scheduleState_.allow300SecondSignal;
-    QMetaObject::invokeMethod(worker, [this, worker, workerIndex, frame, now, allow30, allow300, replay = replay_] {
-        worker->process(frame, now, allow30, allow300, replay);
+    const bool signalEligible = fixedSymbols_.contains(symbol) && !symbol.endsWith(QStringLiteral(".HK"));
+    const quint64 publicationGeneration = publicationGeneration_;
+    QMetaObject::invokeMethod(worker, [this, worker, workerIndex, frame, now, allow30, allow300,
+                                       signalEligible, publicationGeneration, replay = replay_] {
+        worker->process(frame, now, allow30, allow300, replay, signalEligible, publicationGeneration);
         workerPending_[workerIndex].fetch_sub(1);
     }, Qt::QueuedConnection);
 }
@@ -431,58 +575,91 @@ void CoreServer::handleSummaryMessage(QWebSocket *socket, const QString &message
         sendJson(socket, response);
     } else if (request.value(QStringLiteral("op")).toString() == QStringLiteral("set_watchlist")) {
         replaceWatchlist(socket, request.value(QStringLiteral("symbols")).toArray());
+    } else if (request.value(QStringLiteral("op")).toString() == QStringLiteral("set_l1_hotlist")) {
+        replaceHotlist(socket, request.value(QStringLiteral("symbols")).toArray());
     }
+}
+
+bool CoreServer::persistSymbolList(const QString &configKey, const QString &fallbackPath,
+                                   const QStringList &symbols, QString *error) const
+{
+    const QString path = absoluteFrom(rootDirectory_, config_.value(configKey).toString(fallbackPath));
+    QDir().mkpath(QFileInfo(path).absolutePath());
+    QSaveFile file(path);
+    if (!file.open(QIODevice::WriteOnly)) {
+        if (error) *error = QStringLiteral("cannot write %1: %2").arg(path, file.errorString());
+        return false;
+    }
+    const QJsonObject payload{{"version", 1}, {"symbols", QJsonArray::fromStringList(symbols)}};
+    if (file.write(QJsonDocument(payload).toJson(QJsonDocument::Indented)) < 0 || !file.commit()) {
+        if (error) *error = QStringLiteral("cannot atomically save %1: %2").arg(path, file.errorString());
+        return false;
+    }
+    return true;
 }
 
 void CoreServer::replaceWatchlist(QWebSocket *socket, const QJsonArray &symbols)
 {
     QJsonObject response{{"type", "watchlist_ack"}, {"accepted", false}};
-    if (!socket || !socket->peerAddress().isLoopback()) {
-        response.insert(QStringLiteral("error"), QStringLiteral("set_watchlist is restricted to the local A-console"));
+    auto reject = [this, socket, &response](const QString &message) {
+        response.insert(QStringLiteral("error"), message);
+        response.insert(QStringLiteral("symbols"), QJsonArray::fromStringList(fixedSymbols_));
         sendJson(socket, response);
+    };
+    if (!socket || !socket->peerAddress().isLoopback()) {
+        reject(QStringLiteral("set_watchlist is restricted to the local A-console"));
         return;
     }
     const int maximum = config_.value(QStringLiteral("max_upstream_symbols")).toInt(1000);
     if (symbols.isEmpty() || symbols.size() > maximum) {
-        response.insert(QStringLiteral("error"), QStringLiteral("watchlist size must be 1..%1").arg(maximum));
-        sendJson(socket, response);
+        reject(QStringLiteral("watchlist size must be 1..%1").arg(maximum));
         return;
     }
-    static const QRegularExpression validPattern(QStringLiteral("^[0-9]{6}\\.(SH|SZ)$"));
     QStringList replacement;
     for (const QJsonValue &value : symbols) {
         const QString normalized = normalizeSymbol(value.toString());
-        if (!validPattern.match(normalized).hasMatch()) {
-            response.insert(QStringLiteral("error"), QStringLiteral("invalid symbol: %1").arg(value.toString()));
-            sendJson(socket, response);
+        if (!isDomesticSymbol(normalized)) {
+            reject(QStringLiteral("invalid monitored symbol: %1").arg(value.toString()));
             return;
         }
         if (!replacement.contains(normalized)) replacement.append(normalized);
     }
     if (replacement.size() != symbols.size()) {
-        response.insert(QStringLiteral("error"), QStringLiteral("duplicate symbols are not allowed"));
-        sendJson(socket, response);
+        reject(QStringLiteral("duplicate symbols are not allowed"));
+        return;
+    }
+    QSet<QString> unique(replacement.begin(), replacement.end());
+    unique.unite(QSet<QString>(hotSymbols_.begin(), hotSymbols_.end()));
+    if (unique.size() > maximum) {
+        reject(QStringLiteral("monitor and L1 hot lists would maintain %1 unique symbols; limit is %2")
+                   .arg(unique.size()).arg(maximum));
         return;
     }
 
     QString legacyError;
-    if (!legacy_ || !legacy_->replaceDefaultSymbols(replacement, &legacyError)) {
-        response.insert(QStringLiteral("error"), legacyError.isEmpty() ? QStringLiteral("L1 gateway unavailable") : legacyError);
-        sendJson(socket, response);
+    if (!legacy_ || !legacy_->replacePinnedSymbols(replacement, hotSymbols_, &legacyError)) {
+        reject(legacyError.isEmpty() ? QStringLiteral("L1 gateway unavailable") : legacyError);
+        return;
+    }
+    QString persistenceError;
+    if (!persistSymbolList(QStringLiteral("watchlist"), QStringLiteral("config/watchlist.json"),
+                           replacement, &persistenceError)) {
+        legacy_->replacePinnedSymbols(fixedSymbols_, hotSymbols_);
+        reject(persistenceError);
         return;
     }
 
     const QSet<QString> oldSet(fixedSymbols_.begin(), fixedSymbols_.end());
     const QSet<QString> newSet(replacement.begin(), replacement.end());
     const QSet<QString> removed = oldSet - newSet;
+    if (oldSet != newSet) ++publicationGeneration_;
     fixedSymbols_ = replacement;
     for (const QString &symbol : fixedSymbols_) {
         if (names_.value(symbol).isEmpty()) names_.insert(symbol, symbol.left(6));
     }
     for (const QString &symbol : removed) {
-        cache_.remove(symbol);
         for (QuoteWorker *worker : workers_) {
-            QMetaObject::invokeMethod(worker, [worker, symbol] { worker->resetSymbol(symbol); }, Qt::QueuedConnection);
+            QMetaObject::invokeMethod(worker, [worker, symbol] { worker->resetSignalSymbol(symbol); }, Qt::QueuedConnection);
         }
         signalHistory_.erase(std::remove_if(signalHistory_.begin(), signalHistory_.end(), [&symbol](const QJsonObject &event) {
             return event.value(QStringLiteral("symbol")).toString() == symbol;
@@ -490,12 +667,88 @@ void CoreServer::replaceWatchlist(QWebSocket *socket, const QJsonArray &symbols)
         QJsonObject removedEvent{{"type", "symbol_removed"}, {"symbol", symbol}};
         broadcastSummary(removedEvent);
     }
+    const QSet<QString> added = newSet - oldSet;
+    for (const QString &symbol : added) {
+        for (QuoteWorker *worker : workers_) {
+            QMetaObject::invokeMethod(worker, [worker, symbol] { worker->resetSignalSymbol(symbol); }, Qt::QueuedConnection);
+        }
+    }
     response.insert(QStringLiteral("accepted"), true);
     response.insert(QStringLiteral("count"), fixedSymbols_.size());
     response.insert(QStringLiteral("symbols"), QJsonArray::fromStringList(fixedSymbols_));
     sendJson(socket, response);
     writeOperational(QStringLiteral("INFO"), QStringLiteral("watchlist"), QStringLiteral("runtime watchlist replaced"),
                      {{"count", fixedSymbols_.size()}, {"removed", removed.size()}});
+}
+
+void CoreServer::replaceHotlist(QWebSocket *socket, const QJsonArray &symbols)
+{
+    QJsonObject response{{"type", "l1_hotlist_ack"}, {"accepted", false}};
+    auto reject = [this, socket, &response](const QString &message) {
+        response.insert(QStringLiteral("error"), message);
+        response.insert(QStringLiteral("symbols"), QJsonArray::fromStringList(hotSymbols_));
+        sendJson(socket, response);
+    };
+    if (!socket || !socket->peerAddress().isLoopback()) {
+        reject(QStringLiteral("set_l1_hotlist is restricted to the local A-console"));
+        return;
+    }
+    const int maximum = config_.value(QStringLiteral("max_upstream_symbols")).toInt(1000);
+    if (symbols.size() > maximum) {
+        reject(QStringLiteral("L1 hot-list size must be 0..%1").arg(maximum));
+        return;
+    }
+    QStringList replacement;
+    for (const QJsonValue &value : symbols) {
+        const QString normalized = normalizedHotSymbol(value.toString());
+        if (!isDomesticSymbol(normalized) && !isExactHktSymbol(normalized)) {
+            reject(QStringLiteral("invalid L1 hot-list symbol: %1").arg(value.toString()));
+            return;
+        }
+        if (isExactHktSymbol(normalized) && !hktEnabled_) {
+            reject(QStringLiteral("HKT is disabled by enable_hkt_l1=false"));
+            return;
+        }
+        if (!replacement.contains(normalized)) replacement.append(normalized);
+    }
+    if (replacement.size() != symbols.size()) {
+        reject(QStringLiteral("duplicate symbols are not allowed"));
+        return;
+    }
+    QSet<QString> unique(fixedSymbols_.begin(), fixedSymbols_.end());
+    unique.unite(QSet<QString>(replacement.begin(), replacement.end()));
+    if (unique.size() > maximum) {
+        reject(QStringLiteral("monitor and L1 hot lists would maintain %1 unique symbols; limit is %2")
+                   .arg(unique.size()).arg(maximum));
+        return;
+    }
+
+    QString legacyError;
+    if (!legacy_ || !legacy_->replacePinnedSymbols(fixedSymbols_, replacement, &legacyError)) {
+        reject(legacyError.isEmpty() ? QStringLiteral("L1 gateway unavailable") : legacyError);
+        return;
+    }
+    QString persistenceError;
+    if (!persistSymbolList(QStringLiteral("l1_hotlist"), QStringLiteral("config/l1_hotlist.json"),
+                           replacement, &persistenceError)) {
+        legacy_->replacePinnedSymbols(fixedSymbols_, hotSymbols_);
+        reject(persistenceError);
+        return;
+    }
+    const QSet<QString> oldSet(hotSymbols_.begin(), hotSymbols_.end());
+    hotSymbols_ = replacement;
+    for (const QString &symbol : hotSymbols_) {
+        if (names_.value(symbol).isEmpty()) names_.insert(symbol, symbol.left(symbol.indexOf(u'.')));
+    }
+    response.insert(QStringLiteral("accepted"), true);
+    response.insert(QStringLiteral("count"), hotSymbols_.size());
+    response.insert(QStringLiteral("symbols"), QJsonArray::fromStringList(hotSymbols_));
+    sendJson(socket, response);
+    writeOperational(QStringLiteral("INFO"), QStringLiteral("l1_hotlist"),
+                     QStringLiteral("runtime L1 hot list replaced"),
+                     {{"count", hotSymbols_.size()},
+                      {"added", (QSet<QString>(hotSymbols_.begin(), hotSymbols_.end()) - oldSet).size()},
+                      {"removed", (oldSet - QSet<QString>(hotSymbols_.begin(), hotSymbols_.end())).size()}});
 }
 
 void CoreServer::handleDetailMessage(QWebSocket *socket, const QString &message)
@@ -532,8 +785,9 @@ void CoreServer::handleDetailMessage(QWebSocket *socket, const QString &message)
 }
 
 void CoreServer::publishSnapshot(const QuoteSnapshot &incoming, const QJsonObject &signal, bool hasSignal,
-                                 qint64 rise30sPpm, qint64 rise300sPpm)
+                                 qint64 rise30sPpm, qint64 rise300sPpm, quint64 publicationGeneration)
 {
+    if (publicationGeneration != publicationGeneration_) return;
     QuoteSnapshot snapshot = incoming;
     snapshot.name = names_.value(snapshot.symbol);
     snapshot.publishWallNs = QDateTime::currentMSecsSinceEpoch() * 1'000'000LL;
@@ -566,8 +820,7 @@ void CoreServer::publishSnapshot(const QuoteSnapshot &incoming, const QJsonObjec
         summary.insert(QStringLiteral("rise_300s_ppm"), rise300sPpm);
         broadcastSummary(summary);
     }
-    const bool retainMarketEvent = fixedSymbols_.contains(snapshot.symbol)
-                                || config_.value(QStringLiteral("capture_dynamic_market_data")).toBool(false);
+    const bool retainMarketEvent = shouldPersistMarketEvent(snapshot.symbol);
     if (retainMarketEvent && !historicalWritesStopped_ && persistencePending_.load() < 10'000) {
         const int pending = persistencePending_.fetch_add(1) + 1;
         persistencePeak_.store(std::max(persistencePeak_.load(), pending));
@@ -653,30 +906,59 @@ void CoreServer::broadcastSummary(const QJsonObject &object)
 
 void CoreServer::sendAdapterControl(const QStringList &symbols)
 {
+    QSet<QString> active;
+    for (const QString &symbol : symbols) {
+        if (symbol.endsWith(QStringLiteral(".HK"))) {
+            if (hktEnabled_ && scheduleState_.hkQuotesDesired) active.insert(symbol);
+        } else if (scheduleState_.cnQuotesDesired) {
+            active.insert(symbol);
+        }
+    }
+    const bool quotesDesired = !active.isEmpty();
+    if (active == lastAdapterSymbols_ && quotesDesired == lastAdapterQuotesDesired_) return;
+
+    const QSet<QString> released = lastAdapterSymbols_ - active;
+    if (!released.isEmpty()) ++publicationGeneration_;
+    for (const QString &symbol : released) {
+        cache_.remove(symbol);
+        for (QuoteWorker *worker : workers_) {
+            QMetaObject::invokeMethod(worker, [worker, symbol] { worker->resetSymbol(symbol); }, Qt::QueuedConnection);
+        }
+    }
     if (!adapterSocket_ || adapterSocket_->state() != QLocalSocket::ConnectedState) return;
     QJsonArray array;
-    for (const QString &symbol : symbols) array.append(symbol);
+    QStringList ordered(active.begin(), active.end());
+    std::sort(ordered.begin(), ordered.end());
+    for (const QString &symbol : ordered) array.append(symbol);
     BridgeFrame control;
     control.kind = BridgeFrame::Kind::Control;
     control.message = QStringLiteral("set_symbols");
-    control.payloadJson = compact({{"op", "set_symbols"}, {"symbols", array}, {"quotes_desired", scheduleState_.quotesDesired || simulation_}});
+    control.payloadJson = compact({{"op", "set_symbols"}, {"symbols", array}, {"quotes_desired", quotesDesired}});
     adapterSocket_->write(control.encodeLengthPrefixed());
+    lastAdapterSymbols_ = active;
+    lastAdapterQuotesDesired_ = quotesDesired;
 }
 
 void CoreServer::updateSchedule()
 {
     const ScheduleState next = schedule_.stateAt(QDateTime::currentDateTime(), simulation_ || replay_ || forceQuotes_);
-    if (next.phase != scheduleState_.phase || next.quotesDesired != scheduleState_.quotesDesired) {
+    if (next.phase != scheduleState_.phase || next.quotesDesired != scheduleState_.quotesDesired
+        || next.cnQuotesDesired != scheduleState_.cnQuotesDesired
+        || next.hkQuotesDesired != scheduleState_.hkQuotesDesired) {
         if (next.phase == ScheduleState::Phase::MorningWarmup
             || next.phase == ScheduleState::Phase::AfternoonWarmup
             || next.phase == ScheduleState::Phase::Lunch
             || next.phase == ScheduleState::Phase::Offline) {
-            for (QuoteWorker *worker : workers_) QMetaObject::invokeMethod(worker, [worker] { worker->reset(); }, Qt::QueuedConnection);
+            for (QuoteWorker *worker : workers_) {
+                QMetaObject::invokeMethod(worker, [worker] { worker->resetSignals(); }, Qt::QueuedConnection);
+            }
         }
         scheduleState_ = next;
         sendAdapterControl(legacy_ ? legacy_->maintainedSymbols() : fixedSymbols_);
         writeOperational(QStringLiteral("INFO"), QStringLiteral("schedule"), next.label,
-                         {{"quotes_desired", next.quotesDesired}, {"allow_30s", next.allow30SecondSignal}, {"allow_5m", next.allow300SecondSignal}});
+                         {{"quotes_desired", next.quotesDesired}, {"cn_quotes_desired", next.cnQuotesDesired},
+                          {"hk_quotes_desired", next.hkQuotesDesired}, {"allow_30s", next.allow30SecondSignal},
+                          {"allow_5m", next.allow300SecondSignal}});
     } else scheduleState_ = next;
 }
 
@@ -692,6 +974,10 @@ QJsonObject CoreServer::statusObject() const
     const qint64 diskAvailable = storage.isValid() && storage.isReady() ? storage.bytesAvailable() : -1;
     int readyMonitored = 0;
     for (const QString &symbol : fixedSymbols_) if (cache_.contains(symbol)) ++readyMonitored;
+    int readyHot = 0;
+    for (const QString &symbol : hotSymbols_) if (cache_.contains(symbol)) ++readyHot;
+    QSet<QString> pinned(fixedSymbols_.begin(), fixedSymbols_.end());
+    pinned.unite(QSet<QString>(hotSymbols_.begin(), hotSymbols_.end()));
     return {{"type", "status"}, {"server_time", QDateTime::currentDateTime().toString(Qt::ISODateWithMs)},
             {"adapter_connected", !adapterSocket_.isNull()}, {"adapter_session", adapterSession_},
             {"adapter_seq", static_cast<qint64>(lastAdapterSequence_)}, {"adapter_gaps", static_cast<qint64>(adapterGapCount_)},
@@ -702,6 +988,10 @@ QJsonObject CoreServer::statusObject() const
             {"disk_available_bytes", diskAvailable},
             {"quarantined", static_cast<qint64>(rejectedFrameCount_)}, {"ready_symbols", readyMonitored},
             {"watchlist_symbols", fixedSymbols_.size()},
+            {"l1_hot_symbols", hotSymbols_.size()}, {"l1_hot_ready", readyHot},
+            {"unique_pinned_symbols", pinned.size()}, {"active_upstream_symbols", lastAdapterSymbols_.size()},
+            {"cn_quotes_desired", scheduleState_.cnQuotesDesired},
+            {"hk_quotes_desired", scheduleState_.hkQuotesDesired}, {"hkt_enabled", hktEnabled_},
             {"summary_clients", summaryClients_.size()}, {"detail_clients", detailClients_.size()},
             {"monitor_slow_client_drops", static_cast<qint64>(monitorSlowClientDrops_)},
             {"core_latency_ms", lastCoreLatencyNs_ / 1'000'000.0},

@@ -258,9 +258,10 @@ QByteArray makeAlertSound(const QAudioFormat &format, const QString &preset, int
 MonitorWindow::MonitorWindow(ClientSettings settings, QString settingsPath,
                              bool tradingEnabled, QWidget *parent)
     : QMainWindow(parent), settings_(std::move(settings)), settingsPath_(std::move(settingsPath)),
-      serverBase_(settings_.serverBase), profiles_(settings_.profiles), tradingEnabled_(tradingEnabled),
-      soundEnabled_(settings_.soundEnabled), popupEnabled_(settings_.popupEnabled),
-      alertSoundPreset_(settings_.alertSoundPreset), alertSoundRepeat_(settings_.alertSoundRepeat)
+      serverBase_(settings_.serverBase), profiles_(settings_.profiles),
+      alertSoundPreset_(settings_.alertSoundPreset), alertSoundRepeat_(settings_.alertSoundRepeat),
+      tradingEnabled_(tradingEnabled), soundEnabled_(settings_.soundEnabled),
+      popupEnabled_(settings_.popupEnabled)
 {
     buildUi();
     loadSignalList();

@@ -5,6 +5,8 @@
   "legacy_l1_port": 19195,
   "adapter_socket": "runtime/tgw.sock",
   "watchlist": "config/watchlist.json",
+  "l1_hotlist": "config/l1_hotlist.json",
+  "enable_hkt_l1": true,
   "security_names": "config/security_names.tsv",
   "data_dir": "data",
   "log_dir": "logs",

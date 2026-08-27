@@ -31,6 +31,28 @@ BridgeFrame frameFor(const QString &session, bool delta, const QJsonObject &data
     return frame;
 }
 
+BridgeFrame hktFrameFor(const QString &session, bool delta, const QJsonObject &data)
+{
+    BridgeFrame frame = frameFor(session, delta, data);
+    frame.tag = QStringLiteral("16");
+    frame.payloadJson = QJsonDocument(QJsonObject{{"headers", QJsonObject{{"tag", "16"}}},
+                                                   {"is_delta", delta}, {"data", data}})
+                            .toJson(QJsonDocument::Compact);
+    return frame;
+}
+
+QJsonObject hktFullData()
+{
+    return {{"1", 102}, {"2", "02800"}, {"3", 20'260'827'154'936'000LL},
+            {"4", QString::fromLatin1("T0\0\0\0\0\0", 7)}, {"5", 74'786'891'300LL},
+            {"6", 1'952'183'035'644'000LL}, {"7", 26'140'000}, {"8", 26'080'000},
+            {"9", 26'300'000}, {"10", 26'040'000}, {"11", 26'080'000},
+            {"12", "26080000|0|0|0|0"}, {"13", "1617100000|0|0|0|0"},
+            {"14", "26100000|0|0|0|0"}, {"15", "938450000|0|0|0|0"},
+            {"16", 0}, {"17", 0}, {"18", 0}, {"19", 0}, {"20", 0}, {"21", 0},
+            {"22", 0}, {"23", 6}};
+}
+
 QJsonObject fullData(const QString &symbol = QStringLiteral("159518.SZ"))
 {
     return {{"security_code", symbol}, {"market_type", 102}, {"orig_time", 1'784'941'200'123LL},
@@ -187,6 +209,66 @@ private Q_SLOTS:
         QCOMPARE(snapshot.mappingVersion, QStringLiteral("numeric-live-20260827-UNVERIFIED"));
         QVERIFY(!snapshot.numericMappingVerified);
         QVERIFY2(snapshot.qualityIssues.isEmpty(), qPrintable(snapshot.qualityIssues.join(u',')));
+    }
+
+    void hktDeepConnectMapsFullDeltaAndLegacyV1()
+    {
+        SnapshotParser parser;
+        const auto full = parser.consume(hktFrameFor(QStringLiteral("hkt-live"), false, hktFullData()));
+        QVERIFY(full.snapshot.has_value());
+        const QuoteSnapshot &snapshot = *full.snapshot;
+        QCOMPARE(snapshot.symbol, QStringLiteral("02800.HK"));
+        QCOMPARE(snapshot.code, QStringLiteral("02800"));
+        QCOMPARE(snapshot.market, QStringLiteral("HK"));
+        QCOMPARE(snapshot.origTime, 20'260'827'154'936'000LL);
+        QCOMPARE(snapshot.tradingPhase, QStringLiteral("T0"));
+        QCOMPARE(snapshot.preClosePriceE6, 26'140'000);
+        QCOMPARE(snapshot.nominalPriceE6, 26'080'000);
+        QCOMPARE(snapshot.lastPriceE6, 26'080'000);
+        QCOMPARE(snapshot.openPriceE6, 0);
+        QCOMPARE(snapshot.levelCount, 5);
+        QCOMPARE(snapshot.bidPricesE6[0], 26'080'000);
+        QCOMPARE(snapshot.bidPricesE6[5], 0);
+        QCOMPARE(snapshot.askVolumesE2[0], 938'450'000);
+        QVERIFY(snapshot.numericMappingVerified);
+        QVERIFY(snapshot.qualityIssues.contains(QStringLiteral("iopv_unavailable_hkt")));
+        const QJsonObject legacy = snapshot.toLegacyBookJson();
+        QCOMPARE(legacy.value(QStringLiteral("s")).toString(), QStringLiteral("02800.HK"));
+        QCOMPARE(legacy.value(QStringLiteral("lp")).toDouble(), 26.08);
+        QCOMPARE(legacy.value(QStringLiteral("o")).toDouble(), 0.0);
+        QCOMPARE(legacy.value(QStringLiteral("bp")).toArray().size(), 5);
+
+        const QJsonObject delta{{"2", "02800"}, {"3", 20'260'827'155'001'000LL},
+                                {"5", 74'787'091'300LL}, {"11", 26'090'000},
+                                {"12", "26090000|0|0|0|0"},
+                                {"13", "1315500000|0|0|0|0"}};
+        const auto merged = parser.consume(hktFrameFor(QStringLiteral("hkt-live"), true, delta));
+        QVERIFY(merged.snapshot.has_value());
+        QCOMPARE(merged.snapshot->lastPriceE6, 26'090'000);
+        QCOMPARE(merged.snapshot->preClosePriceE6, 26'140'000);
+        QCOMPARE(merged.snapshot->bidVolumesE2[0], 1'315'500'000);
+    }
+
+    void hktRejectsWrongRouteCodeAndMalformedBook()
+    {
+        SnapshotParser parser;
+        QJsonObject wrongRoute = hktFullData();
+        wrongRoute.insert(QStringLiteral("1"), 101);
+        auto result = parser.consume(hktFrameFor(QStringLiteral("bad-route"), false, wrongRoute));
+        QVERIFY(!result.snapshot.has_value());
+        QVERIFY(result.issues.contains(QStringLiteral("hkt_route_market_not_szse")));
+
+        QJsonObject wrongCode = hktFullData();
+        wrongCode.insert(QStringLiteral("2"), QStringLiteral("2800"));
+        result = parser.consume(hktFrameFor(QStringLiteral("bad-code"), false, wrongCode));
+        QVERIFY(!result.snapshot.has_value());
+        QVERIFY(result.issues.contains(QStringLiteral("hkt_code_not_five_digits")));
+
+        QJsonObject wrongBook = hktFullData();
+        wrongBook.insert(QStringLiteral("12"), QStringLiteral("26080000|0|0|0"));
+        result = parser.consume(hktFrameFor(QStringLiteral("bad-book"), false, wrongBook));
+        QVERIFY(!result.snapshot.has_value());
+        QVERIFY(result.issues.contains(QStringLiteral("bid_price_length_4")));
     }
 
     void lofWithoutIopvStillProducesSnapshotButNeverSignals()
@@ -360,7 +442,17 @@ private Q_SLOTS:
         QVERIFY(!morning.allow300SecondSignal);
         QVERIFY(schedule.stateAt(QDateTime(day, QTime(9, 35)), false).allow300SecondSignal);
         QVERIFY(!schedule.stateAt(QDateTime(day, QTime(14, 57)), false).allow30SecondSignal);
-        QVERIFY(!schedule.stateAt(QDateTime(day, QTime(15, 0)), false).quotesDesired);
+        const auto afterDomesticClose = schedule.stateAt(QDateTime(day, QTime(15, 0)), false);
+        QVERIFY(!afterDomesticClose.cnQuotesDesired);
+        QVERIFY(afterDomesticClose.hkQuotesDesired);
+        QVERIFY(afterDomesticClose.quotesDesired);
+        const auto hktClose = schedule.stateAt(QDateTime(day, QTime(16, 0)), false);
+        QVERIFY(!hktClose.cnQuotesDesired);
+        QVERIFY(!hktClose.hkQuotesDesired);
+        QVERIFY(!hktClose.quotesDesired);
+        const auto weekendForced = schedule.stateAt(QDateTime(QDate(2026, 8, 29), QTime(10, 0)), true);
+        QVERIFY(weekendForced.cnQuotesDesired);
+        QVERIFY(weekendForced.hkQuotesDesired);
     }
 };
 

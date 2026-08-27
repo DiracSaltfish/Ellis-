@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QTemporaryDir>
 #include <QTableWidget>
+#include <QTabWidget>
 #include <QtTest>
 
 namespace premium {
@@ -38,6 +39,8 @@ private Q_SLOTS:
                   QByteArrayLiteral("{\"mode\":\"simulation\",\"data_dir\":\"data\"}"));
         writeFile(directory.filePath(QStringLiteral("config/watchlist.json")),
                   QByteArrayLiteral("{\"version\":1,\"symbols\":[\"159866.SZ\"]}"));
+        writeFile(directory.filePath(QStringLiteral("config/l1_hotlist.json")),
+                  QByteArrayLiteral("{\"version\":1,\"symbols\":[\"02800.HK\"]}"));
         writeFile(directory.filePath(QStringLiteral("config/security_names.tsv")),
                   QByteArrayLiteral("159866.SZ\t日经ETF工银\n"));
 
@@ -73,6 +76,25 @@ private Q_SLOTS:
         QVERIFY(popup);
         sound->setChecked(false);
         popup->setChecked(false);
+
+        auto *tabs = window.findChild<QTabWidget *>(QStringLiteral("workspaceTabs"));
+        auto *hotTable = window.findChild<QTableWidget *>(QStringLiteral("hotL1Table"));
+        QVERIFY(tabs);
+        QVERIFY(hotTable);
+        QCOMPARE(tabs->tabText(tabs->indexOf(hotTable->parentWidget()->parentWidget())),
+                 QStringLiteral("额外L1行情维护标的"));
+        QCOMPARE(hotTable->rowCount(), 1);
+        QCOMPARE(hotTable->item(0, 0)->text(), QStringLiteral("02800.HK"));
+        QVERIFY(hotTable->item(0, 1)->text().contains(QStringLiteral("深股通")));
+        QVERIFY(hotTable->item(0, 2)->text().contains(QStringLiteral("仅L1")));
+
+        QJsonObject hotAck{{"type", "l1_hotlist_ack"}, {"accepted", true}, {"count", 2},
+                           {"symbols", QJsonArray{"02800.HK", "159866.SZ"}}};
+        QVERIFY(QMetaObject::invokeMethod(&window, "handleMetricsMessage", Qt::DirectConnection,
+                                          Q_ARG(QString, wire(hotAck))));
+        QCOMPARE(hotTable->rowCount(), 2);
+        QCOMPARE(hotTable->item(1, 0)->text(), QStringLiteral("159866.SZ"));
+        QVERIFY(hotTable->item(1, 2)->text().contains(QStringLiteral("重叠")));
 
         QJsonObject summary{{"type", "summary"}, {"s", "159866.SZ"}, {"name", "日经ETF工银"},
                             {"last_price_e6", 1684000}, {"bid1_price_e6", 1683000},

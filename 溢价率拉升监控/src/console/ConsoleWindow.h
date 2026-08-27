@@ -46,11 +46,17 @@ private:
     void startReplay();
     void validateConfiguration();
     void loadWatchlistEditor();
+    void loadHotlistEditor();
     void refreshWatchlistTable();
+    void refreshHotlistTable();
     bool persistWatchlist();
+    bool persistHotlist();
     void sendWatchlistToCore();
+    void sendHotlistToCore();
     void addWatchSymbol();
+    void addHotSymbol();
     void removeSelectedWatchSymbols();
+    void removeSelectedHotSymbols();
     Q_INVOKABLE void handleMetricsMessage(const QString &message);
     void processSignal(const QJsonObject &signal);
     void appendSignalRow(QTableWidget *table, const QJsonObject &signal, bool prepend);
@@ -73,6 +79,9 @@ private:
     QLineEdit *watchCode_ = nullptr;
     QComboBox *watchMarket_ = nullptr;
     QTableWidget *watchTable_ = nullptr;
+    QLineEdit *hotCode_ = nullptr;
+    QComboBox *hotMarket_ = nullptr;
+    QTableWidget *hotTable_ = nullptr;
     QTabWidget *workspaceTabs_ = nullptr;
     QTableWidget *signalTable_ = nullptr;
     QTableWidget *historyTable_ = nullptr;
@@ -86,6 +95,7 @@ private:
     QComboBox *historyModel_ = nullptr;
     QFutureWatcher<QList<QJsonObject>> *historyWatcher_ = nullptr;
     QStringList watchSymbols_;
+    QStringList hotSymbols_;
     QHash<QString, QString> watchNames_;
     QHash<QString, QJsonObject> latestSummaries_;
     QSet<QString> seenSignals_;

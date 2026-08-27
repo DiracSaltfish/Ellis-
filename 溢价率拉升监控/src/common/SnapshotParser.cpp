@@ -14,7 +14,6 @@ namespace {
 // been confirmed across markets, symbols, reconnects, and full/delta frames.
 constexpr auto KMarket = "1";
 constexpr auto KCode = "2";
-constexpr auto KVariety = "3";
 constexpr auto KOrigTime = "4";
 constexpr auto KPhase = "5";
 constexpr auto KPreClose = "6";
@@ -33,6 +32,27 @@ constexpr auto KTotalAmount = "18";
 constexpr auto KIopv = "19";
 constexpr auto KHighLimit = "20";
 constexpr auto KLowLimit = "21";
+
+// MDHKTSnapshot uses its own wire/tag 16 layout.  It is intentionally kept
+// separate from the domestic L1 map: several numeric keys have different
+// meanings even though both event kinds use compact numeric JSON keys.
+constexpr auto HMarket = "1";
+constexpr auto HOrigTime = "3";
+constexpr auto HPhase = "4";
+constexpr auto HTotalVolume = "5";
+constexpr auto HTotalAmount = "6";
+constexpr auto HPreClose = "7";
+constexpr auto HNominal = "8";
+constexpr auto HHigh = "9";
+constexpr auto HLow = "10";
+constexpr auto HLast = "11";
+constexpr auto HBidPrice = "12";
+constexpr auto HBidVolume = "13";
+constexpr auto HAskPrice = "14";
+constexpr auto HAskVolume = "15";
+constexpr auto HReference = "16";
+constexpr auto HHighLimit = "17";
+constexpr auto HLowLimit = "18";
 
 bool isIntegerJson(const QJsonValue &value, qint64 *out)
 {
@@ -74,14 +94,23 @@ ParseResult SnapshotParser::consume(const BridgeFrame &frame, bool replay)
         return result;
     }
     const QJsonObject incoming = dataValue.toObject();
-    QString symbol = normalizeSymbol(extractSymbol(incoming));
+    QString symbol = canonicalSymbol(incoming, frame.tag);
     if (symbol.isEmpty()) {
         const QString headerSymbol = envelope.value(QStringLiteral("symbol")).toString();
-        symbol = normalizeSymbol(headerSymbol);
+        if (frame.tag == QStringLiteral("16")) {
+            const QString normalizedHeader = headerSymbol.trimmed().toUpper();
+            if (normalizedHeader.size() == 8 && normalizedHeader.endsWith(QStringLiteral(".HK"))) {
+                symbol = normalizedHeader;
+            }
+        } else {
+            symbol = normalizeSymbol(headerSymbol);
+        }
     }
     result.symbol = symbol;
     if (symbol.isEmpty()) {
-        result.issues.append(QStringLiteral("symbol_missing_delta_unroutable"));
+        result.issues.append(frame.tag == QStringLiteral("16")
+                                 ? QStringLiteral("hkt_code_not_five_digits")
+                                 : QStringLiteral("symbol_missing_delta_unroutable"));
         return result;
     }
 
@@ -93,6 +122,7 @@ ParseResult SnapshotParser::consume(const BridgeFrame &frame, bool replay)
     if (!frame.isDelta) {
         state.data = incoming;
         state.sessionId = frame.sessionId;
+        state.symbol = symbol;
         state.hasFull = true;
     } else {
         if (!state.hasFull || state.sessionId != frame.sessionId) {
@@ -113,9 +143,9 @@ void SnapshotParser::resetSession(const QString &sessionId)
 
 void SnapshotParser::resetSymbol(const QString &symbol)
 {
-    const QString normalized = normalizeSymbol(symbol);
+    const QString normalized = symbol.trimmed().toUpper();
     for (auto it = states_.begin(); it != states_.end();) {
-        if (normalizeSymbol(extractSymbol(it->data)) == normalized) it = states_.erase(it);
+        if (it->symbol == normalized) it = states_.erase(it);
         else ++it;
     }
 }
@@ -149,17 +179,18 @@ bool SnapshotParser::integerValue(const QJsonObject &object, const QString &name
 }
 
 bool SnapshotParser::integerArray(const QJsonObject &object, const QString &named, const QString &numeric,
-                                  std::array<qint64, 10> *out, QStringList *issues)
+                                  std::array<qint64, 10> *out, QStringList *issues, int expectedLevels)
 {
+    out->fill(0);
     QJsonValue value = object.value(named);
     if (value.isUndefined()) value = object.value(numeric);
     if (value.isArray()) {
         const QJsonArray array = value.toArray();
-        if (array.size() != 10) {
+        if (array.size() != expectedLevels) {
             issues->append(named + QStringLiteral("_length_%1").arg(array.size()));
             return false;
         }
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < expectedLevels; ++i) {
             qint64 number = 0;
             if (!isIntegerJson(array.at(i), &number)) {
                 issues->append(named + QStringLiteral("_non_integer_%1").arg(i));
@@ -171,11 +202,11 @@ bool SnapshotParser::integerArray(const QJsonObject &object, const QString &name
     }
     if (value.isString()) {
         const QStringList parts = value.toString().split(u'|', Qt::KeepEmptyParts);
-        if (parts.size() != 10) {
+        if (parts.size() != expectedLevels) {
             issues->append(named + QStringLiteral("_length_%1").arg(parts.size()));
             return false;
         }
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < expectedLevels; ++i) {
             bool ok = false;
             const qint64 number = parts.at(i).toLongLong(&ok);
             if (!ok) {
@@ -193,6 +224,17 @@ bool SnapshotParser::integerArray(const QJsonObject &object, const QString &name
 QString SnapshotParser::extractSymbol(const QJsonObject &data)
 {
     return stringValue(data, QStringLiteral("security_code"), QString::fromLatin1(KCode));
+}
+
+QString SnapshotParser::canonicalSymbol(const QJsonObject &data, const QString &tag)
+{
+    const QString code = extractSymbol(data).trimmed().toUpper();
+    if (tag == QStringLiteral("16")) {
+        if (code.size() != 5) return {};
+        for (const QChar character : code) if (!character.isDigit()) return {};
+        return code + QStringLiteral(".HK");
+    }
+    return normalizeSymbol(code);
 }
 
 QString SnapshotParser::marketFromRaw(const QJsonObject &data, const QString &symbol)
@@ -214,6 +256,8 @@ QJsonObject SnapshotParser::mergedObject(QJsonObject base, const QJsonObject &de
 
 ParseResult SnapshotParser::mapSnapshot(const BridgeFrame &frame, const QJsonObject &data, bool replay) const
 {
+    if (frame.tag == QStringLiteral("16")) return mapHktSnapshot(frame, data, replay);
+
     ParseResult result;
     QuoteSnapshot quote;
     quote.code = extractSymbol(data).left(6);
@@ -308,6 +352,114 @@ ParseResult SnapshotParser::mapSnapshot(const BridgeFrame &frame, const QJsonObj
     result.symbol = quote.symbol;
     result.issues = quote.qualityIssues;
     result.snapshot = std::move(quote);
+    return result;
+}
+
+ParseResult SnapshotParser::mapHktSnapshot(const BridgeFrame &frame, const QJsonObject &data, bool replay) const
+{
+    ParseResult result;
+    QuoteSnapshot quote;
+    quote.code = extractSymbol(data);
+    quote.symbol = canonicalSymbol(data, frame.tag);
+    quote.market = QStringLiteral("HK");
+    quote.sourceSession = frame.sessionId;
+    quote.receiveWallNs = frame.receiveWallNs;
+    quote.replay = replay;
+    quote.sourceReady = true;
+    quote.numericMappingVerified = true;
+    quote.mappingVersion = QStringLiteral("numeric-hkt-deep-connect-live-20260827");
+    quote.levelCount = 5;
+    quote.tradingPhase = stringValue(data, QStringLiteral("trading_phase_code"), QString::fromLatin1(HPhase));
+
+    bool structureValid = true;
+    auto required = [&](const QString &name, const char *numeric, qint64 *target) {
+        if (!integerValue(data, name, QString::fromLatin1(numeric), target)) {
+            quote.qualityIssues.append(name + QStringLiteral("_not_int64"));
+            structureValid = false;
+        }
+    };
+
+    qint64 routeMarket = 0;
+    required(QStringLiteral("market_type"), HMarket, &routeMarket);
+    if (routeMarket != 102) {
+        quote.qualityIssues.append(QStringLiteral("hkt_route_market_not_szse"));
+        structureValid = false;
+    }
+    if (quote.symbol.isEmpty()) {
+        quote.qualityIssues.append(QStringLiteral("hkt_code_not_five_digits"));
+        structureValid = false;
+    }
+    required(QStringLiteral("orig_time"), HOrigTime, &quote.origTime);
+    required(QStringLiteral("total_volume_trade"), HTotalVolume, &quote.totalVolumeE2);
+    required(QStringLiteral("total_value_trade"), HTotalAmount, &quote.totalAmountE5);
+    required(QStringLiteral("pre_close_price"), HPreClose, &quote.preClosePriceE6);
+    required(QStringLiteral("nominal_price"), HNominal, &quote.nominalPriceE6);
+    required(QStringLiteral("high_price"), HHigh, &quote.highPriceE6);
+    required(QStringLiteral("low_price"), HLow, &quote.lowPriceE6);
+    required(QStringLiteral("last_price"), HLast, &quote.lastPriceE6);
+    required(QStringLiteral("ref_price"), HReference, &quote.referencePriceE6);
+    required(QStringLiteral("high_limited"), HHighLimit, &quote.highLimitE6);
+    required(QStringLiteral("low_limited"), HLowLimit, &quote.lowLimitE6);
+    structureValid = integerArray(data, QStringLiteral("bid_price"), QString::fromLatin1(HBidPrice),
+                                  &quote.bidPricesE6, &quote.qualityIssues, 5) && structureValid;
+    structureValid = integerArray(data, QStringLiteral("offer_price"), QString::fromLatin1(HAskPrice),
+                                  &quote.askPricesE6, &quote.qualityIssues, 5) && structureValid;
+    structureValid = integerArray(data, QStringLiteral("bid_volume"), QString::fromLatin1(HBidVolume),
+                                  &quote.bidVolumesE2, &quote.qualityIssues, 5) && structureValid;
+    structureValid = integerArray(data, QStringLiteral("offer_volume"), QString::fromLatin1(HAskVolume),
+                                  &quote.askVolumesE2, &quote.qualityIssues, 5) && structureValid;
+
+    for (auto it = data.begin(); it != data.end(); ++it) {
+        bool numeric = false;
+        const int field = it.key().toInt(&numeric);
+        if (!numeric || field < 1 || field > 23) {
+            quote.qualityIssues.append(QStringLiteral("unknown_hkt_field:%1").arg(it.key()));
+        }
+    }
+    if (quote.totalVolumeE2 < 0 || quote.totalAmountE5 < 0) {
+        quote.qualityIssues.append(QStringLiteral("negative_turnover"));
+        structureValid = false;
+    }
+    auto invalidPrice = [](qint64 price) { return price < 0 || (price > 0 && price % 1'000 != 0); };
+    bool priceInvalid = invalidPrice(quote.lastPriceE6) || invalidPrice(quote.nominalPriceE6)
+                     || invalidPrice(quote.preClosePriceE6) || invalidPrice(quote.highPriceE6)
+                     || invalidPrice(quote.lowPriceE6);
+    for (int i = 0; i < 5; ++i) {
+        priceInvalid = priceInvalid || invalidPrice(quote.bidPricesE6[static_cast<size_t>(i)])
+                                    || invalidPrice(quote.askPricesE6[static_cast<size_t>(i)]);
+        if (quote.bidVolumesE2[static_cast<size_t>(i)] < 0 || quote.askVolumesE2[static_cast<size_t>(i)] < 0) {
+            quote.qualityIssues.append(QStringLiteral("negative_book_volume"));
+            structureValid = false;
+        }
+    }
+    if (priceInvalid) {
+        quote.qualityIssues.append(QStringLiteral("price_tick_0_001_invalid"));
+        structureValid = false;
+    }
+    for (int i = 1; i < 5; ++i) {
+        const auto previousBid = quote.bidPricesE6[static_cast<size_t>(i - 1)];
+        const auto currentBid = quote.bidPricesE6[static_cast<size_t>(i)];
+        const auto previousAsk = quote.askPricesE6[static_cast<size_t>(i - 1)];
+        const auto currentAsk = quote.askPricesE6[static_cast<size_t>(i)];
+        if (currentBid > 0 && previousBid > 0 && currentBid > previousBid) {
+            quote.qualityIssues.append(QStringLiteral("bid_order_invalid"));
+            structureValid = false;
+        }
+        if (currentAsk > 0 && previousAsk > 0 && currentAsk < previousAsk) {
+            quote.qualityIssues.append(QStringLiteral("ask_order_invalid"));
+            structureValid = false;
+        }
+    }
+    if (quote.bidPricesE6[0] > 0 && quote.askPricesE6[0] > 0
+        && quote.bidPricesE6[0] > quote.askPricesE6[0]) {
+        quote.qualityIssues.append(QStringLiteral("crossed_book"));
+        structureValid = false;
+    }
+    quote.qualityIssues.append(QStringLiteral("iopv_unavailable_hkt"));
+
+    result.symbol = quote.symbol;
+    result.issues = quote.qualityIssues;
+    if (structureValid) result.snapshot = std::move(quote);
     return result;
 }
 

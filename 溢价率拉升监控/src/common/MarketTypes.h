@@ -25,6 +25,8 @@ struct QuoteSnapshot {
     qint64 receiveWallNs = 0;
     qint64 publishWallNs = 0;
     qint64 lastPriceE6 = 0;
+    qint64 nominalPriceE6 = 0;
+    qint64 referencePriceE6 = 0;
     qint64 preClosePriceE6 = 0;
     qint64 openPriceE6 = 0;
     qint64 highPriceE6 = 0;
@@ -35,6 +37,7 @@ struct QuoteSnapshot {
     qint64 totalVolumeE2 = 0;
     qint64 totalAmountE5 = 0;
     qint64 numTrades = 0;
+    qint64 levelCount = 10;
     std::array<qint64, 10> bidPricesE6{};
     std::array<qint64, 10> askPricesE6{};
     std::array<qint64, 10> bidVolumesE2{};

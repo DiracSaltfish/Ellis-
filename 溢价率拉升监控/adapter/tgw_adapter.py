@@ -26,7 +26,8 @@ from proto_wire import BridgeFrame, encode_framed, take_frames
 LOG = logging.getLogger("tgw-adapter")
 MAX_EVENTS = 10_000
 SUBSCRIPTION_BATCH_SIZE = 20
-MAX_RECONCILE_RETRY_SEC = 30.0
+MAX_RECONCILE_RETRY_SEC = 300.0
+MAX_SUBSCRIBE_CALLS_PER_RECONCILE = 64
 
 
 def strip_inline_comment(value: str) -> str:
@@ -46,9 +47,10 @@ class Adapter:
         self.sequence = 0
         self.desired: set[str] = set()
         self.quotes_desired = simulate
-        self.events: queue.Queue[tuple[dict[str, Any], int, int]] = queue.Queue(maxsize=MAX_EVENTS)
+        self.events: queue.Queue[tuple[dict[str, Any], int, int, int]] = queue.Queue(maxsize=MAX_EVENTS)
         self.stop = threading.Event()
         self.dropped = 0
+        self.stale_bridge_drops = 0
         self.socket: socket.socket | None = None
         self.sdk: Any = None
         self.subscriptions: dict[str, Any] = {}
@@ -59,6 +61,9 @@ class Adapter:
         self.sdk_bridge_epoch = -1
         self.reconcile_retry_at = 0.0
         self.reconcile_retry_delay = 1.0
+        # symbol -> (next_attempt_monotonic, delay_seconds, failures, last_result)
+        self.symbol_retries: dict[str, tuple[float, float, int, str]] = {}
+        self.subscribe_call_budget = MAX_SUBSCRIBE_CALLS_PER_RECONCILE
 
     def load_defaults(self) -> None:
         payload = json.loads(self.watchlist_path.read_text(encoding="utf-8"))
@@ -85,13 +90,15 @@ class Adapter:
                     time.sleep(delay)
                     delay = min(5.0, delay * 2)
 
-    def _send(self, frame: BridgeFrame) -> None:
+    def _send(self, frame: BridgeFrame, expected_bridge_epoch: int | None = None) -> bool:
         while not self.stop.is_set():
             if self.socket is None:
                 self.connect_core()
             try:
                 assert self.socket is not None
                 with self.send_lock:
+                    if expected_bridge_epoch is not None and expected_bridge_epoch != self.bridge_epoch:
+                        return False
                     # Sequence assignment and socket write are one critical
                     # section so status/control and market threads can never
                     # put adapter_seq on the wire out of order.
@@ -100,12 +107,13 @@ class Adapter:
                     frame.session_id = self.session_id
                     payload = encode_framed(frame)
                     self.socket.sendall(payload)
-                return
+                return True
             except OSError as exc:
                 LOG.warning("core send failed: %s", exc)
                 if self.socket:
                     self.socket.close()
                 self.socket = None
+        return False
 
     def _status(self, message: str, detail: dict[str, Any] | None = None) -> None:
         self._send(BridgeFrame(kind=2, sdk_queue_depth=self.events.qsize(), message=message,
@@ -148,6 +156,8 @@ class Adapter:
             old = set(self.desired)
             self.desired = set(desired)
             quotes_desired = self.quotes_desired
+        for symbol in old - desired:
+            self.symbol_retries.pop(symbol, None)
         self.reconcile_retry_at = 0.0
         self._status("subscription_set_updated", {
             "desired": len(desired),
@@ -161,7 +171,7 @@ class Adapter:
             return set(self.desired), bool(self.quotes_desired)
 
     def enqueue_event(self, event: dict[str, Any]) -> None:
-        received = (event, time.time_ns(), time.monotonic_ns())
+        received = (event, time.time_ns(), time.monotonic_ns(), self.bridge_epoch)
         try:
             self.events.put_nowait(received)
         except queue.Full:
@@ -174,7 +184,7 @@ class Adapter:
     def event_writer(self) -> None:
         while not self.stop.is_set():
             try:
-                event, received_wall, received_mono = self.events.get(timeout=0.5)
+                event, received_wall, received_mono, event_bridge_epoch = self.events.get(timeout=0.5)
             except queue.Empty:
                 continue
             headers = event.get("headers") if isinstance(event.get("headers"), dict) else {}
@@ -183,16 +193,26 @@ class Adapter:
             except (TypeError, ValueError) as exc:
                 self._status("raw_json_rejected", {"error": str(exc)})
                 continue
-            self._send(BridgeFrame(kind=1, receive_wall_ns=received_wall,
-                                   receive_monotonic_ns=received_mono,
-                                   is_delta=bool(event.get("is_delta")),
-                                   tag=str(headers.get("tag", "")), payload_json=encoded,
-                                   sdk_queue_depth=self.events.qsize()))
+            sent = self._send(BridgeFrame(kind=1, receive_wall_ns=received_wall,
+                                          receive_monotonic_ns=received_mono,
+                                          is_delta=bool(event.get("is_delta")),
+                                          tag=str(headers.get("tag", "")), payload_json=encoded,
+                                          sdk_queue_depth=self.events.qsize()),
+                              expected_bridge_epoch=event_bridge_epoch)
+            if not sent:
+                self.stale_bridge_drops += 1
+                if self.stale_bridge_drops == 1 or self.stale_bridge_drops % 100 == 0:
+                    self._status("stale_bridge_event_dropped", {
+                        "dropped": self.stale_bridge_drops,
+                        "event_bridge_epoch": event_bridge_epoch,
+                        "current_bridge_epoch": self.bridge_epoch,
+                    })
 
     def simulation_loop(self) -> None:
         randomizer = random.Random(8421)
         states: dict[str, dict[str, Any]] = {}
         full_pending: set[str] = set()
+        previous_desired: set[str] = set()
         tick = 0
         observed_bridge_epoch = -1
         while not self.stop.is_set():
@@ -201,12 +221,15 @@ class Adapter:
                 full_pending.update(desired)
                 observed_bridge_epoch = self.bridge_epoch
             desired, quotes_desired = self.desired_snapshot()
+            full_pending.update(desired - previous_desired)
+            full_pending.intersection_update(desired)
+            previous_desired = set(desired)
             if not quotes_desired:
                 time.sleep(0.25)
                 continue
             for symbol in sorted(desired):
                 if symbol not in states:
-                    seed = int(symbol[:6]) % 400_000
+                    seed = int(symbol.split(".", 1)[0]) % 400_000
                     # ETF/LOF 场内报价最小变动单位为 0.001；仿真价也必须落在
                     # price_e6 的 1_000 整数倍，避免 UI 测试被误认为浮点抖动。
                     iopv = 800_000 + (seed // 1_000) * 1_000
@@ -235,6 +258,41 @@ class Adapter:
                 batch += symbols[: 20 - len(batch)]
             for symbol in batch:
                 state = states[symbol]
+                if symbol.endswith(".HK"):
+                    code = symbol[:5]
+                    current = int(state["last_price"])
+                    current += randomizer.randint(-1, 1) * 1_000
+                    current = max(1_000, current)
+                    state["last_price"] = current
+                    state["high_price"] = max(state["high_price"], current)
+                    state["low_price"] = min(state["low_price"], current)
+                    state["total_volume_trade"] += 10_000
+                    bid = [current - index * 1_000 for index in range(5)]
+                    ask = [current + (index + 1) * 1_000 for index in range(5)]
+                    hkt_full = {
+                        "1": 102, "2": code, "3": int(time.strftime("%Y%m%d%H%M%S")) * 1000,
+                        "4": "T0\x00", "5": state["total_volume_trade"],
+                        "6": state["total_value_trade"], "7": state["pre_close_price"],
+                        "8": current, "9": state["high_price"], "10": state["low_price"],
+                        "11": current, "12": "|".join(map(str, bid)),
+                        "13": "|".join(map(str, state["bid_volume"][:5])),
+                        "14": "|".join(map(str, ask)),
+                        "15": "|".join(map(str, state["offer_volume"][:5])),
+                        "16": 0, "17": 0, "18": 0, "19": 0, "20": 0, "21": 0,
+                        "22": 0, "23": 6,
+                    }
+                    if symbol in full_pending:
+                        payload = hkt_full
+                        full_pending.remove(symbol)
+                        is_delta = False
+                    else:
+                        payload = {key: hkt_full[key] for key in
+                                   ("2", "3", "5", "6", "8", "9", "10", "11", "12", "13", "14", "15")}
+                        is_delta = True
+                    self.enqueue_event({"headers": {"tag": "16"}, "status": 0,
+                                        "is_delta": 1 if is_delta else 0, "data": payload,
+                                        "simulation": True})
+                    continue
                 state["orig_time"] = int(time.time() * 1000)
                 state["num_trades"] += 1
                 state["total_volume_trade"] += 10_000
@@ -289,6 +347,7 @@ class Adapter:
         self.subscriptions.clear()
         self.reconcile_retry_at = 0.0
         self.reconcile_retry_delay = 1.0
+        self.symbol_retries.clear()
         desired, quotes_desired = self.desired_snapshot()
         self._status("tgw_logged_in", {
             "desired": len(desired),
@@ -298,38 +357,103 @@ class Adapter:
 
     def _make_subscribe_item(self, symbol: str) -> Any:
         assert self.sdk is not None
-        item = self.sdk.SubscribeItem().set_code(symbol[:6])
-        item.market = self.sdk.MarketType.kSSE if symbol.endswith(".SH") else self.sdk.MarketType.kSZSE
-        item.flag = self.sdk.SubscribeDataType.kSnapshot
+        if symbol.endswith(".HK"):
+            if len(symbol) != 8 or len(symbol[:5]) != 5 or not symbol[:5].isdigit():
+                raise ValueError(f"invalid canonical HKT symbol: {symbol}")
+            item = self.sdk.SubscribeItem().set_code(symbol[:5])
+            item.market = self.sdk.MarketType.kSZSE
+            item.flag = self.sdk.SubscribeDataType.kHKTSnapshot
+        else:
+            if len(symbol) != 9 or symbol[6:] not in (".SH", ".SZ") or not symbol[:6].isdigit():
+                raise ValueError(f"invalid canonical domestic symbol: {symbol}")
+            item = self.sdk.SubscribeItem().set_code(symbol[:6])
+            item.market = self.sdk.MarketType.kSSE if symbol.endswith(".SH") else self.sdk.MarketType.kSZSE
+            item.flag = self.sdk.SubscribeDataType.kSnapshot
         item.category_type = 0
         return item
+
+    def _schedule_symbol_retry(self, symbol: str, result: int) -> None:
+        previous = self.symbol_retries.get(symbol)
+        delay = 1.0 if previous is None else min(MAX_RECONCILE_RETRY_SEC, previous[1] * 2)
+        failures = 1 if previous is None else previous[2] + 1
+        retry_at = time.monotonic() + delay
+        self.symbol_retries[symbol] = (retry_at, delay, failures, str(result))
+        self._status("subscribe_symbol_backoff", {
+            "symbol": symbol, "result": result, "failures": failures, "retry_sec": delay,
+        })
+
+    def _defer_batch_retry(self, symbols: list[str], result: int) -> None:
+        maximum_delay = 0.0
+        maximum_failures = 0
+        now = time.monotonic()
+        for symbol in symbols:
+            previous = self.symbol_retries.get(symbol)
+            delay = 1.0 if previous is None else min(MAX_RECONCILE_RETRY_SEC, previous[1] * 2)
+            failures = 1 if previous is None else previous[2] + 1
+            # Stable sub-second spread prevents a large rejected universe from
+            # retrying on one exact timer edge while remaining deterministic.
+            jitter = (sum(symbol.encode("ascii", errors="ignore")) % 1000) / 1000.0
+            self.symbol_retries[symbol] = (now + delay + jitter, delay, failures, str(result))
+            maximum_delay = max(maximum_delay, delay + jitter)
+            maximum_failures = max(maximum_failures, failures)
+        self._status("subscribe_batch_backoff", {
+            "symbols": len(symbols), "result": result, "max_failures": maximum_failures,
+            "max_retry_sec": round(maximum_delay, 3), "reason": "reconcile_call_budget",
+        })
+
+    def _subscribe_batch(self, batch: list[tuple[str, Any]]) -> None:
+        if not batch:
+            return
+        if self.subscribe_call_budget <= 0:
+            self._defer_batch_retry([symbol for symbol, _ in batch], -2)
+            return
+        self.subscribe_call_budget -= 1
+        started = time.monotonic()
+        result = int(self.sdk.Subscribe([item for _, item in batch]))
+        detail = {
+            "symbols": len(batch), "result": result,
+            "latency_ms": round((time.monotonic() - started) * 1000, 3),
+            "active": len(self.subscriptions),
+            "feed": "hkt" if batch[0][0].endswith(".HK") else "domestic",
+        }
+        if result == 0:
+            self.subscriptions.update(batch)
+            for symbol, _ in batch:
+                self.symbol_retries.pop(symbol, None)
+            detail["active"] = len(self.subscriptions)
+            self._status("subscribe_accepted", detail)
+            return
+        self._status("subscribe_rejected", detail)
+        if len(batch) == 1:
+            self._schedule_symbol_retry(batch[0][0], result)
+            return
+        midpoint = len(batch) // 2
+        self._subscribe_batch(batch[:midpoint])
+        self._subscribe_batch(batch[midpoint:])
 
     def _subscribe_live_many(self, symbols: list[str]) -> bool:
         _, quotes_desired = self.desired_snapshot()
         if self.sdk is None or not quotes_desired:
             return True
-        candidates: list[tuple[str, Any]] = []
+        self.subscribe_call_budget = MAX_SUBSCRIBE_CALLS_PER_RECONCILE
+        candidates: dict[str, list[tuple[str, Any]]] = {"domestic": [], "hkt": []}
+        now = time.monotonic()
         for symbol in symbols:
             if symbol in self.subscriptions:
                 continue
-            candidates.append((symbol, self._make_subscribe_item(symbol)))
-        for offset in range(0, len(candidates), SUBSCRIPTION_BATCH_SIZE):
-            batch = candidates[offset:offset + SUBSCRIPTION_BATCH_SIZE]
-            started = time.monotonic()
-            result = int(self.sdk.Subscribe([item for _, item in batch]))
-            detail = {
-                "offset": offset,
-                "symbols": len(batch),
-                "result": result,
-                "latency_ms": round((time.monotonic() - started) * 1000, 3),
-                "active": len(self.subscriptions),
-            }
-            if result != 0:
-                self._status("subscribe_rejected", detail)
-                return False
-            self.subscriptions.update(batch)
-            detail["active"] = len(self.subscriptions)
-            self._status("subscribe_accepted", detail)
+            retry = self.symbol_retries.get(symbol)
+            if retry is not None and retry[0] > now:
+                continue
+            group = "hkt" if symbol.endswith(".HK") else "domestic"
+            try:
+                candidates[group].append((symbol, self._make_subscribe_item(symbol)))
+            except (AttributeError, TypeError, ValueError) as exc:
+                LOG.warning("subscription item rejected for %s: %s", symbol, exc)
+                self._schedule_symbol_retry(symbol, -1)
+        for group in ("domestic", "hkt"):
+            values = candidates[group]
+            for offset in range(0, len(values), SUBSCRIPTION_BATCH_SIZE):
+                self._subscribe_batch(values[offset:offset + SUBSCRIPTION_BATCH_SIZE])
         return True
 
     def _subscribe_live(self, symbol: str) -> bool:
@@ -357,6 +481,7 @@ class Adapter:
                 return False
             for symbol, _ in batch:
                 self.subscriptions.pop(symbol, None)
+                self.symbol_retries.pop(symbol, None)
             detail["active"] = len(self.subscriptions)
             self._status("unsubscribe_accepted", detail)
         return True
@@ -371,9 +496,11 @@ class Adapter:
             return False
         if quotes_desired:
             add = sorted(desired - set(self.subscriptions))
-            if add and not self._subscribe_live_many(add):
-                return False
-        return set(self.subscriptions) == (desired if quotes_desired else set())
+            if add:
+                self._subscribe_live_many(add)
+        # Failed symbols are isolated behind their own timers.  They do not
+        # force global reconnects or block healthy domestic/HKT subscriptions.
+        return True
 
     def live_loop(self) -> None:
         delay = 1.0
@@ -432,7 +559,7 @@ class Adapter:
                     self.sdk = None
                     self.subscriptions.clear()
                 time.sleep(delay)
-                delay = min(30.0, delay * 2)
+                delay = min(MAX_RECONCILE_RETRY_SEC, delay * 2)
 
     def run(self) -> None:
         self.load_defaults()
