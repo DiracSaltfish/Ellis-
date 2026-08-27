@@ -1,0 +1,22 @@
+# Credentials and protocol captures must never enter version control.
+config/*.ini
+analysis/*session*.bin
+analysis/*.pcap
+analysis/*.trace
+
+# Local/generated artifacts.
+__pycache__/
+*.py[cod]
+*.so
+*.dylib
+macos_build/build/
+build/
+dist/
+*.egg-info/
+
+# Extracted vendor packages, native debug symbols and captured binary frames.
+# Reconstructed/decompiled source and written evidence remain versioned.
+analysis/native_win/
+analysis/tgw_whl/
+analysis/amazingdata_whl/
+analysis/*.bin

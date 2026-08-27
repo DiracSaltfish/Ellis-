@@ -1,0 +1,283 @@
+{
+  "source": "Five TGW QueryKline minute-line exports downloaded on 2026-08-27",
+  "method": {
+    "event_windows_minutes": [
+      3,
+      5,
+      10,
+      15
+    ],
+    "return_threshold": "max(fixed floor, 95th percentile within each file/window)",
+    "fixed_return_floors_pct": {
+      "3": 0.35,
+      "5": 0.5,
+      "10": 0.8,
+      "15": 1.0
+    },
+    "volume_ratio": "event mean minute volume / previous 30 continuous minutes mean",
+    "candidate_filters": {
+      "min_volume_ratio": 1.8,
+      "min_close_location": 0.7,
+      "max_retrace": "permitted maximum is max(0.25%, 45% of run-up)"
+    }
+  },
+  "quality_checks": {
+    "all_files_have_expected_242_rows": true,
+    "all_files_passed_ohlc_and_duplicate_checks": true
+  },
+  "files": [
+    {
+      "source_file": "159518_SZ_20260813_1m.csv",
+      "security_code": "159518",
+      "market_type": "102",
+      "date": "20260813",
+      "row_count": 242,
+      "quality_errors": [],
+      "window_distribution": {
+        "3": {
+          "observations": 177,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.08403361344537785,
+          "p95_return_pct": 0.16666666666667052,
+          "p98_return_pct": 0.1680672268907557,
+          "max_return_pct": 0.24979184013322886,
+          "threshold_pct": 0.35
+        },
+        "5": {
+          "observations": 173,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.16666666666667052,
+          "p95_return_pct": 0.1680672268907557,
+          "p98_return_pct": 0.24970040218841838,
+          "max_return_pct": 0.33305578684430515,
+          "threshold_pct": 0.5
+        },
+        "10": {
+          "observations": 163,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.16728019502518343,
+          "p95_return_pct": 0.241619378808982,
+          "p98_return_pct": 0.33333333333334103,
+          "max_return_pct": 0.4166666666666652,
+          "threshold_pct": 0.8
+        },
+        "15": {
+          "observations": 153,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.1680672268907557,
+          "p95_return_pct": 0.24987510407993518,
+          "p98_return_pct": 0.33333333333334103,
+          "max_return_pct": 0.4166666666666652,
+          "threshold_pct": 1.0
+        }
+      },
+      "candidate_count": 0
+    },
+    {
+      "source_file": "159518_SZ_20260821_1m.csv",
+      "security_code": "159518",
+      "market_type": "102",
+      "date": "20260821",
+      "row_count": 242,
+      "quality_errors": [],
+      "window_distribution": {
+        "3": {
+          "observations": 177,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.07911392405062223,
+          "p95_return_pct": 0.07911392405062223,
+          "p98_return_pct": 0.1581628058237854,
+          "max_return_pct": 0.15822784810126667,
+          "threshold_pct": 0.35
+        },
+        "5": {
+          "observations": 173,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.07911392405062223,
+          "p95_return_pct": 0.15810276679841806,
+          "p98_return_pct": 0.15822784810126667,
+          "max_return_pct": 0.15822784810126667,
+          "threshold_pct": 0.5
+        },
+        "10": {
+          "observations": 163,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.07911392405062223,
+          "p95_return_pct": 0.15810276679841806,
+          "p98_return_pct": 0.15822784810126667,
+          "max_return_pct": 0.15822784810126667,
+          "threshold_pct": 0.8
+        },
+        "15": {
+          "observations": 153,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.07911392405062223,
+          "p95_return_pct": 0.15822784810126667,
+          "p98_return_pct": 0.15822784810126667,
+          "max_return_pct": 0.2373417721518889,
+          "threshold_pct": 1.0
+        }
+      },
+      "candidate_count": 0
+    },
+    {
+      "source_file": "159518_SZ_20260824_1m.csv",
+      "security_code": "159518",
+      "market_type": "102",
+      "date": "20260824",
+      "row_count": 242,
+      "quality_errors": [],
+      "window_distribution": {
+        "3": {
+          "observations": 177,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.1567889851865445,
+          "p95_return_pct": 0.15738119281115903,
+          "p98_return_pct": 0.19484795350191686,
+          "max_return_pct": 0.23696682464455776,
+          "threshold_pct": 0.35
+        },
+        "5": {
+          "observations": 173,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.1572823040733473,
+          "p95_return_pct": 0.23529411764706687,
+          "p98_return_pct": 0.23645191718358305,
+          "max_return_pct": 0.3949447077409074,
+          "threshold_pct": 0.5
+        },
+        "10": {
+          "observations": 163,
+          "p50_return_pct": 0.07818608287724071,
+          "p90_return_pct": 0.1576044129235621,
+          "p95_return_pct": 0.23622047244094002,
+          "p98_return_pct": 0.31589591663955296,
+          "max_return_pct": 0.4739336492890933,
+          "threshold_pct": 0.8
+        },
+        "15": {
+          "observations": 153,
+          "p50_return_pct": 0.07824726134584292,
+          "p90_return_pct": 0.314613935993151,
+          "p95_return_pct": 0.39351493337132837,
+          "p98_return_pct": 0.3949322390839942,
+          "max_return_pct": 0.5529225908372792,
+          "threshold_pct": 1.0
+        }
+      },
+      "candidate_count": 0
+    },
+    {
+      "source_file": "159691_SZ_20260826_1m.csv",
+      "security_code": "159691",
+      "market_type": "102",
+      "date": "20260826",
+      "row_count": 242,
+      "quality_errors": [],
+      "window_distribution": {
+        "3": {
+          "observations": 177,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.16160312810581168,
+          "p95_return_pct": 0.16249655727632817,
+          "p98_return_pct": 0.4342931923790572,
+          "max_return_pct": 0.7205764611689425,
+          "threshold_pct": 0.35
+        },
+        "5": {
+          "observations": 173,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.16233766233766378,
+          "p95_return_pct": 0.24174902883803642,
+          "p98_return_pct": 0.6855741003058891,
+          "max_return_pct": 1.200000000000001,
+          "threshold_pct": 0.5
+        },
+        "10": {
+          "observations": 163,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.16297324209232134,
+          "p95_return_pct": 0.24350649350648457,
+          "p98_return_pct": 0.7012381104883946,
+          "max_return_pct": 1.4434643143544479,
+          "threshold_pct": 0.8
+        },
+        "15": {
+          "observations": 153,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.16233766233766378,
+          "p95_return_pct": 0.24350649350648457,
+          "p98_return_pct": 0.8788836798059003,
+          "max_return_pct": 1.3621794871794934,
+          "threshold_pct": 1.0
+        }
+      },
+      "candidate_count": 3
+    },
+    {
+      "source_file": "513350_SH_20260821_1m.csv",
+      "security_code": "513350",
+      "market_type": "101",
+      "date": "20260821",
+      "row_count": 242,
+      "quality_errors": [],
+      "window_distribution": {
+        "3": {
+          "observations": 177,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.07467148562121828,
+          "p95_return_pct": 0.14892032762472418,
+          "p98_return_pct": 0.14919585517602219,
+          "max_return_pct": 0.22354694485842153,
+          "threshold_pct": 0.35
+        },
+        "5": {
+          "observations": 173,
+          "p50_return_pct": 0.0,
+          "p90_return_pct": 0.07485029940119681,
+          "p95_return_pct": 0.14903129657228842,
+          "p98_return_pct": 0.1492047592017558,
+          "max_return_pct": 0.2238805970149249,
+          "threshold_pct": 0.5
+        },
+        "10": {
+          "observations": 163,
+          "p50_return_pct": -0.07440476190476719,
+          "p90_return_pct": 0.14892032762472418,
+          "p95_return_pct": 0.14924260131112366,
+          "p98_return_pct": 0.20582382180497416,
+          "max_return_pct": 0.22471910112360494,
+          "threshold_pct": 0.8
+        },
+        "15": {
+          "observations": 153,
+          "p50_return_pct": -0.07440476190476719,
+          "p90_return_pct": 0.07485029940119681,
+          "p95_return_pct": 0.14936569813392975,
+          "p98_return_pct": 0.22354694485842153,
+          "max_return_pct": 0.298284862043241,
+          "threshold_pct": 1.0
+        }
+      },
+      "candidate_count": 0
+    }
+  ],
+  "deduplicated_candidates": [
+    {
+      "source_file": "159691_SZ_20260826_1m.csv",
+      "security_code": "159691",
+      "market_type": "102",
+      "date": "20260826",
+      "window_minutes": 5,
+      "start_time": "1343",
+      "end_time": "1348",
+      "return_pct": 1.200000000000001,
+      "max_retrace_pct": 0.0,
+      "close_location": 0.8421052631578947,
+      "volume_ratio": 2.4054289194362273,
+      "return_threshold_pct": 0.5,
+      "is_candidate": true,
+      "signal_score": 2.8865147033234755
+    }
+  ]
+}

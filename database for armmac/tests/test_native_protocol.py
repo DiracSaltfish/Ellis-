@@ -5,7 +5,9 @@ import json
 import os
 import socket
 import sys
+import threading
 import unittest
+from decimal import Decimal
 from pathlib import Path
 from unittest.mock import patch
 
@@ -13,9 +15,14 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src" / "python"))
 
+import tgw_macos as tgw  # noqa: E402
 from tgw_macos import _backend, _protocol, interface  # noqa: E402
+from tgw_macos._kline_units import (  # noqa: E402
+    normalize_verified_159691_szse_one_minute_kline_rows,
+)
 from tgw_macos._protocol import (  # noqa: E402
     CompressedMessage,
+    DecodedMessageBatch,
     SNAPSHOT_ROW_FIELD_COUNT,
     SNAPSHOT_WIRE_TAG,
     ZSTD_MAGIC,
@@ -249,6 +256,67 @@ class ProtocolEnvelopeTests(unittest.TestCase):
             "variety_category": 0,
         }])
 
+    def test_one_minute_kline_maps_to_verified_wire_period_and_tag(self):
+        # Captured from an authorized official Linux SDK session on 2026-08-26:
+        # public cyc_type=10000 remains period_type=10000 and the response tag
+        # is 10000. Minute rows use an HHmm suffix in kline_time.
+        self.assertEqual(kline_wire_period(10000), 10000)
+        request = ReqKline().set_code("159691")
+        request.market_type = 102
+        request.cq_flag = 0
+        request.cq_date = 0
+        request.qj_flag = 0
+        request.cyc_type = 10000
+        request.cyc_def = 0
+        request.auto_complete = 1
+        request.begin_date = 20260826
+        request.end_date = 20260826
+        request.begin_time = 900
+        request.end_time = 1500
+        raw = build_kline_request("user", "token", 1, request)
+        value = json.loads(raw)
+        self.assertEqual(value["method"], "ReqGetKline")
+        self.assertEqual(value["params"]["period_type"], 10000)
+        self.assertEqual(value["params"]["begin_time"], 900)
+        self.assertEqual(value["params"]["end_time"], 1500)
+        self.assertEqual(
+            list(value["params"]),
+            [
+                "security_code", "market_type", "cq_flag", "auto_complete",
+                "period_type", "begin_date", "end_date", "begin_time",
+                "end_time", "QueryBandWidth",
+            ],
+        )
+        packets = [
+            {
+                "headers": {
+                    "id": 1, "tag": 10000, "pack_num": 2, "all_pack_num": 2,
+                },
+                "status": 0,
+                "data": ["159691,102,202608260931,101,111,91,106,201,301"],
+            },
+            {
+                "headers": {
+                    "id": 1, "tag": 10000, "pack_num": 1, "all_pack_num": 2,
+                },
+                "status": 0,
+                "data": ["159691,102,202608260930,100,110,90,105,200,300"],
+            },
+        ]
+        rows = parse_kline_packets(packets, expected_tag=10000)
+        self.assertEqual(
+            [row["kline_time"] for row in rows], [202608260930, 202608260931]
+        )
+        for row in rows:
+            self.assertEqual(row["orig_time"], 0)
+            self.assertEqual(row["variety_category"], 0)
+            self.assertEqual(row["market_type"], 102)
+            self.assertEqual(row["security_code"], "159691")
+            self.assertEqual(len(row), 11)
+            for key, value in row.items():
+                if key != "security_code":
+                    self.assertIsInstance(value, int)
+
     def test_week_kline_maps_to_verified_wire_period_and_tag(self):
         # Captured from an authorized official Linux SDK session on 2026-08-26:
         # public cyc_type=10009 is transmitted as period_type=10101 and the
@@ -363,11 +431,135 @@ class ProtocolEnvelopeTests(unittest.TestCase):
                 if key != "security_code":
                     self.assertIsInstance(value, int)
 
+    def test_season_kline_maps_to_verified_wire_period_and_tag(self):
+        # Captured from an authorized official Linux SDK session on 2026-08-26:
+        # public cyc_type=10011 is transmitted as period_type=10103 and the
+        # response packets carry tag=10103 with the daily CSV contract.
+        self.assertEqual(kline_wire_period(10011), 10103)
+        request = ReqKline().set_code("510300")
+        request.market_type = 101
+        request.cq_flag = 0
+        request.cq_date = 0
+        request.qj_flag = 0
+        request.cyc_type = 10011
+        request.cyc_def = 0
+        request.auto_complete = 1
+        request.begin_date = 20260401
+        request.end_date = 20260630
+        raw = build_kline_request("user", "token", 1, request)
+        value = json.loads(raw)
+        self.assertEqual(value["method"], "ReqGetKline")
+        self.assertEqual(value["params"]["period_type"], 10103)
+        self.assertEqual(
+            list(value["params"]),
+            [
+                "security_code", "market_type", "cq_flag", "auto_complete",
+                "period_type", "begin_date", "end_date", "begin_time",
+                "end_time", "QueryBandWidth",
+            ],
+        )
+        packets = [
+            {
+                "headers": {
+                    "id": 1, "tag": 10103, "pack_num": 2, "all_pack_num": 2,
+                },
+                "status": 0,
+                "data": ["510300,101,20260630,100,110,90,105,200,300"],
+            },
+            {
+                "headers": {
+                    "id": 1, "tag": 10103, "pack_num": 1, "all_pack_num": 2,
+                },
+                "status": 0,
+                "data": ["510300,101,20260331,99,111,89,104,201,301"],
+            },
+        ]
+        rows = parse_kline_packets(packets, expected_tag=10103)
+        self.assertEqual(
+            [row["kline_time"] for row in rows], [20260331, 20260630]
+        )
+        for row in rows:
+            self.assertEqual(row["orig_time"], 0)
+            self.assertEqual(row["variety_category"], 0)
+            self.assertEqual(row["market_type"], 101)
+            self.assertEqual(row["security_code"], "510300")
+            self.assertEqual(len(row), 11)
+            self.assertEqual(sorted(row), sorted([
+                "market_type", "security_code", "orig_time", "kline_time",
+                "open_price", "high_price", "low_price", "close_price",
+                "volume_trade", "value_trade", "variety_category",
+            ]))
+            for key, value in row.items():
+                if key != "security_code":
+                    self.assertIsInstance(value, int)
+
+    def test_year_kline_maps_to_verified_wire_period_and_tag(self):
+        # Captured from an authorized official Linux SDK session on 2026-08-26:
+        # public cyc_type=10012 is transmitted as period_type=10104 and the
+        # response packets carry tag=10104 with the daily CSV contract.
+        self.assertEqual(kline_wire_period(10012), 10104)
+        request = ReqKline().set_code("510300")
+        request.market_type = 101
+        request.cq_flag = 0
+        request.cq_date = 0
+        request.qj_flag = 0
+        request.cyc_type = 10012
+        request.cyc_def = 0
+        request.auto_complete = 1
+        request.begin_date = 20250101
+        request.end_date = 20251231
+        raw = build_kline_request("user", "token", 1, request)
+        value = json.loads(raw)
+        self.assertEqual(value["method"], "ReqGetKline")
+        self.assertEqual(value["params"]["period_type"], 10104)
+        self.assertEqual(
+            list(value["params"]),
+            [
+                "security_code", "market_type", "cq_flag", "auto_complete",
+                "period_type", "begin_date", "end_date", "begin_time",
+                "end_time", "QueryBandWidth",
+            ],
+        )
+        packets = [
+            {
+                "headers": {
+                    "id": 1, "tag": 10104, "pack_num": 2, "all_pack_num": 2,
+                },
+                "status": 0,
+                "data": ["510300,101,20251231,100,110,90,105,200,300"],
+            },
+            {
+                "headers": {
+                    "id": 1, "tag": 10104, "pack_num": 1, "all_pack_num": 2,
+                },
+                "status": 0,
+                "data": ["510300,101,20250102,99,111,89,104,201,301"],
+            },
+        ]
+        rows = parse_kline_packets(packets, expected_tag=10104)
+        self.assertEqual(
+            [row["kline_time"] for row in rows], [20250102, 20251231]
+        )
+        for row in rows:
+            self.assertEqual(row["orig_time"], 0)
+            self.assertEqual(row["variety_category"], 0)
+            self.assertEqual(row["market_type"], 101)
+            self.assertEqual(row["security_code"], "510300")
+            self.assertEqual(len(row), 11)
+            self.assertEqual(sorted(row), sorted([
+                "market_type", "security_code", "orig_time", "kline_time",
+                "open_price", "high_price", "low_price", "close_price",
+                "volume_trade", "value_trade", "variety_category",
+            ]))
+            for key, value in row.items():
+                if key != "security_code":
+                    self.assertIsInstance(value, int)
+
     def test_kline_rejects_unverified_cycles(self):
-        # Only daily 10008, weekly 10009 and monthly 10010 are wire-proven;
-        # every other public cycle (minutes/season/year or arbitrary values)
-        # must fail loudly instead of reusing a verified wire enum.
-        for cyc_type in (10000, 10007, 10011, 10012, 9999):
+        # One-minute 10000 plus daily 10008, weekly 10009, monthly 10010,
+        # seasonal 10011 and yearly 10012 are wire-proven. Every other public
+        # cycle must fail loudly instead of reusing a verified wire enum.
+        for cyc_type in (10001, 10007, 9999):
             request = ReqKline().set_code("510300")
             request.cyc_type = cyc_type
             with self.assertRaisesRegex(
@@ -375,7 +567,8 @@ class ProtocolEnvelopeTests(unittest.TestCase):
             ):
                 build_kline_request("user", "token", 1, request)
         self.assertEqual(
-            sorted(_protocol.VERIFIED_KLINE_WIRE_TYPES), [10008, 10009, 10010]
+            sorted(_protocol.VERIFIED_KLINE_WIRE_TYPES),
+            [10000, 10008, 10009, 10010, 10011, 10012],
         )
 
     def test_kline_response_rejects_wrong_period_tag(self):
@@ -426,7 +619,8 @@ class ProtocolEnvelopeTests(unittest.TestCase):
             "status": 0,
             "data": [row],
         }]
-        rows = parse_snapshot_packets(packets)
+        rows, error_code = parse_snapshot_packets(packets)
+        self.assertIsNone(error_code)
         expected_keys = [
             "market_type", "security_code", "variety_category", "orig_time",
             "trading_phase_code", "pre_close_price", "open_price", "high_price",
@@ -473,6 +667,77 @@ class ProtocolEnvelopeTests(unittest.TestCase):
         with self.assertRaisesRegex(NotImplementedError, "SZSE ETF 159518"):
             build_snapshot_request("user", "token", 1, request)
 
+    def test_snapshot_error_frame_maps_to_public_data_empty(self):
+        # Captured empty-query wire frame (2026-08-26, authorized Linux SDK):
+        # string tag "DataEmpty", wire-generic status=-100, pack counters 0 and
+        # an empty string data payload. The official SDK surfaces -76.
+        packets = [{
+            "headers": {"id": 1, "tag": "DataEmpty", "pack_num": 0, "all_pack_num": 0},
+            "status": -100,
+            "data": "",
+        }]
+        rows, error_code = parse_snapshot_packets(packets)
+        self.assertEqual(rows, [])
+        self.assertEqual(error_code, -76)
+
+    def test_snapshot_rejects_unobserved_error_shapes(self):
+        unknown_tag = [{
+            "headers": {"id": 1, "tag": "SomeError", "pack_num": 0, "all_pack_num": 0},
+            "status": -100,
+            "data": "",
+        }]
+        with self.assertRaisesRegex(Exception, "error tag"):
+            parse_snapshot_packets(unknown_tag)
+
+        packed = "|".join(["1"] * 10)
+        data_frame = {
+            "headers": {"id": 1, "tag": SNAPSHOT_WIRE_TAG,
+                        "pack_num": 1, "all_pack_num": 1},
+            "status": 0,
+            "data": [",".join(["000001", "101"] + ["1"] * 8 + [packed] * 4 + ["1"] * 22)],
+        }
+        error_frame = {
+            "headers": {"id": 1, "tag": "DataEmpty", "pack_num": 0, "all_pack_num": 0},
+            "status": -100,
+            "data": "",
+        }
+        with self.assertRaisesRegex(Exception, "mixes"):
+            parse_snapshot_packets([data_frame, error_frame])
+
+        # Defensive branch: two *mapped* error frames must agree on one code.
+        # A second real wire tag has not been captured yet, so the mapping is
+        # extended synthetically for this unit test only.
+        with patch.dict(_protocol.SNAPSHOT_ERROR_TAGS, {"SyntheticError": -88}):
+            conflicting = [
+                {
+                    "headers": {"id": 1, "tag": "DataEmpty",
+                                "pack_num": 0, "all_pack_num": 0},
+                    "status": -100, "data": "",
+                },
+                {
+                    "headers": {"id": 1, "tag": "SyntheticError",
+                                "pack_num": 0, "all_pack_num": 0},
+                    "status": -100, "data": "",
+                },
+            ]
+            with self.assertRaisesRegex(Exception, "distinct error"):
+                parse_snapshot_packets(conflicting)
+            agreeing = [
+                {
+                    "headers": {"id": 1, "tag": "DataEmpty",
+                                "pack_num": 0, "all_pack_num": 0},
+                    "status": -100, "data": "",
+                },
+                {
+                    "headers": {"id": 1, "tag": "DataEmpty",
+                                "pack_num": 0, "all_pack_num": 0},
+                    "status": -100, "data": "",
+                },
+            ]
+            rows, error_code = parse_snapshot_packets(agreeing)
+            self.assertEqual(rows, [])
+            self.assertEqual(error_code, -76)
+
     def test_snapshot_multi_packet_ordering_and_error_shapes(self):
         packed = "|".join(["1"] * 10)
         row_a = ",".join(["000001", "101"] + ["1"] * 8 + [packed] * 4 + ["1"] * 22)
@@ -488,10 +753,11 @@ class ProtocolEnvelopeTests(unittest.TestCase):
                 "data": payload,
             }
 
-        ordered = parse_snapshot_packets([
+        rows, error_code = parse_snapshot_packets([
             packet(2, 2, [row_b]), packet(1, 2, [row_a]),
         ])
-        self.assertEqual([item["security_code"] for item in ordered], ["000001", "000002"])
+        self.assertIsNone(error_code)
+        self.assertEqual([item["security_code"] for item in rows], ["000001", "000002"])
 
         cases = [
             ([packet(1, 2, [row_a])], "incomplete"),
@@ -500,11 +766,6 @@ class ProtocolEnvelopeTests(unittest.TestCase):
                 "headers": {"id": 7, "tag": 999, "pack_num": 1, "all_pack_num": 1},
                 "status": 0, "data": [row_a],
             }], "tag"),
-            ([{
-                "headers": {"id": 7, "tag": SNAPSHOT_WIRE_TAG,
-                            "pack_num": 1, "all_pack_num": 1},
-                "status": -76, "data": [row_a],
-            }], "status"),
             ([packet(1, 1, [",".join(["000001"] * 10)])], "36 fields"),
             ([packet(1, 1, [
                 ",".join([
@@ -543,6 +804,37 @@ class ProtocolEnvelopeTests(unittest.TestCase):
         self.assertEqual(value["status"], 0)
         self.assertEqual((b"Y" + compressed)[1:5], ZSTD_MAGIC)
 
+    def test_zstd_bulk_push_decodes_backtick_delimited_object_stream(self):
+        decoded = (
+            b'{"headers":{"tag":"14"},"status":0,"is_delta":0,'
+            b'"data":{"1":102,"2":"159866"}}`'
+            b'{"headers":{"tag":"14"},"status":0,"is_delta":1,'
+            b'"data":{"2":"164824","10":1312000}}\x00'
+        )
+        with patch.object(_protocol, "_decompress_zstd", return_value=decoded):
+            value = decode_server_payload(b"Y" + ZSTD_MAGIC + b"fixture")
+        self.assertIsInstance(value, DecodedMessageBatch)
+        self.assertEqual(len(value.messages), 2)
+        self.assertEqual(value.messages[0]["data"]["2"], "159866")
+        self.assertEqual(value.messages[1]["data"]["2"], "164824")
+
+    def test_bulk_push_dispatches_each_object_as_an_individual_raw_event(self):
+        decoded = (
+            b'{"headers":{"tag":"14"},"status":0,"is_delta":0,'
+            b'"data":{"2":"159866"}}`'
+            b'{"headers":{"tag":"14"},"status":0,"is_delta":0,'
+            b'"data":{"2":"164824"}}\x00'
+        )
+        client = _protocol.TgwWssClient()
+        with patch.object(_protocol, "_decompress_zstd", return_value=decoded):
+            client._dispatch_payload(b"Y" + ZSTD_MAGIC + b"fixture")
+        self.assertEqual(client.recv_event(timeout=0.01)["data"]["2"], "159866")
+        self.assertEqual(client.recv_event(timeout=0.01)["data"]["2"], "164824")
+
+    def test_object_stream_rejects_unobserved_separator(self):
+        with self.assertRaisesRegex(_protocol.TgwProtocolError, "separated"):
+            decode_server_payload(b'{"status":0}|{"status":0}')
+
 
 class BackendSelectionTests(unittest.TestCase):
     def test_live_is_default_and_simulation_is_explicit(self):
@@ -563,6 +855,235 @@ class PublicContractTests(unittest.TestCase):
             interface.Subscribe(SubscribeItem(), object())
         with self.assertRaisesRegex(NotImplementedError, "asynchronous query SPI"):
             interface.QueryKline(ReqKline(), object(), return_df_format=False)
+
+    def test_error_code_table_matches_official_values(self):
+        # Values cross-checked against the official V1.0.9.2 Python wheel.
+        self.assertEqual(tgw.ErrorCode.kSuccess, 0)
+        self.assertEqual(tgw.ErrorCode.kFailure, -100)
+        self.assertEqual(tgw.ErrorCode.kDataEmpty, -76)
+        self.assertEqual(tgw.ErrorCode.kNonQueryTimePeriod, -88)
+        self.assertEqual(tgw.ErrorCode.kTimeout, -83)
+        self.assertEqual(tgw.ErrorCode.kOverMaxQueryLimit, -78)
+        self.assertEqual(interface.GetErrorMsg(0), "成功")
+        self.assertEqual(interface.GetErrorMsg(-76), "数据为空")
+        self.assertEqual(interface.GetErrorMsg(-88), "非查询时间段(非查询时间段不支持查询)")
+        self.assertEqual(interface.GetErrorMsg(-12345), "unknown error code")
+
+    @staticmethod
+    def _verified_one_minute_row(**overrides):
+        row = {
+            "market_type": 102,
+            "security_code": "159691",
+            "orig_time": 0,
+            "kline_time": 202608260930,
+            "open_price": 2_500_000,
+            "high_price": 2_750_000,
+            "low_price": 2_250_000,
+            "close_price": 2_625_000,
+            "volume_trade": 123_400,
+            "value_trade": 250_012_345,
+            "variety_category": 0,
+        }
+        row.update(overrides)
+        return row
+
+    @staticmethod
+    def _verified_one_minute_request():
+        request = ReqKline().set_code("159691")
+        request.market_type = 102
+        request.cq_flag = 0
+        request.cq_date = 0
+        request.qj_flag = 0
+        request.cyc_type = 10000
+        request.cyc_def = 0
+        request.auto_complete = 1
+        request.begin_date = 20260826
+        request.end_date = 20260826
+        request.begin_time = 900
+        request.end_time = 1500
+        return request
+
+    def test_verified_one_minute_normalizer_emits_explicit_exact_units(self):
+        raw_row = self._verified_one_minute_row()
+        normalized = normalize_verified_159691_szse_one_minute_kline_rows([raw_row])
+        self.assertEqual(normalized, [{
+            "market_type": 102,
+            "security_code": "159691",
+            "orig_time": 0,
+            "kline_time": 202608260930,
+            "open_price_yuan": Decimal("2.5"),
+            "high_price_yuan": Decimal("2.75"),
+            "low_price_yuan": Decimal("2.25"),
+            "close_price_yuan": Decimal("2.625"),
+            "volume_shares": 1234,
+            "value_trade_yuan": Decimal("2500.12345"),
+            "variety_category": 0,
+            "raw_open_price": 2_500_000,
+            "raw_high_price": 2_750_000,
+            "raw_low_price": 2_250_000,
+            "raw_close_price": 2_625_000,
+            "raw_volume_trade": 123_400,
+            "raw_value_trade": 250_012_345,
+        }])
+        # The public top-level re-export has the same exact, non-float result.
+        self.assertEqual(
+            tgw.NormalizeVerified159691SzseOneMinuteKlineRows([raw_row]),
+            normalized,
+        )
+
+    def test_verified_one_minute_normalizer_rejects_out_of_scope_or_invalid_rows(self):
+        for override, error in (
+            ({"security_code": "000001"}, "security_code"),
+            ({"kline_time": 202608270930}, "2026-08-26"),
+            ({"volume_trade": 123_401}, "not divisible"),
+            ({"high_price": 2_400_000}, "OHLC"),
+        ):
+            with self.subTest(override=override), self.assertRaisesRegex(
+                (NotImplementedError, ValueError), error
+            ):
+                normalize_verified_159691_szse_one_minute_kline_rows([
+                    self._verified_one_minute_row(**override)
+                ])
+
+    def test_query_kline_normalized_is_opt_in_and_prevalidates_scope(self):
+        calls = []
+
+        def query(kind, request_payload):
+            calls.append((kind, request_payload))
+            return [self._verified_one_minute_row()]
+
+        self._install_fake_backend(query=query)
+        request = self._verified_one_minute_request()
+        normalized, error = interface.QueryKline(
+            request, return_df_format=False, normalized=True
+        )
+        self.assertEqual(error, 0)
+        self.assertEqual(normalized[0]["close_price_yuan"], Decimal("2.625"))
+        self.assertEqual(normalized[0]["volume_shares"], 1234)
+        self.assertEqual(calls[0][0], "kline")
+
+        request.market_type = 101
+        with self.assertRaisesRegex(NotImplementedError, "market_type=101"):
+            interface.QueryKline(request, return_df_format=False, normalized=True)
+        self.assertEqual(len(calls), 1)
+
+    def _install_fake_backend(self, **methods):
+        class FakeBackend:
+            pass
+
+        backend = FakeBackend()
+        for name, method in methods.items():
+            setattr(backend, name, method)
+        previous = interface._g_backend
+        interface._g_backend = backend
+        self.addCleanup(setattr, interface, "_g_backend", previous)
+        return backend
+
+    def test_snapshot_sync_empty_returns_official_data_empty(self):
+        calls = {}
+
+        def query(kind, req):
+            calls["kind"] = kind
+            return [], -76
+
+        self._install_fake_backend(query=query)
+        request = ReqDefault().set_code("159518")
+        rows, error = interface.QuerySnapshot(request, return_df_format=False)
+        self.assertIsNone(rows)
+        self.assertEqual(error, -76)
+        self.assertEqual(calls["kind"], "snapshot")
+        # DataFrame mode keeps the official (None, -76) shape on empty data.
+        rows, error = interface.QuerySnapshot(request, return_df_format=True)
+        self.assertIsNone(rows)
+        self.assertEqual(error, -76)
+
+    def test_snapshot_async_delivers_result_through_spi(self):
+        prepared = ("prepared",)
+
+        def build_query(kind, req):
+            return prepared
+
+        def run_query(value):
+            assert value is prepared
+            return [{"security_code": "159518"}], None
+
+        deliveries = []
+        done = threading.Event()
+
+        class Collector:
+            def __call__(self, result, err_code):
+                deliveries.append((result, err_code))
+                done.set()
+
+        self._install_fake_backend(build_query=build_query, run_query=run_query)
+        request = ReqDefault().set_code("159518")
+        submitted, submit_err = interface.QuerySnapshot(
+            request, query_spi=Collector(), return_df_format=False
+        )
+        self.assertIs(submitted, True)
+        self.assertIsNone(submit_err)
+        self.assertTrue(done.wait(timeout=5.0))
+        self.assertEqual(deliveries, [([{"security_code": "159518"}], None)])
+
+    def test_snapshot_async_maps_timeout_and_errors(self):
+        import threading as threading_module
+
+        from tgw_macos._protocol import TgwTimeoutError as ProtocolTimeout
+
+        cases = [
+            (ProtocolTimeout("slow"), -83),
+            (RuntimeError("boom"), "boom"),
+        ]
+        for raised, expected_err in cases:
+            with self.subTest(expected=expected_err):
+                done = threading_module.Event()
+                deliveries = []
+
+                class Collector:
+                    def __call__(self, result, err_code):
+                        deliveries.append((result, err_code))
+                        done.set()
+
+                def run_query(_value):
+                    raise raised
+
+                self._install_fake_backend(
+                    build_query=lambda kind, req: (), run_query=run_query
+                )
+                submitted, submit_err = interface.QuerySnapshot(
+                    ReqDefault().set_code("159518"),
+                    query_spi=Collector(),
+                    return_df_format=False,
+                )
+                self.assertIs(submitted, True)
+                self.assertIsNone(submit_err)
+                self.assertTrue(done.wait(timeout=5.0))
+                self.assertEqual(len(deliveries), 1)
+                result, err = deliveries[0]
+                self.assertIsNone(result)
+                self.assertEqual(err, expected_err)
+
+    def test_snapshot_async_empty_maps_to_data_empty_callback(self):
+        done = threading.Event()
+        deliveries = []
+
+        class Collector:
+            def __call__(self, result, err_code):
+                deliveries.append((result, err_code))
+                done.set()
+
+        self._install_fake_backend(
+            build_query=lambda kind, req: (),
+            run_query=lambda _value: ([], -76),
+        )
+        submitted, _submit_err = interface.QuerySnapshot(
+            ReqDefault().set_code("159518"),
+            query_spi=Collector(),
+            return_df_format=False,
+        )
+        self.assertIs(submitted, True)
+        self.assertTrue(done.wait(timeout=5.0))
+        self.assertEqual(deliveries, [(None, -76)])
 
     def test_packaged_vendor_ca_is_discoverable(self):
         ca_file = _backend._find_ca_file()

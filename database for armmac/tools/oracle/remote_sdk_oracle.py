@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import collections
 import json
 import threading
 import time
@@ -146,6 +147,457 @@ def _etf_info_shapes(result: Any) -> tuple[dict[str, Any], dict[str, Any]]:
     return shape, invariants
 
 
+class _SnapshotAsyncCollector:
+    """Async user SPI for snapshot queries: counters and error codes only."""
+
+    def __init__(self, wait_seconds: float) -> None:
+        self.wait_seconds = wait_seconds
+        self.submitted_at: float | None = None
+        self.submit_return: dict[str, Any] | None = None
+        self.calls: list[dict[str, Any]] = []
+        self.first_call_delay: float | None = None
+        self._done = threading.Event()
+
+    def __call__(self, result: Any, err_code: Any) -> None:
+        if self.submitted_at is not None and self.first_call_delay is None:
+            self.first_call_delay = round(time.monotonic() - self.submitted_at, 3)
+        self.calls.append({
+            "result_kind": type(result).__name__ if result is not None else None,
+            "records": len(result) if isinstance(result, list) else None,
+            "err_code": (
+                err_code
+                if isinstance(err_code, int)
+                else (str(err_code)[:80] if err_code is not None else None)
+            ),
+        })
+        self._done.set()
+
+    def summary(self) -> dict[str, Any]:
+        self._done.wait(self.wait_seconds)
+        time.sleep(2.0)  # grace window so trailing status callbacks still count
+        return {
+            "submit_return": self.submit_return,
+            "call_count": len(self.calls),
+            "calls": self.calls,
+            "first_call_delay_sec": self.first_call_delay,
+        }
+
+
+class _SecuritiesInfoAsyncCollector:
+    """Async user SPI for securities-info: per-batch counters and column types."""
+
+    def __init__(self, wait_seconds: float, quiet_seconds: float = 5.0) -> None:
+        self.wait_seconds = wait_seconds
+        self.quiet_seconds = quiet_seconds
+        self.submitted_at: float | None = None
+        self.first_call_delay: float | None = None
+        self.batch_sizes: list[int] = []
+        self.status_errors: list[Any] = []
+        self.columns: list[str] | None = None
+        self.column_types: dict[str, str] | None = None
+        self._rows: list[dict[str, Any]] = []
+        self._last_call_at: float | None = None
+
+    def __call__(self, result: Any, err_code: Any) -> None:
+        self._last_call_at = time.monotonic()
+        if self.submitted_at is not None and self.first_call_delay is None:
+            self.first_call_delay = round(self._last_call_at - self.submitted_at, 3)
+        if err_code is not None and result is None:
+            self.status_errors.append(
+                err_code if isinstance(err_code, int) else str(type(err_code).__name__)
+            )
+            return
+        if isinstance(result, list):
+            self.batch_sizes.append(len(result))
+            for row in result:
+                if isinstance(row, dict):
+                    if self.columns is None:
+                        self.columns = sorted(row)
+                        self.column_types = {
+                            key: type(row[key]).__name__ for key in sorted(row)
+                        }
+                    self._rows.append({
+                        "market": row.get("market_type"),
+                        "variety": row.get("variety_category"),
+                        "price_fields_count": sum(
+                            1 for key in _SECINFO_PRICE_FIELDS if key in row
+                        ),
+                        "qty_fields_count": sum(
+                            1 for key in _SECINFO_QTY_FIELDS if key in row
+                        ),
+                    })
+
+    def summary(self) -> dict[str, Any]:
+        deadline = time.monotonic() + self.wait_seconds
+        while time.monotonic() < deadline:
+            if (
+                self._last_call_at is not None
+                and time.monotonic() - self._last_call_at > self.quiet_seconds
+            ):
+                break
+            time.sleep(0.2)
+        return {
+            "batch_count": len(self.batch_sizes),
+            "batch_sizes": self.batch_sizes,
+            "total_rows": len(self._rows),
+            "columns": self.columns,
+            "column_types": self.column_types,
+            "status_errors": self.status_errors,
+            "first_call_delay_sec": self.first_call_delay,
+            "invariants": {
+                "distinct_market_type": sorted(
+                    {row["market"] for row in self._rows if isinstance(row["market"], int)}
+                ),
+                "distinct_variety_category": sorted(
+                    {row["variety"] for row in self._rows if isinstance(row["variety"], int)}
+                ),
+                "price_field_count": sorted(
+                    {row["price_fields_count"] for row in self._rows}
+                ),
+                "qty_field_count": sorted(
+                    {row["qty_fields_count"] for row in self._rows}
+                ),
+            },
+        }
+
+
+class _ExFactorAsyncCollector:
+    """Async user SPI for ex-factor: per-batch counters and double invariants.
+
+    Mirrors the sync probe's column/type and invariant summary but delivered
+    through the official asynchronous query_spi path. Never records the factor
+    business values themselves.
+    """
+
+    def __init__(self, wait_seconds: float, quiet_seconds: float = 5.0) -> None:
+        self.wait_seconds = wait_seconds
+        self.quiet_seconds = quiet_seconds
+        self.submitted_at: float | None = None
+        self.first_call_delay: float | None = None
+        self.batch_sizes: list[int] = []
+        self.status_errors: list[Any] = []
+        self.columns: list[str] | None = None
+        self.column_types: dict[str, str] | None = None
+        self._rows: list[dict[str, Any]] = []
+        self._cum_factors: list[float] = []
+        self._last_call_at: float | None = None
+
+    def __call__(self, result: Any, err_code: Any) -> None:
+        self._last_call_at = time.monotonic()
+        if self.submitted_at is not None and self.first_call_delay is None:
+            self.first_call_delay = round(self._last_call_at - self.submitted_at, 3)
+        if err_code is not None and result is None:
+            self.status_errors.append(
+                err_code if isinstance(err_code, int) else str(type(err_code).__name__)
+            )
+            return
+        if isinstance(result, list):
+            self.batch_sizes.append(len(result))
+            for row in result:
+                if isinstance(row, dict):
+                    if self.columns is None:
+                        self.columns = sorted(row)
+                        self.column_types = {
+                            key: type(row[key]).__name__ for key in sorted(row)
+                        }
+                    self._rows.append(_ex_factor_row_invariants(row))
+                    if isinstance(row.get("cum_factor"), float):
+                        self._cum_factors.append(row["cum_factor"])
+
+    def summary(self) -> dict[str, Any]:
+        deadline = time.monotonic() + self.wait_seconds
+        while time.monotonic() < deadline:
+            if (
+                self._last_call_at is not None
+                and time.monotonic() - self._last_call_at > self.quiet_seconds
+            ):
+                break
+            time.sleep(0.2)
+        return {
+            "batch_count": len(self.batch_sizes),
+            "batch_sizes": self.batch_sizes,
+            "total_rows": len(self._rows),
+            "columns": self.columns,
+            "column_types": self.column_types,
+            "status_errors": self.status_errors,
+            "first_call_delay_sec": self.first_call_delay,
+            "invariants": _merge_ex_factor_invariants(
+                self._rows, self._cum_factors
+            ),
+        }
+
+
+def _ex_factor_row_invariants(row: dict[str, Any]) -> dict[str, Any]:
+    """Desensitized per-row invariant summary (no business factor values)."""
+    def digit_length(value: Any) -> int | None:
+        return len(str(value)) if isinstance(value, (int, float)) else None
+
+    def decimal_places(value: Any) -> int | None:
+        if isinstance(value, float):
+            text = format(value, ".15g")
+            return len(text.split(".")[1]) if "." in text else 0
+        return None
+
+    inv: dict[str, Any] = {
+        "ex_date_digit_length": digit_length(row.get("ex_date")),
+        "ex_date_is_int": isinstance(row.get("ex_date"), int),
+        "ex_factor_kind": type(row.get("ex_factor")).__name__,
+        "ex_factor_is_float": isinstance(row.get("ex_factor"), float),
+        "ex_factor_is_non_negative": isinstance(row.get("ex_factor"), (int, float))
+        and row.get("ex_factor") >= 0,
+        "ex_factor_decimal_places": decimal_places(row.get("ex_factor")),
+        "cum_factor_kind": type(row.get("cum_factor")).__name__,
+        "cum_factor_is_float": isinstance(row.get("cum_factor"), float),
+        "cum_factor_is_non_negative": isinstance(row.get("cum_factor"), (int, float))
+        and row.get("cum_factor") >= 0,
+        "cum_factor_decimal_places": decimal_places(row.get("cum_factor")),
+        "inner_code_len": len(str(row.get("inner_code", ""))),
+        "security_code_len": len(str(row.get("security_code", ""))),
+    }
+    return inv
+
+
+def _merge_ex_factor_invariants(rows: list[dict[str, Any]],
+                                cum_factors: list[float] | None = None
+                                ) -> dict[str, Any]:
+    """Collapse per-row invariants into compact set summaries.
+
+    ``cum_factors`` carries the actual cumulative values so the monotonic
+    invariant is computed on the real doubles (the per-row dict only holds
+    desensitized metadata and never the factor values).
+    """
+    keys = [
+        "ex_date_digit_length", "ex_date_is_int", "ex_factor_kind",
+        "ex_factor_is_float", "ex_factor_is_non_negative",
+        "ex_factor_decimal_places", "cum_factor_kind", "cum_factor_is_float",
+        "cum_factor_is_non_negative", "cum_factor_decimal_places",
+        "inner_code_len", "security_code_len",
+    ]
+    merged: dict[str, Any] = {}
+    for key in keys:
+        values = [row[key] for row in rows if row.get(key) is not None]
+        merged[key] = sorted(set(values))
+    if cum_factors:
+        merged["cum_factor_monotonic_nondecreasing"] = all(
+            left <= right
+            for left, right in zip(cum_factors, cum_factors[1:])
+        )
+        merged["cum_factor_monotonic_violations"] = sum(
+            1 for left, right in zip(cum_factors, cum_factors[1:]) if left > right
+        )
+        merged["cum_factor_first_is_one_or_more"] = any(
+            value >= 1.0 for value in cum_factors
+        )
+        merged["cum_factor_positive_count"] = sum(
+            1 for value in cum_factors if value > 0.0
+        )
+        merged["cum_factor_row_count"] = len(cum_factors)
+    if rows:
+        merged["inner_code_distinct_count"] = len(
+            {row.get("inner_code") for row in rows}
+        )
+        merged["security_code_distinct_count"] = len(
+            {row.get("security_code") for row in rows}
+        )
+    return merged
+
+
+_SECINFO_PRICE_FIELDS = {
+    "pre_close_price", "exercise_price", "high_limited", "low_limited",
+    "price_tick", "par_value", "coupon_rate",
+}
+_SECINFO_QTY_FIELDS = {
+    "buy_qty_unit", "sell_qty_unit", "market_buy_qty_unit", "market_sell_qty_unit",
+    "buy_qty_lower_limit", "buy_qty_upper_limit", "sell_qty_lower_limit",
+    "sell_qty_upper_limit", "market_buy_qty_lower_limit", "market_buy_qty_upper_limit",
+    "market_sell_qty_lower_limit", "market_sell_qty_upper_limit",
+    "outstanding_share", "public_float_share_quantity",
+}
+
+
+def _securities_info_shapes(result: Any) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Desensitized shape + invariant summary of one securities-info result."""
+    shape: dict[str, Any] = {}
+    invariants: dict[str, Any] = {}
+    if not isinstance(result, list):
+        return {"type": type(result).__name__}, invariants
+    shape["type"] = "list"
+    shape["length"] = len(result)
+    if not result:
+        return shape, invariants
+    first = result[0]
+    if not isinstance(first, dict):
+        shape["entry_kind"] = type(first).__name__
+        return shape, invariants
+    shape["entry_kind"] = "object"
+    keys = sorted(first)
+    shape["column_count"] = len(keys)
+    shape["columns_sorted"] = keys
+    shape["value_types"] = {key: type(first[key]).__name__ for key in keys}
+    shape["all_key_sets_identical"] = all(
+        isinstance(row, dict) and sorted(row) == keys for row in result
+    )
+    markets = {row.get("market_type") for row in result if isinstance(row, dict)}
+    varieties = {
+        row.get("variety_category") for row in result if isinstance(row, dict)
+    }
+    date_lengths = sorted({
+        len(str(row[key]))
+        for row in result if isinstance(row, dict)
+        for key in ("list_day", "expire_date")
+        if key in row and isinstance(row[key], (int,))
+    })
+    non_empty_fraction = {
+        key: round(
+            sum(
+                1 for row in result
+                if isinstance(row, dict) and row.get(key) not in (None, "", 0)
+            ) / len(result),
+            2,
+        )
+        for key in ("underlying_security_id", "contract_type", "product_code",
+                    "regular_share", "english_name")
+    }
+    invariants = {
+        "distinct_market_type": sorted(markets),
+        "distinct_variety_category": sorted(varieties),
+        "date_digit_lengths": date_lengths,
+        "non_empty_fraction": non_empty_fraction,
+        "string_len_histogram_currency": dict(sorted(collections.Counter(
+            len(row.get("currency", ""))
+            for row in result if isinstance(row, dict) and isinstance(row.get("currency"), str)
+        ).items())),
+    }
+    return shape, invariants
+
+
+class _CodeTableBatchCollector:
+    """Async user SPI for the code table: per-batch counters and column metadata."""
+
+    def __init__(self, wait_seconds: float, quiet_seconds: float = 5.0) -> None:
+        self.wait_seconds = wait_seconds
+        self.quiet_seconds = quiet_seconds
+        self.submitted_at: float | None = None
+        self.first_call_delay: float | None = None
+        self.batch_sizes: list[int] = []
+        self.status_errors: list[Any] = []
+        self.columns: list[str] | None = None
+        self.column_types: dict[str, str] | None = None
+        self._rows: list[dict[str, Any]] = []
+        self._last_call_at: float | None = None
+
+    def __call__(self, result: Any, err_code: Any) -> None:
+        self._last_call_at = time.monotonic()
+        if self.submitted_at is not None and self.first_call_delay is None:
+            self.first_call_delay = round(self._last_call_at - self.submitted_at, 3)
+        if err_code is not None and result is None:
+            self.status_errors.append(
+                err_code if isinstance(err_code, int) else str(type(err_code).__name__)
+            )
+            return
+        if isinstance(result, list):
+            self.batch_sizes.append(len(result))
+            for row in result:
+                if isinstance(row, dict):
+                    if self.columns is None:
+                        self.columns = sorted(row)
+                        self.column_types = {
+                            key: type(row[key]).__name__ for key in sorted(row)
+                        }
+                    self._rows.append({
+                        "market": row.get("market_type"),
+                        "stype": row.get("security_type"),
+                        "currency": row.get("currency"),
+                        "code": row.get("security_code"),
+                        "symbol_empty": row.get("symbol") == "",
+                        "en_empty": row.get("english_name") == "",
+                    })
+
+    def summary(self) -> dict[str, Any]:
+        deadline = time.monotonic() + self.wait_seconds
+        while time.monotonic() < deadline:
+            if (
+                self._last_call_at is not None
+                and time.monotonic() - self._last_call_at > self.quiet_seconds
+            ):
+                break
+            time.sleep(0.2)
+        codes = [row["code"] for row in self._rows]
+        return {
+            "batch_count": len(self.batch_sizes),
+            "batch_sizes_head": self.batch_sizes[:20],
+            "batch_sizes_tail": self.batch_sizes[-5:],
+            "total_rows": len(self._rows),
+            "columns": self.columns,
+            "column_types": self.column_types,
+            "status_errors": self.status_errors,
+            "first_call_delay_sec": self.first_call_delay,
+            "invariants": {
+                "distinct_market_types": sorted(
+                    {row["market"] for row in self._rows if isinstance(row["market"], int)}
+                ),
+                "distinct_security_types": sorted(
+                    {row["stype"] for row in self._rows if isinstance(row["stype"], str)}
+                ),
+                "distinct_currencies": sorted(
+                    {row["currency"] for row in self._rows if isinstance(row["currency"], str)}
+                ),
+                "code_length_histogram": dict(
+                    sorted(collections.Counter(
+                        len(code) for code in codes if isinstance(code, str)
+                    ).items())
+                ),
+                "duplicate_code_rows": len(codes) - len(set(codes)),
+                "empty_symbol_rows": sum(1 for row in self._rows if row["symbol_empty"]),
+                "empty_english_name_rows": sum(1 for row in self._rows if row["en_empty"]),
+            },
+        }
+
+
+def _code_table_sync_summary(result: Any) -> dict[str, Any]:
+    """Desynchronized sync-wrapper summary: row count and column names only."""
+    if not isinstance(result, list):
+        return {"type": type(result).__name__}
+    first = result[0] if result else None
+    return {
+        "type": "list",
+        "rows": len(result),
+        "columns": sorted(first) if isinstance(first, dict) else None,
+    }
+
+
+def _ex_factor_sync_summary(result: Any) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Desensitized shape + invariant summary of one sync ex-factor result."""
+    shape: dict[str, Any] = {}
+    invariants: dict[str, Any] = {}
+    if not isinstance(result, list):
+        return {"type": type(result).__name__}, invariants
+    shape["type"] = "list"
+    shape["length"] = len(result)
+    if not result:
+        return shape, invariants
+    first = result[0]
+    if not isinstance(first, dict):
+        shape["entry_kind"] = type(first).__name__
+        return shape, invariants
+    shape["entry_kind"] = "object"
+    keys = sorted(first)
+    shape["column_count"] = len(keys)
+    shape["columns_sorted"] = keys
+    shape["value_types"] = {key: type(first[key]).__name__ for key in keys}
+    shape["all_key_sets_identical"] = all(
+        isinstance(row, dict) and sorted(row) == keys for row in result
+    )
+    row_invariants = [_ex_factor_row_invariants(row) for row in result]
+    cum_factors = [
+        row.get("cum_factor")
+        for row in result
+        if isinstance(row.get("cum_factor"), float)
+    ]
+    invariants = _merge_ex_factor_invariants(row_invariants, cum_factors)
+    return shape, invariants
+
+
 def safe_shape(value: Any) -> Any:
     if isinstance(value, dict):
         return {str(key): safe_shape(item) for key, item in sorted(value.items())}
@@ -167,7 +619,8 @@ def main() -> int:
     parser.add_argument("--env-file", type=Path, default=Path("/etc/galaxy-relay/relay.env"))
     parser.add_argument(
         "--kind",
-        choices=("calendar", "kline", "month_kline", "snapshot", "etf-info"),
+        choices=("calendar", "kline", "month_kline", "snapshot", "etf-info",
+                 "code-table", "securities-info", "ex-factor"),
         default="calendar",
     )
     parser.add_argument("--security-code", default="159518")
@@ -183,6 +636,18 @@ def main() -> int:
     # request once (after a cooldown) to count per-batch deliveries.
     parser.add_argument("--etf-collector-wait", type=float, default=30.0)
     parser.add_argument("--etf-cooldown", type=float, default=5.0)
+    # Snapshot async-SPI controls: one collector run instead of the sync call.
+    parser.add_argument("--snapshot-async", action="store_true")
+    parser.add_argument("--collector-wait", type=float, default=20.0)
+    # Code-table controls: sync probe first, then one async full-batch run.
+    parser.add_argument("--code-table-cooldown", type=float, default=5.0)
+    parser.add_argument("--code-table-collector-wait", type=float, default=60.0)
+    # Securities-info controls: sync probe first, then one async full-batch run.
+    parser.add_argument("--securities-info-cooldown", type=float, default=5.0)
+    parser.add_argument("--securities-info-collector-wait", type=float, default=30.0)
+    # Ex-factor controls: sync probe first, then one async full-batch run.
+    parser.add_argument("--ex-factor-cooldown", type=float, default=5.0)
+    parser.add_argument("--ex-factor-collector-wait", type=float, default=30.0)
     args = parser.parse_args()
 
     config = yaml.safe_load(args.config.read_text(encoding="utf-8"))
@@ -207,6 +672,7 @@ def main() -> int:
 
     try:
         set_codes: dict[str, int] = {}
+        snapshot_async_summary: dict[str, Any] = {}
         if args.kind == "calendar":
             task_id = tgw.GetTaskID()
             params = {
@@ -223,8 +689,8 @@ def main() -> int:
             req_defaults = {}
         elif args.kind in ("kline", "month_kline"):
             request = tgw.ReqKline()
-            request.security_code = "510300"
-            request.market_type = tgw.MarketType.kSSE
+            request.security_code = str(args.security_code)
+            request.market_type = int(args.market_type)
             request.cq_flag = 0
             request.cq_date = 0
             request.qj_flag = 0
@@ -233,8 +699,8 @@ def main() -> int:
             request.auto_complete = 1
             request.begin_date = int(args.begin_date)
             request.end_date = int(args.end_date)
-            request.begin_time = 0
-            request.end_time = 0
+            request.begin_time = int(args.begin_time)
+            request.end_time = int(args.end_time)
             result, error = tgw.QueryKline(request, return_df_format=False)
             req_defaults = {}
         elif args.kind == "snapshot":
@@ -246,12 +712,98 @@ def main() -> int:
             request.end_time = args.end_time
             # data_type/level_type intentionally keep the official constructor
             # defaults (0/0); only their presence is reported.
-            result, error = tgw.QuerySnapshot(request, return_df_format=False)
             req_defaults = {
                 "data_type": int(request.data_type),
                 "level_type": int(request.level_type),
             }
+            if args.snapshot_async:
+                collector = _SnapshotAsyncCollector(args.collector_wait)
+                collector.submitted_at = time.monotonic()
+                submit_result, submit_err = tgw.QuerySnapshot(
+                    request, query_spi=collector, return_df_format=False
+                )
+                collector.submit_return = {
+                    "result": (
+                        submit_result if isinstance(submit_result, bool)
+                        else type(submit_result).__name__
+                    ),
+                    "err": int(submit_err) if isinstance(submit_err, int) else None,
+                }
+                snapshot_async_summary = collector.summary()
+                del collector
+                result = None
+                error = 0
+            else:
+                result, error = tgw.QuerySnapshot(request, return_df_format=False)
+        code_table_sync: dict[str, Any] = {}
+        code_table_async: dict[str, Any] = {}
+        if args.kind == "code-table":
+            # Minimal sample discipline: one synchronous probe records the
+            # wrapper's own container (known first-batch race), then one
+            # cooled-down asynchronous collector accumulates every batch for
+            # authoritative counts. Non-zero sync error stops immediately.
+            result, error = tgw.QueryCodeTable(return_df_format=False)
+            req_defaults = {}
+            code_table_sync = _code_table_sync_summary(result)
+            if isinstance(error, int) and error != 0:
+                code_table_async["skipped"] = "sync probe returned non-zero"
+            else:
+                time.sleep(max(0.0, args.code_table_cooldown))
+                collector = _CodeTableBatchCollector(args.code_table_collector_wait)
+                collector.submitted_at = time.monotonic()
+                issued, issue_error = tgw.QueryCodeTable(
+                    query_spi=collector, return_df_format=False
+                )
+                code_table_async["submit_return"] = {
+                    "result": (
+                        issued if isinstance(issued, bool) else type(issued).__name__
+                    ),
+                    "err": int(issue_error) if isinstance(issue_error, int) else None,
+                }
+                code_table_async.update(collector.summary())
+                del collector
         etf_summary: dict[str, Any] = {}
+        secinfo_async: dict[str, Any] = {}
+        exfactor_async: dict[str, Any] = {}
+        if args.kind == "securities-info":
+            item = tgw.SubCodeTableItem()
+            item.market = int(args.market_type)
+            item.security_code = str(args.security_code)
+            result, error = tgw.QuerySecuritiesInfo(item, return_df_format=False)
+            req_defaults = {}
+            time.sleep(max(0.0, args.securities_info_cooldown))
+            collector = _SecuritiesInfoAsyncCollector(args.securities_info_collector_wait)
+            collector.submitted_at = time.monotonic()
+            issued, issue_error = tgw.QuerySecuritiesInfo(
+                item, query_spi=collector, return_df_format=False
+            )
+            secinfo_async["submit_return"] = {
+                "result": (
+                    issued if isinstance(issued, bool) else type(issued).__name__
+                ),
+                "err": int(issue_error) if isinstance(issue_error, int) else None,
+            }
+            secinfo_async.update(collector.summary())
+            del collector
+        if args.kind == "ex-factor":
+            result, error = tgw.QueryExFactorTable(
+                str(args.security_code), return_df_format=False
+            )
+            req_defaults = {}
+            time.sleep(max(0.0, args.ex_factor_cooldown))
+            collector = _ExFactorAsyncCollector(args.ex_factor_collector_wait)
+            collector.submitted_at = time.monotonic()
+            issued, issue_error = tgw.QueryExFactorTable(
+                str(args.security_code), query_spi=collector, return_df_format=False
+            )
+            exfactor_async["submit_return"] = {
+                "result": (
+                    issued if isinstance(issued, bool) else type(issued).__name__
+                ),
+                "err": int(issue_error) if isinstance(issue_error, int) else None,
+            }
+            exfactor_async.update(collector.summary())
+            del collector
         if args.kind == "etf-info":
             item = tgw.SubCodeTableItem()
             item.market = int(args.market_type)
@@ -325,19 +877,44 @@ def main() -> int:
                     ),
                 }
         etf_shapes: dict[str, Any] = {}
+        exfactor_shapes: dict[str, Any] = {}
         if args.kind == "etf-info":
             etf_shapes, etf_invariants = _etf_info_shapes(result)
             invariants = etf_invariants
+        if args.kind == "securities-info":
+            etf_shapes, secinfo_invariants = _securities_info_shapes(result)
+            invariants = secinfo_invariants
+        if args.kind == "ex-factor":
+            exfactor_shapes, exfactor_invariants = _ex_factor_sync_summary(result)
+            invariants = exfactor_invariants
+        if args.kind == "code-table":
+            # Never route code-table rows through safe_shape(): the generic
+            # recursion would print first-row business values. The dedicated
+            # sync summary carries row/column metadata only.
+            result_shape = code_table_sync
+        elif args.kind == "securities-info":
+            # Dedicated shape already strips business values; do not recurse.
+            result_shape = etf_shapes
+        elif args.kind == "ex-factor":
+            # Dedicated shape already strips business values; do not recurse.
+            result_shape = exfactor_shapes
+        else:
+            result_shape = safe_shape(result) if args.kind != "etf-info" else etf_shapes
         print(json.dumps({
             "login": True,
             "query_kind": args.kind,
             "set_param_statuses": sorted(set(set_codes.values())),
             "query_error_type": type(error).__name__,
             "query_error": int(error) if isinstance(error, int) else None,
-            "result_shape": safe_shape(result) if args.kind != "etf-info" else etf_shapes,
+            "result_shape": result_shape,
             "result_invariants": invariants,
             "req_default_fields": req_defaults,
             "etf_async": etf_summary,
+            "snapshot_async": snapshot_async_summary,
+            "code_table_sync": code_table_sync,
+            "code_table_async": code_table_async,
+            "securities_info_async": secinfo_async,
+            "ex_factor_async": exfactor_async,
         }, sort_keys=True))
     finally:
         tgw.Close()

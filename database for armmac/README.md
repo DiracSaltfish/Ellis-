@@ -13,9 +13,12 @@ Python 实现的 TGW internet-mode TLS/WebSocket 中间层；它在 Apple Silico
 4. [`docs/POST_MARKET_TEST_WORKFLOW.md`](docs/POST_MARKET_TEST_WORKFLOW.md)：盘后 OpenCode/Ox Alpha 单接口测试、修复与验收循环。
 5. [`docs/PDF_API_INVENTORY.md`](docs/PDF_API_INVENTORY.md)：两份 PDF 与发行头文件的完整候选接口、结构和差异清单。
 
-当前历史行情已完成 `QueryKline` 日线、周线与月线三个独立子范围的 Linux 官方 SDK / Mac
-同参对齐；其它周期仍按“一个周期一个证据”继续推进。`QueryETFInfo` 已完成 SSE `510300`
-单 ETF 的 Linux/wire/Mac 闭环；`QueryCodeTable` 目前仍只有静态契约，尚不可调用。
+当前历史行情已完成 `QueryKline` 的 SZSE `159691` 1 分钟线，以及日线、周线、月线、季线与年线
+六个独立子范围的 Linux 官方 SDK / Mac 同参对齐；其中只有 `159691` 在 2026-08-26 的 1 分钟
+数据提供经独立行情界面对照的显式单位输出。其它周期仍按“一个周期一个证据”继续推进。`QueryETFInfo` 已完成 SSE
+`510300` 单 ETF、`QuerySecuritiesInfo` 已完成 SSE `510300` 单代码、`QueryExFactorTable`
+已完成 `000001` 单代码的 Linux/wire/Mac 闭环；`QueryCodeTable` 已完成 wire 取证与 Mac
+实现（`ARM_IMPLEMENTED`），服务端全市场缺包阻塞成功同参，尚不可作为 `LIVE_ALIGNED` 使用。
 
 ## 快速开始
 

@@ -10,7 +10,9 @@ from ctypes import (
     c_bool,
     c_char,
     c_char_p,
+    c_double,
     c_int32,
+    c_int64,
     c_uint8,
     c_uint16,
     c_uint32,
@@ -128,6 +130,49 @@ class ReqDefault(Structure):
         return self
 
 
+class MDCodeTable(Structure):
+    """Code-table output row; ``#pragma pack(1)`` per tgw_struct.h:841-849.
+
+    ``market_type`` is the only numeric field (``uint8``); the rest are fixed
+    width character arrays. Wire rows are decoded into the official 6-column
+    JSON shape, so this structure is an ABI mirror for layout/offset tests.
+    """
+
+    _pack_ = 1
+    _fields_ = [
+        ("security_code", c_char * 16),
+        ("symbol", c_char * 32),
+        ("english_name", c_char * 128),
+        ("market_type", c_uint8),
+        ("security_type", c_char * 10),
+        ("currency", c_char * 4),
+    ]
+
+
+class MDExFactorTable(Structure):
+    """Ex-factor output row; ``#pragma pack(1)`` per tgw_struct.h:855-862.
+
+    ``inner_code``/``security_code`` use the ``ConstField.kSecurityCodeLen``
+    width (16); ``ex_date`` is ``uint32_t`` (yyyyMMdd); ``ex_factor`` and
+    ``cum_factor`` are ``double`` (the header annotates them ``N38(15)``).
+    Wire rows are decoded into the official 5-column JSON shape, so this
+    structure is an ABI mirror for layout/offset tests.
+    """
+
+    _pack_ = 1
+    _fields_ = [
+        ("inner_code", c_char * 16),
+        ("security_code", c_char * 16),
+        ("ex_date", c_uint32),
+        ("ex_factor", c_double),
+        ("cum_factor", c_double),
+    ]
+
+    def set_code(self, code: str | bytes) -> "MDExFactorTable":
+        self.security_code = _encoded(code)
+        return self
+
+
 class SubCodeTableItem(Structure):
     """Shared ``QuerySecuritiesInfo``/``QueryETFInfo`` request item.
 
@@ -144,4 +189,63 @@ class SubCodeTableItem(Structure):
     def set_code(self, code: str | bytes) -> "SubCodeTableItem":
         self.security_code = _encoded(code)
         return self
+
+
+class MDCodeTableRecord(Structure):
+    """Securities-static-info output row; ``#pragma pack(1)`` per
+    tgw_struct.h:895-943.
+
+    ``market_type``/``variety_category`` are ``uint8``; the fixed-width char
+    arrays use the ``ConstField`` lengths. The wire delivers this as a
+    numeric-key JSON object (slots 1..43 mirroring this field order), so this
+    structure is an ABI mirror for layout/offset tests rather than the wire
+    decode path.
+    """
+
+    _pack_ = 1
+    _fields_ = [
+        ("security_code", c_char * 32),
+        ("market_type", c_uint8),
+        ("symbol", c_char * 128),
+        ("english_name", c_char * 64),
+        ("security_type", c_char * 16),
+        ("currency", c_char * 8),
+        ("variety_category", c_uint8),
+        ("pre_close_price", c_int64),
+        ("underlying_security_id", c_char * 16),
+        ("contract_type", c_char * 16),
+        ("exercise_price", c_int64),
+        ("expire_date", c_uint32),
+        ("high_limited", c_int64),
+        ("low_limited", c_int64),
+        ("security_status", c_char * 16),
+        ("price_tick", c_int64),
+        ("buy_qty_unit", c_int64),
+        ("sell_qty_unit", c_int64),
+        ("market_buy_qty_unit", c_int64),
+        ("market_sell_qty_unit", c_int64),
+        ("buy_qty_lower_limit", c_int64),
+        ("buy_qty_upper_limit", c_int64),
+        ("sell_qty_lower_limit", c_int64),
+        ("sell_qty_upper_limit", c_int64),
+        ("market_buy_qty_lower_limit", c_int64),
+        ("market_buy_qty_upper_limit", c_int64),
+        ("market_sell_qty_lower_limit", c_int64),
+        ("market_sell_qty_upper_limit", c_int64),
+        ("list_day", c_uint32),
+        ("par_value", c_int64),
+        ("outstanding_share", c_int64),
+        ("public_float_share_quantity", c_int64),
+        ("contract_multiplier", c_int64),
+        ("regular_share", c_char * 9),
+        ("interest", c_int64),
+        ("coupon_rate", c_int64),
+        ("product_code", c_char * 32),
+        ("delivery_year", c_uint32),
+        ("delivery_month", c_uint32),
+        ("create_date", c_uint32),
+        ("start_deliv_date", c_uint32),
+        ("end_deliv_date", c_uint32),
+        ("position_type", c_uint32),
+    ]
 

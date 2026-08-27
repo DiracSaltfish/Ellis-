@@ -24,14 +24,14 @@
 
 | 接口 | PDF 页（正文页） | 关键请求/响应 | 模式 | 当前状态 | 下一步 |
 |---|---:|---|---|---|---|
-| QueryKline | 33–34（25–26） | `ReqKline`, `MDKLine` | 两者 | `LIVE_ALIGNED(daily + weekly + monthly only)` | 下一周期从季线开始，仍逐周期取证 |
-| QuerySnapshot | 34（26） | `ReqDefault`, 多类 Snapshot SPI | 两者 | `WIRE_VERIFIED(SZSE ETF L1 sample; Arm CHANGES_REQUESTED)` | 拒绝未验证 `level_type`/品种；对齐 `kDataEmpty` 与异步 SPI 语义后复验 Mac live |
+| QueryKline | 33–34（25–26） | `ReqKline`, `MDKLine` | 两者 | `LIVE_ALIGNED(159691 one-minute sample + daily + weekly + monthly + quarterly + yearly)` | 159691 1 分钟 `10000` 已实捕；其 2026-08-26 样本的价格/成交量/成交额单位已由独立界面交叉核验。其它分钟周期、标的和单位仍逐周期取证 |
+| QuerySnapshot | 34（26） | `ReqDefault`, 多类 Snapshot SPI | 两者 | `LIVE_ALIGNED(SZSE ETF L1 sample; data_type=0 sync+async error contract)` | 多包异步交付语义未观测；拒绝未验证 `level_type`/品种/市场；其它错误标签未捕获 |
 | QueryOrderQueue | 35（27） | `ReqDefault`, `MDOrderQueue` | coloc only | `OUT_OF_SCOPE_COLOC` | 等 coloc 专项 |
 | QueryTickExecution | 35（27） | `ReqDefault`, tick execution | coloc only | `OUT_OF_SCOPE_COLOC` | 等 coloc 专项 |
 | QueryTickOrder | 35（27） | `ReqDefault`, tick order | coloc only | `OUT_OF_SCOPE_COLOC` | 等 coloc 专项 |
-| QueryCodeTable | 36（28） | `MDCodeTable`, code table SPI | 两者 | `STATIC_MATCHED(static contract only)` | 用异步 SPI 累积完整分包后做 Linux shape + wire |
-| QuerySecuritiesInfo | 36（28） | `SubCodeTableItem` | 两者 | `INVENTORIED` | 单市场单代码 oracle |
-| QueryExFactorTable | 36–37（28–29） | code, ex-factor SPI | 两者 | `INVENTORIED` | 单代码 oracle |
+| QueryCodeTable | 36（28） | `MDCodeTable`, code table SPI | 两者 | `ARM_IMPLEMENTED` | wire 已证（`dgw*_query`/`ReqGetReduceCodeTable`/tag 11103/反引号 6 字段/缺包 `ReqGetPackage`）；服务端全市场缺第 3 包阻塞成功同参（Linux `-83`/Mac 缺包超时一致）；待服务端分流后再闭环 `LIVE_ALIGNED` |
+| QuerySecuritiesInfo | 36（28） | `SubCodeTableItem` | 两者 | `LIVE_ALIGNED(SSE single code only)` | 已闭合 SSE `510300` 同步单 item（push `ReqGetCodeTableList`/tag `"109"`/43 字段）；SZSE/NEEQ/多 item 仍显式拒绝 |
+| QueryExFactorTable | 36–37（28–29） | code, ex-factor SPI | 两者 | `LIVE_ALIGNED(000001 only)` | 已闭合 `000001` 单代码（one-shot `ReqGetExFactor`/tag 11102/5 字段/double 18 位）；其它代码与异步面待验 |
 | QueryFactor | 37（29） | `ReqFactor`, `Factor` | 两者 | `INVENTORIED` | 确认权限后最小请求 |
 | SetThirdInfoParam | 37–38（29–30） | task → key/value | 两者 | `WIRE_VERIFIED` | 已验证日历参数；保留逐功能号范围 |
 | QueryThirdInfo | 38（30） | `ThirdInfoData` 嵌套 JSON | 两者 | `LIVE_ALIGNED(calendar function only)` | 逐 AmazingData 功能号验证 |

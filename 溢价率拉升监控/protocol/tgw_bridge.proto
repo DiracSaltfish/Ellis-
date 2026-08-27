@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package etf.premium.v1;
+
+// The project deliberately keeps the TGW event itself as bytes containing the
+// decoded JSON object. Numeric-key mapping is performed and audited by C++.
+message BridgeFrame {
+  enum Kind {
+    KIND_UNSPECIFIED = 0;
+    MARKET_EVENT = 1;
+    ADAPTER_STATUS = 2;
+    CONTROL = 3;
+    CONTROL_RESULT = 4;
+  }
+
+  Kind kind = 1;
+  uint64 sequence = 2;
+  string session_id = 3;
+  int64 receive_wall_ns = 4;
+  int64 receive_monotonic_ns = 5;
+  bool is_delta = 6;
+  string tag = 7;
+  bytes payload_json = 8;
+  uint32 sdk_queue_depth = 9;
+  string message = 10;
+}
+

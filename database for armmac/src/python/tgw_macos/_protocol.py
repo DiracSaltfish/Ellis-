@@ -54,6 +54,13 @@ class CompressedMessage:
     payload: bytes
 
 
+@dataclass(frozen=True)
+class DecodedMessageBatch:
+    """Multiple TGW JSON objects carried by one server WebSocket message."""
+
+    messages: tuple[dict[str, Any], ...]
+
+
 def _compact_json(value: dict[str, Any]) -> bytes:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
 
@@ -149,15 +156,21 @@ def build_query_complete_request(username: str, token: str, request_id: int) -> 
 
 
 # Public TGW ``MDDatatype`` K-line cycles are not the internet wire values.
-# Each entry below was captured from an authorized official Linux SDK session:
-# daily 10008 -> 10100, weekly 10009 -> 10101 and monthly 10010 -> 10102
+# Each entry below was captured from an authorized official Linux SDK session
 # (2026-08-26, method ReqGetKline; response tag equals the wire period and the
-# status/paging contract matches the daily one). Unlisted periods must keep
-# failing explicitly until individually verified.
+# status/paging contract matches the daily one):
+# one-minute 10000 -> 10000, daily 10008 -> 10100, weekly 10009 -> 10101,
+# monthly 10010 -> 10102, seasonal 10011 -> 10103 and yearly 10012 ->
+# 10104 (yearly captured independently on /amd/dgw/dgw2_query, not
+# extrapolated from the others).
+# Unlisted periods must keep failing explicitly until individually verified.
 VERIFIED_KLINE_WIRE_TYPES = {
-    10008: 10100,  # kDayKline   -> wire period_type/tag 10100
-    10009: 10101,  # kWeekKline  -> wire period_type/tag 10101
-    10010: 10102,  # kMonthKline -> wire period_type/tag 10102
+    10000: 10000,  # k1Kline      -> wire period_type/tag 10000
+    10008: 10100,  # kDayKline    -> wire period_type/tag 10100
+    10009: 10101,  # kWeekKline   -> wire period_type/tag 10101
+    10010: 10102,  # kMonthKline  -> wire period_type/tag 10102
+    10011: 10103,  # kSeasonKline -> wire period_type/tag 10103
+    10012: 10104,  # kYearKline   -> wire period_type/tag 10104
 }
 
 
@@ -206,6 +219,15 @@ def build_kline_request(username: str, token: str, request_id: int, request: Any
 # the kDayKline=10100 precedent where the response tag equals the wire enum.
 SNAPSHOT_WIRE_TAG = 11000
 SNAPSHOT_ROW_FIELD_COUNT = 36
+
+# Error responses on the dgw*_query channel do not reuse the numeric data tag.
+# Captured empty-query frame (2026-08-26): headers {id, tag:"DataEmpty",
+# pack_num:0, all_pack_num:0}, status=-100 (wire-generic failure) and an empty
+# string data payload; the official SDK surfaces public ErrorCode.kDataEmpty.
+# Only captured tags may map to public codes; unknown tags fail explicitly.
+SNAPSHOT_ERROR_TAGS = {
+    "DataEmpty": -76,  # ErrorCode.kDataEmpty ("数据为空")
+}
 
 
 def build_snapshot_request(username: str, token: str, request_id: int, request: Any) -> bytes:
@@ -299,10 +321,44 @@ def _decode_snapshot_row(fields: list[str]) -> dict[str, Any]:
     return row
 
 
-def parse_snapshot_packets(packets: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Decode the official 36-field CSV rows returned for ``ReqGetSnapshot``."""
+def _snapshot_error_code(packet: dict[str, Any]) -> int:
+    """Map one captured wire error frame to its public error code."""
+    headers = packet.get("headers")
+    tag = headers.get("tag") if isinstance(headers, dict) else None
+    if not isinstance(tag, str) or tag not in SNAPSHOT_ERROR_TAGS:
+        raise TgwProtocolError(
+            f"snapshot error tag {tag!r} has not been observed in internet mode"
+        )
+    return SNAPSHOT_ERROR_TAGS[tag]
+
+
+def parse_snapshot_packets(packets: list[dict[str, Any]]
+                           ) -> tuple[list[dict[str, Any]], int | None]:
+    """Decode ``ReqGetSnapshot`` responses into official sync-mode semantics.
+
+    Returns ``(rows, error_code)``: ``error_code is None`` means every frame
+    had ``status=0`` and ``rows`` holds the decoded 57-key records; otherwise
+    the captured error-frame shape maps to a public error code and rows stay
+    empty. Data frames and error frames in one response were never observed
+    and fail explicitly.
+    """
+    if not packets:
+        raise TgwProtocolError("empty query response")
+    ok_frames = [packet for packet in packets if packet.get("status") == 0]
+    error_frames = [packet for packet in packets if packet.get("status") != 0]
+    if ok_frames and error_frames:
+        raise TgwProtocolError(
+            "snapshot response mixes data and error frames (unobserved shape)"
+        )
+    if error_frames:
+        codes = [_snapshot_error_code(packet) for packet in error_frames]
+        if len(set(codes)) != 1:
+            raise TgwProtocolError(
+                "snapshot response carries multiple distinct error frames"
+            )
+        return [], codes[0]
     rows: list[dict[str, Any]] = []
-    for packet in _ordered_query_packets(packets, SNAPSHOT_WIRE_TAG):
+    for packet in _ordered_query_packets(ok_frames, SNAPSHOT_WIRE_TAG):
         data = packet.get("data")
         if not isinstance(data, list) or not all(isinstance(row, str) for row in data):
             raise TgwProtocolError("snapshot response data is not a string array")
@@ -313,6 +369,91 @@ def parse_snapshot_packets(packets: list[dict[str, Any]]) -> list[dict[str, Any]
                     f"snapshot response row does not contain {SNAPSHOT_ROW_FIELD_COUNT} fields"
                 )
             rows.append(_decode_snapshot_row(fields))
+    return rows, None
+
+
+# ---------------------------------------------------------------------------
+# QueryCodeTable (internet mode, full-market)
+#
+# Wire contract captured from an authorized official Linux SDK session on
+# 2026-08-26: the code table runs on the *one-shot* dgw*_query endpoint (not
+# the persistent push channel), request method ReqGetReduceCodeTable with only
+# a QueryBandWidth param, headers id -> userName -> token. Responses carry the
+# integer tag 11103 with pack_num/all_pack_num paging and ZSTD/0x59 frames.
+# Each ``data`` row is backtick (U+0060) separated into exactly 6 fields whose
+# order mirrors MDCodeTable. The official client retries a missing packet via
+# ReqGetPackage {pack_num:"N,"}. A completion frame was not captured (the sync
+# probe timed out on a missing packet), so the code table reuses the channel
+# standard ReqGetComplete like the other dgw*_query queries; ReqGetCodelistComplete
+# remains an unproven candidate and is not used.
+# ---------------------------------------------------------------------------
+CODE_TABLE_WIRE_TAG = 11103
+CODE_TABLE_ROW_FIELD_COUNT = 6
+
+# Column order follows MDCodeTable (tgw_struct.h:841-849).
+CODE_TABLE_COLUMNS = [
+    "security_code", "symbol", "english_name", "market_type",
+    "security_type", "currency",
+]
+
+
+def build_code_table_request(username: str, token: str, request_id: int) -> bytes:
+    """Build the official internet-mode ``ReqGetReduceCodeTable`` envelope.
+
+    The query has no business parameters; only the bandwidth cap is sent,
+    matching the captured params ``{"QueryBandWidth": 0.0}`` and the
+    ``id -> userName -> token`` header order.
+    """
+    return _compact_json({
+        "headers": {"id": int(request_id), "userName": username, "token": token},
+        "method": "ReqGetReduceCodeTable",
+        "params": {"QueryBandWidth": 0.0},
+    })
+
+
+def build_get_package_request(username: str, token: str, request_id: int,
+                              pack_num: int) -> bytes:
+    """Build the captured ``ReqGetPackage`` retry for a missing packet."""
+    return _compact_json({
+        "headers": {"id": int(request_id), "userName": username, "token": token},
+        "method": "ReqGetPackage",
+        "params": {"pack_num": f"{int(pack_num)},"},
+    })
+
+
+def parse_code_table_packets(packets: list[dict[str, Any]],
+                             expected_tag: int = CODE_TABLE_WIRE_TAG
+                             ) -> list[dict[str, Any]]:
+    """Decode ``ReqGetReduceCodeTable`` responses into official 6-column rows.
+
+    Reuses ``_ordered_query_packets`` to validate status/tag/packet integrity
+    (tag 11103, status 0, a complete 1..all_pack_num set), then splits each
+    row on the backtick separator. ``market_type`` is the only integer column;
+    the rest are passed through as strings. Unknown tags/statuses fail.
+    """
+    rows: list[dict[str, Any]] = []
+    for packet in _ordered_query_packets(packets, expected_tag):
+        data = packet.get("data")
+        if not isinstance(data, list) or not all(isinstance(row, str) for row in data):
+            raise TgwProtocolError("code-table response data is not a string array")
+        for encoded in data:
+            fields = encoded.split("\x60")
+            if len(fields) != CODE_TABLE_ROW_FIELD_COUNT:
+                raise TgwProtocolError(
+                    f"code-table response row does not contain "
+                    f"{CODE_TABLE_ROW_FIELD_COUNT} fields"
+                )
+            market_text = fields[3].strip()
+            if not market_text.lstrip("-").isdigit():
+                raise TgwProtocolError("code-table market_type is not an integer")
+            rows.append({
+                "security_code": fields[0],
+                "symbol": fields[1],
+                "english_name": fields[2],
+                "market_type": int(market_text),
+                "security_type": fields[4],
+                "currency": fields[5],
+            })
     return rows
 
 
@@ -529,6 +670,272 @@ def parse_etf_info_packets(packets: list[dict[str, Any]], *,
     return results
 
 
+# ---------------------------------------------------------------------------
+# QuerySecuritiesInfo (internet mode)
+#
+# Wire contract captured from an authorized official Linux SDK session on
+# 2026-08-26 (SSE 510300): this query shares the *persistent push* connection
+# (/amd/dgw/push) with ETF info and subscriptions -- it does NOT open a
+# one-shot dgw*_query endpoint. The request method is ReqGetCodeTableList
+# (captured, not extrapolated) with a single "Security" param "<code>|<market>"
+# and headers id -> userName -> token. Completion is ReqGetCodelistComplete
+# (no params). Responses carry the string tag "109" (code_num in headers),
+# status 0, 0x59+ZSTD frames, and a data array of numeric-key record objects
+# ("1".."43") whose slot order mirrors MDCodeTableRecord; there are no
+# pack_num/all_pack_num paging controls. Only the single-item, single-frame
+# shape has been observed; all other branches fail explicitly below.
+# ---------------------------------------------------------------------------
+SECINFO_WIRE_TAG = "109"
+SECINFO_RECORD_FIELD_COUNT = 43
+
+# Live-verified market sample. The public header allows SSE/SZSE/NEEQ, but only
+# an SSE sample has completed the Linux/wire/Mac loop so far.
+VERIFIED_SECINFO_MARKETS = {101}
+
+
+def build_secinfo_request(username: str, token: str, request_id: int,
+                          items: list[dict[str, Any]]) -> bytes:
+    """Build the captured internet-mode ``ReqGetCodeTableList`` envelope."""
+    if len(items) != 1:
+        raise NotImplementedError(
+            "only the single-item securities-info query has been wire-verified"
+        )
+    market = int(items[0]["market"])
+    if market not in VERIFIED_SECINFO_MARKETS:
+        raise NotImplementedError(
+            f"securities-info query for market {market} has not been "
+            "wire-verified in internet mode"
+        )
+    security_code = str(items[0]["security_code"]).strip()
+    if not security_code:
+        raise ValueError("securities-info request is missing security_code")
+    try:
+        encoded_code = security_code.encode("utf-8")
+    except UnicodeEncodeError as exc:
+        raise ValueError("securities-info security_code is not encodable") from exc
+    if len(encoded_code) > 32:
+        raise ValueError("securities-info security_code exceeds 32 bytes")
+    # Captured header key order for the push/codelist channel is
+    # id -> userName -> token.
+    return _compact_json({
+        "headers": {"id": int(request_id), "userName": username, "token": token},
+        "method": "ReqGetCodeTableList",
+        "params": {"Security": f"{security_code}|{market}"},
+    })
+
+
+# (wire slot, official field name, kind). kind "str" marks fixed-width char
+# arrays delivered as JSON strings; "int" marks every numeric field (int64,
+# uint8, uint32) delivered as JSON integers. Slot order mirrors the
+# MDCodeTableRecord ABI (tgw_struct.h:895-943).
+SECINFO_RECORD_FIELDS: list[tuple[int, str, str]] = [
+    (1, "security_code", "str"),
+    (2, "market_type", "int"),
+    (3, "symbol", "str"),
+    (4, "english_name", "str"),
+    (5, "security_type", "str"),
+    (6, "currency", "str"),
+    (7, "variety_category", "int"),
+    (8, "pre_close_price", "int"),
+    (9, "underlying_security_id", "str"),
+    (10, "contract_type", "str"),
+    (11, "exercise_price", "int"),
+    (12, "expire_date", "int"),
+    (13, "high_limited", "int"),
+    (14, "low_limited", "int"),
+    (15, "security_status", "str"),
+    (16, "price_tick", "int"),
+    (17, "buy_qty_unit", "int"),
+    (18, "sell_qty_unit", "int"),
+    (19, "market_buy_qty_unit", "int"),
+    (20, "market_sell_qty_unit", "int"),
+    (21, "buy_qty_lower_limit", "int"),
+    (22, "buy_qty_upper_limit", "int"),
+    (23, "sell_qty_lower_limit", "int"),
+    (24, "sell_qty_upper_limit", "int"),
+    (25, "market_buy_qty_lower_limit", "int"),
+    (26, "market_buy_qty_upper_limit", "int"),
+    (27, "market_sell_qty_lower_limit", "int"),
+    (28, "market_sell_qty_upper_limit", "int"),
+    (29, "list_day", "int"),
+    (30, "par_value", "int"),
+    (31, "outstanding_share", "int"),
+    (32, "public_float_share_quantity", "int"),
+    (33, "contract_multiplier", "int"),
+    (34, "regular_share", "str"),
+    (35, "interest", "int"),
+    (36, "coupon_rate", "int"),
+    (37, "product_code", "str"),
+    (38, "delivery_year", "int"),
+    (39, "delivery_month", "int"),
+    (40, "create_date", "int"),
+    (41, "start_deliv_date", "int"),
+    (42, "end_deliv_date", "int"),
+    (43, "position_type", "int"),
+]
+
+
+def decode_secinfo_record(record: dict[str, Any]) -> dict[str, Any]:
+    """Convert one numeric-key wire record to the official named shape."""
+    if not isinstance(record, dict):
+        raise TgwProtocolError("securities-info record is not an object")
+    expected_keys = {str(position) for position, _, _ in SECINFO_RECORD_FIELDS}
+    actual_keys = set(record)
+    if actual_keys != expected_keys:
+        missing = sorted(expected_keys - actual_keys)
+        extra = sorted(actual_keys - expected_keys)
+        raise TgwProtocolError(
+            f"securities-info slot mismatch (missing={missing}, extra={extra})"
+        )
+    decoded: dict[str, Any] = {}
+    for position, name, kind in SECINFO_RECORD_FIELDS:
+        value = record[str(position)]
+        if kind == "int":
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TgwProtocolError(
+                    f"securities-info field {name} is not an integer"
+                )
+            decoded[name] = value
+        else:
+            if not isinstance(value, str):
+                raise TgwProtocolError(
+                    f"securities-info field {name} is not a string"
+                )
+            decoded[name] = value
+    return decoded
+
+
+def parse_secinfo_packets(packets: list[dict[str, Any]], *,
+                          expected_tag: str = SECINFO_WIRE_TAG,
+                          expected_request_id: int | None = None
+                          ) -> list[dict[str, Any]]:
+    """Validate codelist-channel response frames and flatten their records.
+
+    Frames on this channel carry no pack_num/all_pack_num paging controls, so
+    validation covers status, tag, optional request-id echo, the code_num count
+    and the nested record shape instead of packet counters. Multiple frames
+    concatenate in arrival order (only the single-frame shape observed live).
+    """
+    if not packets:
+        raise TgwProtocolError("empty query response")
+    results: list[dict[str, Any]] = []
+    for packet in packets:
+        if packet.get("status") != 0:
+            raise TgwProtocolError(
+                f"query rejected (status={packet.get('status')!r})"
+            )
+        headers = packet.get("headers")
+        if not isinstance(headers, dict) or headers.get("tag") != expected_tag:
+            raise TgwProtocolError(
+                f"unexpected query response tag (expected {expected_tag!r})"
+            )
+        if expected_request_id is not None and headers.get("id") != expected_request_id:
+            raise TgwProtocolError("query response request id mismatch")
+        data = packet.get("data")
+        if not isinstance(data, list):
+            raise TgwProtocolError("securities-info response data is not a list")
+        for record in data:
+            results.append(decode_secinfo_record(record))
+    return results
+
+
+# ---------------------------------------------------------------------------
+# QueryExFactorTable (internet mode, single code)
+#
+# Wire contract captured from an authorized official Linux SDK session on
+# 2026-08-26 (SSE 000001): this query runs on the *one-shot* dgw*_query
+# endpoint (not the persistent push channel), request method ReqGetExFactor
+# with params security_code (str) then QueryBandWidth (float), headers
+# id -> userName -> token. Completion is the channel-standard ReqGetComplete.
+# Responses carry the integer tag 11102, status 0, pack_num/all_pack_num
+# paging and 0x59+ZSTD frames; each ``data`` row is a 5-field CSV string whose
+# order mirrors MDExFactorTable: inner_code, security_code, ex_date,
+# ex_factor, cum_factor. The two double fields travel as fixed-point decimal
+# strings with 18 fractional digits and decode to Python float via the
+# official json path. Only the single-code, synchronous shape has been
+# observed; all other branches fail explicitly below.
+# ---------------------------------------------------------------------------
+EX_FACTOR_WIRE_TAG = 11102
+EX_FACTOR_ROW_FIELD_COUNT = 5
+
+
+def build_ex_factor_request(username: str, token: str, request_id: int,
+                            security_code: str) -> bytes:
+    """Build the captured internet-mode ``ReqGetExFactor`` envelope.
+
+    The public API takes only ``const char* code``; the wire carries it as the
+    string ``security_code`` param. Header key order id -> userName -> token
+    and the trailing QueryBandWidth float match the captured envelope.
+    """
+    security_code = str(security_code).strip()
+    if not security_code:
+        raise ValueError("ex-factor request is missing security_code")
+    try:
+        encoded_code = security_code.encode("utf-8")
+    except UnicodeEncodeError as exc:
+        raise ValueError("ex-factor security_code is not encodable") from exc
+    if len(encoded_code) > 32:
+        raise ValueError("ex-factor security_code exceeds 32 bytes")
+    return _compact_json({
+        "headers": {"id": int(request_id), "userName": username, "token": token},
+        "method": "ReqGetExFactor",
+        "params": {
+            "security_code": security_code,
+            "QueryBandWidth": 0.0,
+        },
+    })
+
+
+def _decode_ex_factor_row(fields: list[str]) -> dict[str, Any]:
+    """Decode one captured 5-field CSV row into the official named shape.
+
+    The official wrapper parses the CSV into C++ doubles and re-serializes to
+    JSON before exposing Python floats; parsing the fixed-point decimal string
+    with ``float`` reproduces that exact double value.
+    """
+    if len(fields) != EX_FACTOR_ROW_FIELD_COUNT:
+        raise TgwProtocolError(
+            f"ex-factor response row does not contain "
+            f"{EX_FACTOR_ROW_FIELD_COUNT} fields"
+        )
+    if not fields[2].isdigit():
+        raise TgwProtocolError("ex-factor ex_date is not an integer")
+    for name, value in (("ex_factor", fields[3]), ("cum_factor", fields[4])):
+        try:
+            float(value)
+        except ValueError as exc:
+            raise TgwProtocolError(
+                f"ex-factor {name} is not a number"
+            ) from exc
+    return {
+        "inner_code": fields[0],
+        "security_code": fields[1],
+        "ex_date": int(fields[2]),
+        "ex_factor": float(fields[3]),
+        "cum_factor": float(fields[4]),
+    }
+
+
+def parse_ex_factor_packets(packets: list[dict[str, Any]],
+                            expected_tag: int = EX_FACTOR_WIRE_TAG
+                            ) -> list[dict[str, Any]]:
+    """Decode ``ReqGetExFactor`` responses into official 5-column rows.
+
+    Reuses ``_ordered_query_packets`` to validate status/tag/packet integrity
+    (tag 11102, status 0, a complete 1..all_pack_num set), then splits each
+    row on commas and maps the CSV columns to the MDExFactorTable fields with
+    doubles decoded as Python floats. Unknown tags/statuses fail.
+    """
+    rows: list[dict[str, Any]] = []
+    for packet in _ordered_query_packets(packets, expected_tag):
+        data = packet.get("data")
+        if not isinstance(data, list) or not all(isinstance(row, str) for row in data):
+            raise TgwProtocolError("ex-factor response data is not a string array")
+        for encoded in data:
+            rows.append(_decode_ex_factor_row(encoded.split(",")))
+    return rows
+
+
 def _ordered_query_packets(packets: list[dict[str, Any]], expected_tag: int
                            ) -> list[dict[str, Any]]:
     if not packets:
@@ -585,8 +992,8 @@ def parse_kline_packets(packets: list[dict[str, Any]], expected_tag: int) -> lis
     """Decode the official 9-field CSV rows returned for ``ReqGetKline``.
 
     The response tag equals the wire period enum (10100 daily / 10101 weekly /
-    10102 monthly), so callers must pass the same verified tag used to build
-    the request.
+    10102 monthly / 10103 seasonal / 10104 yearly), so callers must pass the
+    same verified tag used to build the request.
     """
     rows: list[dict[str, Any]] = []
     for packet in _ordered_query_packets(packets, expected_tag):
@@ -665,10 +1072,71 @@ def _decompress_zstd(payload: bytes) -> bytes | None:
                 return target.raw[:written]
             return None
         return zstd.decompress(payload)
-    return zstandard.ZstdDecompressor().decompress(payload)
+    decompressor = zstandard.ZstdDecompressor()
+    try:
+        return decompressor.decompress(payload)
+    except zstandard.ZstdError:
+        # Official push frames may omit the frame content size; one-shot
+        # decompress refuses those, the streaming object does not.
+        try:
+            return decompressor.decompressobj().decompress(payload)
+        except zstandard.ZstdError:
+            return None
 
 
-def decode_server_payload(payload: bytes) -> dict[str, Any] | CompressedMessage:
+def _decode_json_object_stream(raw: bytes) -> tuple[dict[str, Any], ...]:
+    """Decode one or more TGW objects separated by whitespace or backticks.
+
+    Bulk subscription pushes observed on 2026-08-27 are encoded as one ZSTD
+    frame whose decompressed buffer contains adjacent JSON objects separated by
+    ASCII 0x60 (``).  A final C NUL terminator belongs to the buffer, not to a
+    JSON document.
+    """
+
+    try:
+        text = raw.rstrip(b"\x00\r\n\t ").decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise TgwProtocolError("TGW server payload is not UTF-8 JSON") from exc
+    if not text:
+        raise TgwProtocolError("TGW server payload contains no JSON object")
+
+    decoder = json.JSONDecoder()
+    messages: list[dict[str, Any]] = []
+    offset = 0
+    length = len(text)
+    while offset < length:
+        if messages:
+            separator_start = offset
+            while offset < length and text[offset].isspace():
+                offset += 1
+            if offset < length and text[offset] == "`":
+                offset += 1
+                while offset < length and text[offset].isspace():
+                    offset += 1
+            elif offset == separator_start:
+                raise TgwProtocolError(
+                    "TGW JSON objects must be separated by whitespace or ASCII 0x60"
+                )
+            if offset >= length:
+                raise TgwProtocolError("TGW server payload ends after an object separator")
+        else:
+            while offset < length and text[offset].isspace():
+                offset += 1
+
+        try:
+            value, offset = decoder.raw_decode(text, offset)
+        except json.JSONDecodeError as exc:
+            raise TgwProtocolError("TGW server payload contains invalid JSON") from exc
+        if not isinstance(value, dict):
+            raise TgwProtocolError("TGW server JSON members must be objects")
+        messages.append(value)
+
+    return tuple(messages)
+
+
+def decode_server_payload(
+    payload: bytes,
+) -> dict[str, Any] | DecodedMessageBatch | CompressedMessage:
     raw = payload
     if raw.startswith(ZSTD_MAGIC):
         compressed = raw
@@ -683,16 +1151,12 @@ def decode_server_payload(payload: bytes) -> dict[str, Any] | CompressedMessage:
         decoded = _decompress_zstd(compressed)
         if decoded is None:
             return CompressedMessage(payload=payload)
-        # The official 1.0.9.2 encoder includes a C-string terminator in the
-        # decompressed buffer. It is outside the JSON document.
-        raw = decoded.rstrip(b"\x00\r\n\t ")
-    try:
-        value = json.loads(raw.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise TgwProtocolError("server payload is neither TGW JSON nor supported ZSTD JSON") from exc
-    if not isinstance(value, dict):
-        raise TgwProtocolError("TGW server JSON must be an object")
-    return value
+        raw = decoded
+
+    messages = _decode_json_object_stream(raw)
+    if len(messages) == 1:
+        return messages[0]
+    return DecodedMessageBatch(messages=messages)
 
 
 def _find_header_end(buffer: bytearray) -> int:
@@ -855,10 +1319,15 @@ class TgwWssClient:
             self._stop.set()
 
     def _dispatch_payload(self, payload: bytes) -> None:
-        message = decode_server_payload(payload)
-        if isinstance(message, CompressedMessage):
-            self._offer_event(message)
+        decoded = decode_server_payload(payload)
+        if isinstance(decoded, CompressedMessage):
+            self._offer_event(decoded)
             return
+        messages = decoded.messages if isinstance(decoded, DecodedMessageBatch) else (decoded,)
+        for message in messages:
+            self._dispatch_message(message)
+
+    def _dispatch_message(self, message: dict[str, Any]) -> None:
         headers = message.get("headers")
         request_id = headers.get("id") if isinstance(headers, dict) else None
         waiter = None

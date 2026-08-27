@@ -82,12 +82,14 @@ node tools/build_api_acceptance_tracker.mjs
 
 | 顺序 | 接口/子范围 | 原因 |
 |---:|---|---|
-| 1 | `QuerySnapshot` 已有 SZSE ETF 子范围 | 补 `kDataEmpty`、同步/异步错误合约 |
-| 2 | `QueryCodeTable` 全市场 shape | 必须使用异步回调完整累计所有批次，再取脱敏摘要 |
-| 3 | `QueryKline` 季线（随后年线/分钟族） | 日、周、月已闭环；仍按一个周期一个证据推进 |
-| 4 | `QueryETFInfo` SZSE 单 ETF | SSE `510300` 已闭环；新市场必须另做 oracle/wire/Mac |
-| 5 | `get_code_info/get_code_list` | 验证 AmazingData wrapper 到底层接口的真实映射 |
-| 6 | 一个 ThirdInfo 功能号 | 按 PDF 第 7 章从低风险、窄结果接口逐个推进 |
+| 1 | `QuerySnapshot` 已有 SZSE ETF 子范围 | ~~补 `kDataEmpty`、同步/异步错误合约~~ **已完成（2026-08-26，`LIVE_ALIGNED`，证据 `docs/evidence/query_snapshot_error_async_contract.md`）** |
+| 2 | `QueryCodeTable` 全市场 shape | ~~必须使用异步回调完整累计所有批次，再取脱敏摘要~~ **已完成（2026-08-26，wire 已证 + Mac `ARM_IMPLEMENTED`；服务端全市场缺第 3 包阻塞成功同参，证据 `docs/evidence/query_code_table_live_closure.md`）** |
+| 3 | `QueryKline` 分钟族（随后分钟族逐周期） | ~~季线/年线~~ **季线与年线已完成（2026-08-26，`LIVE_ALIGNED(quarterly only)`/`LIVE_ALIGNED(yearly only)`）**；分钟族开始 |
+| 4 | `QuerySecuritiesInfo` 下一市场/多 item | ~~SSE 单代码~~ **已完成（2026-08-26，`LIVE_ALIGNED(SSE single code only)`，证据 `docs/evidence/query_securities_info_sse.md`）**；SZSE/NEEQ 另取证 |
+| 5 | `QueryExFactorTable` 下一代码/多代码 | ~~`000001` 单代码~~ **已完成（2026-08-26，`LIVE_ALIGNED(000001 only)`，证据 `docs/evidence/query_ex_factor_table_000001.md`）**；其它代码另取证 |
+| 6 | `QueryETFInfo` SZSE 单 ETF | SSE `510300` 已闭环；新市场必须另做 oracle/wire/Mac |
+| 7 | `get_code_info/get_code_list` | 验证 AmazingData wrapper 到底层接口的真实映射 |
+| 8 | 一个 ThirdInfo 功能号 | 按 PDF 第 7 章从低风险、窄结果接口逐个推进 |
 
 ## 6. 每轮结束检查
 

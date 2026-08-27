@@ -8,6 +8,7 @@ import configparser
 import getpass
 import statistics
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -68,14 +69,33 @@ def main() -> int:
         "--cyc-type",
         type=int,
         default=10008,
-        help="public MDDatatype cycle for --kline (10008 daily, 10009 weekly, 10010 monthly)",
+        help="public MDDatatype cycle for --kline (10000 1-minute, 10008 daily, "
+             "10009 weekly, 10010 monthly, 10011 seasonal, 10012 yearly)",
     )
     cli.add_argument("--begin-date", type=int, default=20260825)
     cli.add_argument("--end-date", type=int, default=20260825)
     cli.add_argument(
+        "--kline-begin-time",
+        type=int,
+        default=0,
+        help="K-line HHmm start time; use 900 for the verified 1-minute sample",
+    )
+    cli.add_argument(
+        "--kline-end-time",
+        type=int,
+        default=0,
+        help="K-line HHmm end time; use 1500 for the verified 1-minute sample",
+    )
+    cli.add_argument(
         "--snapshot",
         metavar="CODE",
         help="run one reconstructed L1 snapshot query and print shape only",
+    )
+    cli.add_argument(
+        "--snapshot-async",
+        action="store_true",
+        help="with --snapshot: use the async query_spi contract and print "
+             "callback counters only",
     )
     cli.add_argument("--date", type=int, default=20260825)
     cli.add_argument("--begin-time", type=int, default=93000000)
@@ -84,6 +104,22 @@ def main() -> int:
         "--etf-info",
         metavar="CODE",
         help="run one reconstructed ETF info query and print shape only",
+    )
+    cli.add_argument(
+        "--securities-info",
+        metavar="CODE",
+        help="run one reconstructed securities-info query and print shape only",
+    )
+    cli.add_argument(
+        "--ex-factor",
+        metavar="CODE",
+        help="run one reconstructed ex-factor table query and print shape only",
+    )
+    cli.add_argument(
+        "--code-table",
+        action="store_true",
+        help="run one reconstructed full-market code table query and print "
+             "desensitized shape only",
     )
     args = cli.parse_args()
     hosts, port, username, password, mode = load_config(args.config)
@@ -137,8 +173,8 @@ def main() -> int:
                     request.auto_complete = 1
                     request.begin_date = args.begin_date
                     request.end_date = args.end_date
-                    request.begin_time = 0
-                    request.end_time = 0
+                    request.begin_time = args.kline_begin_time
+                    request.end_time = args.kline_end_time
                     rows, error = tgw.QueryKline(request, return_df_format=False)
                     if rows:
                         first = rows[0]
@@ -158,9 +194,45 @@ def main() -> int:
                     request.date = args.date
                     request.begin_time = args.begin_time
                     request.end_time = args.end_time
-                    rows, error = tgw.QuerySnapshot(request, return_df_format=False)
-                    columns = sorted(rows[0]) if rows else []
-                    print(f"snapshot_query_error={error} rows={len(rows)} columns={columns}")
+                    if args.snapshot_async:
+                        deliveries = []
+                        done = threading.Event()
+
+                        class Collector:
+                            def __call__(self, result, err_code):
+                                if isinstance(err_code, int):
+                                    shown_err = err_code
+                                elif err_code is None:
+                                    shown_err = None
+                                else:
+                                    shown_err = f"{type(err_code).__name__}:{str(err_code)[:160]}"
+                                deliveries.append(
+                                    (
+                                        type(result).__name__ if result is not None else None,
+                                        len(result) if isinstance(result, list) else None,
+                                        shown_err,
+                                    )
+                                )
+                                done.set()
+
+                        started = time.monotonic()
+                        submitted, submit_err = tgw.QuerySnapshot(
+                            request, query_spi=Collector(), return_df_format=False
+                        )
+                        done.wait(timeout=20.0)
+                        print(
+                            f"snapshot_async_submit={submitted!r} "
+                            f"submit_error={submit_err!r} "
+                            f"callbacks={deliveries} "
+                            f"elapsed_sec={round(time.monotonic() - started, 3)}"
+                        )
+                    else:
+                        rows, error = tgw.QuerySnapshot(request, return_df_format=False)
+                        columns = sorted(rows[0]) if rows else []
+                        print(
+                            f"snapshot_query_error={error} rows={len(rows) if rows else 0} "
+                            f"columns={columns}"
+                        )
                 if args.etf_info:
                     item = tgw.SubCodeTableItem().set_code(args.etf_info)
                     item.market = args.market
@@ -174,6 +246,99 @@ def main() -> int:
                         f"etf_query_error={error} records={len(pairs)} "
                         f"basic_columns={columns} constituent_counts={cons_counts} "
                         f"constituent_columns={cons_columns}"
+                    )
+                if args.securities_info:
+                    item = tgw.SubCodeTableItem().set_code(args.securities_info)
+                    item.market = args.market
+                    rows, error = tgw.QuerySecuritiesInfo(
+                        item, return_df_format=False
+                    )
+                    columns = sorted(rows[0]) if rows else []
+                    column_types = {}
+                    markets = set()
+                    varieties = set()
+                    if rows:
+                        column_types = {
+                            key: type(rows[0][key]).__name__ for key in columns
+                        }
+                        markets = {row.get("market_type") for row in rows}
+                        varieties = {
+                            row.get("variety_category") for row in rows
+                        }
+                    print(
+                        f"securities_info_query_error={error} rows={len(rows)} "
+                        f"columns={columns} "
+                        f"column_types={{{', '.join(
+                            f'{key!r}: {column_types[key]!r}' for key in columns
+                        )}}} "
+                        f"distinct_market_types={sorted(m for m in markets if isinstance(m, int))} "
+                        f"distinct_variety_categories={sorted(v for v in varieties if isinstance(v, int))}"
+                    )
+                if args.ex_factor:
+                    rows, error = tgw.QueryExFactorTable(
+                        args.ex_factor, return_df_format=False
+                    )
+                    columns = sorted(rows[0]) if rows else []
+                    column_types = {}
+                    ex_dates = set()
+                    monotonic = False
+                    if rows:
+                        column_types = {
+                            key: type(rows[0][key]).__name__ for key in columns
+                        }
+                        ex_dates = {
+                            len(str(row.get("ex_date"))) for row in rows
+                            if isinstance(row.get("ex_date"), int)
+                        }
+                        cum_factors = [
+                            row.get("cum_factor") for row in rows
+                            if isinstance(row.get("cum_factor"), float)
+                        ]
+                        monotonic = all(
+                            left <= right
+                            for left, right in zip(cum_factors, cum_factors[1:])
+                        )
+                    print(
+                        f"ex_factor_query_error={error} rows={len(rows)} "
+                        f"columns={columns} "
+                        f"column_types={{{', '.join(
+                            f'{key!r}: {column_types[key]!r}' for key in columns
+                        )}}} "
+                        f"ex_date_digit_lengths={sorted(ex_dates)} "
+                        f"cum_factor_monotonic={monotonic}"
+                    )
+                if args.code_table:
+                    rows, error = tgw.QueryCodeTable(return_df_format=False)
+                    columns = sorted(rows[0]) if rows else []
+                    column_types = {}
+                    markets = set()
+                    stypes = set()
+                    currencies = set()
+                    code_lens = collections.Counter()
+                    dup_codes = 0
+                    if rows:
+                        column_types = {
+                            key: type(rows[0][key]).__name__ for key in columns
+                        }
+                        codes = []
+                        for row in rows:
+                            markets.add(row.get("market_type"))
+                            stypes.add(row.get("security_type"))
+                            currencies.add(row.get("currency"))
+                            code_lens[len(str(row.get("security_code", "")))] += 1
+                            codes.append(row.get("security_code"))
+                        dup_codes = len(codes) - len(set(codes))
+                    print(
+                        f"code_table_query_error={error} rows={len(rows)} "
+                        f"columns={columns} "
+                        f"column_types={{{', '.join(
+                            f'{key!r}: {column_types[key]!r}' for key in columns
+                        )}}} "
+                        f"distinct_market_types={sorted(m for m in markets if isinstance(m, int))} "
+                        f"distinct_security_type_count={len(stypes)} "
+                        f"distinct_currency_count={len(currencies)} "
+                        f"code_length_histogram={dict(sorted(code_lens.items()))} "
+                        f"duplicate_code_rows={dup_codes}"
                     )
             except Exception as exc:
                 print(f"query_failed={type(exc).__name__}: {exc}")

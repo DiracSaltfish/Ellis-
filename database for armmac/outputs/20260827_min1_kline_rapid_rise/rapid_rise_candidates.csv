@@ -1,0 +1,2 @@
+source_file,security_code,market_type,date,window_minutes,start_time,end_time,return_pct,return_threshold_pct,volume_ratio,max_retrace_pct,close_location,signal_score
+159691_SZ_20260826_1m.csv,159691,102,20260826,5,1343,1348,1.200000000000001,0.5,2.4054289194362273,0.0,0.8421052631578947,2.8865147033234755

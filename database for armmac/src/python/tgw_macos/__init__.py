@@ -19,8 +19,40 @@ class ApiMode(IntEnum):
 
 
 class ErrorCode(IntEnum):
+    """Public error codes; values verified against the official V1.0.9.2
+    Python wheel and the C++ manual's ErrorCode table (PDF 页 62 / 正文 54)."""
+
+    kFailure = -100
+    kUnInited = -99
+    kNullSpi = -98
+    kParamIllegal = -97
+    kNetError = -96
+    kPermissionError = -95
+    kLogonFailed = -94
+    kAllocateMemoryFailed = -93
+    kChannelError = -92
+    kOverLoad = -91
+    kLogoned = -90
+    kHqsError = -89
+    kNonQueryTimePeriod = -88
+    kDbAndCodeTableNoCode = -87
+    kIllegalMode = -86
+    kThreadBusy = -85
+    kParseDataError = -84
+    kTimeout = -83
+    kFlowOverLimit = -82
+    kCodeTableCacheNotAvailable = -81
+    kOverMaxSubLimit = -80
+    kLostConnection = -79
+    kOverMaxQueryLimit = -78
+    kFunctionIdNull = -77
+    kDataEmpty = -76
+    kUserNotExist = -75
+    kVerifyFailure = -74
+    kApiInterfaceUsing = -73
+    kTaskIdRepeat = -70
+    kDqsError = -69
     kSuccess = 0
-    kFail = -1
 
 
 class LogLevel(IntEnum):
@@ -76,9 +108,12 @@ class SubscribeDataType(IntEnum):
 
 from ._structures import (  # noqa: E402
     Cfg, ColocaCfg, LogonResponse, SubscribeItem, ReqKline, ReqDefault,
-    SubCodeTableItem,
+    SubCodeTableItem, MDCodeTable, MDCodeTableRecord, MDExFactorTable,
 )
 from ._backend import get_backend                                                 # noqa: E402
+from ._kline_units import (                                                       # noqa: E402
+    normalize_verified_159691_szse_one_minute_kline_rows,
+)
 from . import interface                                                           # noqa: E402,E402
 
 # 与原版一致的顶层再导出
@@ -90,11 +125,19 @@ SetLogSpi = interface.SetLogSpi
 Subscribe = interface.Subscribe
 UnSubscribe = interface.UnSubscribe
 QueryKline = interface.QueryKline
+# Explicit opt-in adapter; its deliberately narrow scope is documented in
+# MACOS_SDK_USAGE.md and validated at runtime.
+NormalizeVerified159691SzseOneMinuteKlineRows = (
+    normalize_verified_159691_szse_one_minute_kline_rows
+)
 QuerySnapshot = interface.QuerySnapshot
 QueryETFInfo = interface.QueryETFInfo
+QuerySecuritiesInfo = interface.QuerySecuritiesInfo
+QueryExFactorTable = interface.QueryExFactorTable
 QueryThirdInfo = interface.QueryThirdInfo
+QueryCodeTable = interface.QueryCodeTable
 SetThirdInfoParam = interface.SetThirdInfoParam
 GetErrorMsg = interface.GetErrorMsg
 ReceiveRawEvent = interface.ReceiveRawEvent
 
-__version__ = "1.0.9.2.macos.re5"
+__version__ = "1.0.9.2.macos.re6"

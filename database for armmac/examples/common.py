@@ -7,7 +7,7 @@ import tgw_macos as tgw
 
 
 def login_from_config(path: str | Path = "config/galaxy_account.ini") -> bool:
-    parser = configparser.ConfigParser()
+    parser = configparser.ConfigParser(inline_comment_prefixes=("#", ";"))
     with Path(path).open(encoding="utf-8") as stream:
         parser.read_file(stream)
     section = parser["galaxy"]

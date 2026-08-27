@@ -1,0 +1,48 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "macos-arm64-debug",
+      "displayName": "macOS arm64 Debug",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build/macos-arm64-debug-make",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_OSX_ARCHITECTURES": "arm64",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "26.0",
+        "CMAKE_PREFIX_PATH": "/opt/homebrew/opt/qt"
+      }
+    },
+    {
+      "name": "macos-arm64-release",
+      "displayName": "macOS arm64 Release",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build/macos-arm64-release-make",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_OSX_ARCHITECTURES": "arm64",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "26.0",
+        "CMAKE_PREFIX_PATH": "/opt/homebrew/opt/qt"
+      }
+    },
+    {
+      "name": "windows-msvc-release",
+      "displayName": "Windows MSVC Release",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/windows-msvc-release",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Release",
+        "PREMIUM_ENABLE_ZSTD": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {"name": "macos-arm64-debug", "configurePreset": "macos-arm64-debug"},
+    {"name": "macos-arm64-release", "configurePreset": "macos-arm64-release"},
+    {"name": "windows-msvc-release", "configurePreset": "windows-msvc-release", "configuration": "Release"}
+  ],
+  "testPresets": [
+    {"name": "macos-arm64-debug", "configurePreset": "macos-arm64-debug", "output": {"outputOnFailure": true}}
+  ]
+}

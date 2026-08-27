@@ -1,6 +1,6 @@
 # macOS ARM64 重写版：开发状态、风险与接手说明
 
-更新时间：2026-08-26；当前实现：`1.0.9.2.macos.re5`。
+更新时间：2026-08-27；当前实现：`1.0.9.2.macos.re6`。
 
 ## 1. 来源与性质
 
@@ -86,29 +86,53 @@ envelope builders + parsers + ZSTD/full/delta raw delivery
 ### 4.2 查询
 
 - ThirdInfo 交易日历：`function_id=A010061003`；
-- 日/周/月 K 线：SSE `510300`，`10008→period_type/tag 10100`、`10009→10101`、`10010→10102`；
+- 日/周/月/季/年 K 线：SSE `510300`，`10008→period_type/tag 10100`、`10009→10101`、
+  `10010→10102`、`10011→10103`、`10012→10104`（季/年已实捕证明并完成 Linux/Mac 同参）；
 - ETF 成分：SSE `510300` 单 item 同步查询；Linux/Mac 均返回 1 条 35 字段基础信息与
   300 条 × 13 字段成分，wire 走常驻 push 的 `ReqGetETFCodeTableList`/tag `"111"`；
-- 历史快照：SZSE `159518`、`data_type=0`、`level_type=0` 的 57-key 低层结果已完成
-  Linux/Mac 同参数据对齐，但公开错误与异步合约未通过验收，仍为实验接口。
+- 证券信息：SSE `510300` 单代码同步查询；Linux/Mac 同参 1 行 43 字段（`MDCodeTableRecord`
+  pack(1) sizeof=555）；wire 走常驻 push 的 `ReqGetCodeTableList`/tag `"109"`；
+  全市场/多 item/SZSE/NEEQ 显式拒绝；
+- 除权因子：`000001` 单代码同步查询；Linux/Mac 同参 33 行 5 字段（double 18 位小数
+  往返无损，cum_factor 单调违例 2 处两侧吻合）；wire 走 one-shot `ReqGetExFactor`/
+  tag `11102`；空结果/异步面未验；
+- 历史快照：SZSE `159518`、`data_type=0`、`level_type=0` 的 57-key 低层结果与公开错误
+  合约（同步 `(None,-76)`、异步 `query_spi` 回调）均已完成 Linux/Mac 同参验证；多包异步
+  交付语义与其它市场/data_type 未验。
+- 代码表：`QueryCodeTable` 已完成 wire 取证与 Mac 实现（one-shot `dgw*_query` 通道、
+  `ReqGetReduceCodeTable`、tag `11103`、反引号 6 字段、缺包 `ReqGetPackage` 补拉）；
+  服务端全市场大表持续缺第 3 包且对补拉无响应，Linux `-83` 与 Mac 缺包超时同因同果，
+  无成功同参样本 → 状态 `ARM_IMPLEMENTED`，待服务端分流后闭环。
+- 季线：`QueryKline` `cyc_type=10011` 已完成 PDF/HDR/官方 Python 静态三方核对
+  （`STATIC_MATCHED`）；`10011→wire 10103` 为外推假设，实捕前不实现。
 
 ### 4.3 订阅
 
 - SZSE `159518` L1：公开 flag 10 → wire/tag 14；Mac 60 秒 19 条，full 2、delta 17；
 - HKT `02800.SH`：市场 101、公开 flag 12 → wire/tag 16；Mac 30 秒 6 条，full 1、delta 5；
-- 支持普通 JSON、ZSTD、`0x59 + ZSTD` 解压；
-- 提供 `ReceiveRawEvent`，但只交付数字 key 的 raw full/delta。
+- 支持普通 JSON、ZSTD、`0x59 + ZSTD` 解压；批量推送解压后的多个 JSON
+  以 ASCII `0x60` 分隔，reader 会拆成独立 dict 后再进入原有请求/事件路由；
+- 2026-08-27 re6 wheel 实盘：202 标的按 20 分 11 批订阅均返回 0，同会话追加
+  `164824.SZ` 返回 0（33.787 ms）；30 秒内 203/203 标的均收到 full，无未知/缺失标的；
+- 同日单独移除原 202 批次中 `159866.SZ`：`UnSubscribe(item)` 返回 0
+  （30.866 ms）；移除前 10 秒该标的有 4 条事件，3 秒在途宽限和随后 20 秒观察均为
+  0 条，同期其它标的继续产生 918 条事件；
+- 加长复验再次返回 0（31.180 ms）；3 秒宽限+后 30 秒目标仍为 0 条，其它
+  201/201 标的全部继续更新（1332 事件），排除了整批误取消；
+- 提供 `ReceiveRawEvent`，但只交付数字 key 的 raw full/delta；203 标的短时
+  覆盖不等于 1000 标的、长时或断线恢复验收。
 
 ### 4.4 静态/测试
 
 - pack(1) 大小：`ColocaCfg=22`、`Cfg=145`、`LogonResponse=14`、
   `SubscribeItem=42`、`SubCodeTableItem=36`、`ReqKline=71`、`ReqDefault=55`；
 - `ReqDefault.level_type` 的发行包差异已锁定；
-- `QueryCodeTable` 已完成 PDF、V1.0.8 HDR 和官方 Python wrapper 的静态契约核对，但尚未
-  暴露为可调用 Mac API；`QueryETFInfo` 在静态核对之上已完成 SSE 单 ETF 在线闭环；
+- `QueryCodeTable` 已完成 PDF、V1.0.8 HDR、官方 Python wrapper 静态契约核对，并完成
+  wire 取证与 Mac 实现（同步全量累计、`query_spi` 显式拒绝）；`QueryETFInfo` 在静态
+  核对之上已完成 SSE 单 ETF 在线闭环；
 - envelope、枚举转换、ZSTD fixture、多包排序/缺包/重复包/错 tag/status、CSV 形状均有
   合成测试；
-- 新工程统一套件当前为 50 项，2026-08-26 在本机 50/50 通过；
+- 新工程统一套件当前为 136 项，2026-08-27 在本机 135 通过（1 skip 为 pandas 缺失分支）；
 - 真实账号、token、MAC 和原始价格不在 fixture 中。
 
 证据位于 `docs/evidence/`。任何范围扩展必须新建或更新对应证据文件，不能只改状态表。
@@ -144,12 +168,15 @@ TLS/WSS、request correlation、ZSTD、query lifecycle 和 parser 逐层迁移�
 ### P1：公开合约差异
 
 1. 官方类型化 push SPI (`OnMDSnapshot/OnMDHKTSnapshot`) 未实现；传 `push_spi` 明确报错。
-2. 官方异步 query SPI 未实现；传 `query_spi` 明确报错。
-3. 查询非零 status（尤其 `kDataEmpty=-76`）目前转为异常，未对齐官方同步错误码返回。
-4. `GetErrorMsg` 只认识 0；日志 SPI、`FreeMemory`、回调数据所有权不完整。
+2. 官方异步 query SPI 仅 `QuerySnapshot` 已实现并对齐（2026-08-26）；K 线/ThirdInfo/ETF
+   传 `query_spi` 仍明确报错。
+3. 查询非零 status 对齐进度：快照空数据已按官方语义返回 `(None,-76)`（含异步回调）；K 线/
+   ThirdInfo 的非零 status 仍转为异常，未对齐官方错误码返回。
+4. `GetErrorMsg` 已对齐官方全量错误码文案（静态对齐）；各错误码的线上触发条件未逐项验证。
+   日志 SPI、`FreeMemory`、回调数据所有权不完整。
 5. `GetTaskID` 只是单例整数递增，没有锁和并发唯一性测试。
-6. 服务端曾对 query WSS 返回 `1000 / accept conn active close`；准入、频率、IP/账号并发
-   规则未知，不能密集重试。
+6. 服务端曾对 query WSS 返回 `1000 / accept conn active close`（2026-08-26 快照复验中再次
+   出现 3 次，低频间隔后恢复）；准入、频率、IP/账号并发规则未知，不能密集重试。
 
 ### P2：覆盖率
 

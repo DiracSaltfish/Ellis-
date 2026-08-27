@@ -1,0 +1,96 @@
+{
+  "source": "TGW QueryKline, one-minute period (cyc_type=10000)",
+  "requests": [
+    {
+      "code": "159691",
+      "market_type": 102,
+      "date": 20260826,
+      "begin_time": 900,
+      "end_time": 1500,
+      "cq_flag": 0,
+      "qj_flag": 0
+    },
+    {
+      "code": "159518",
+      "market_type": 102,
+      "date": 20260824,
+      "begin_time": 900,
+      "end_time": 1500,
+      "cq_flag": 0,
+      "qj_flag": 0
+    },
+    {
+      "code": "159518",
+      "market_type": 102,
+      "date": 20260821,
+      "begin_time": 900,
+      "end_time": 1500,
+      "cq_flag": 0,
+      "qj_flag": 0
+    },
+    {
+      "code": "159518",
+      "market_type": 102,
+      "date": 20260813,
+      "begin_time": 900,
+      "end_time": 1500,
+      "cq_flag": 0,
+      "qj_flag": 0
+    },
+    {
+      "code": "513350",
+      "market_type": 101,
+      "date": 20260821,
+      "begin_time": 900,
+      "end_time": 1500,
+      "cq_flag": 0,
+      "qj_flag": 0
+    }
+  ],
+  "fields": [
+    "market_type",
+    "security_code",
+    "orig_time",
+    "kline_time",
+    "open_price",
+    "high_price",
+    "low_price",
+    "close_price",
+    "volume_trade",
+    "value_trade",
+    "variety_category",
+    "open_price_yuan",
+    "high_price_yuan",
+    "low_price_yuan",
+    "close_price_yuan",
+    "volume_shares",
+    "value_trade_yuan"
+  ],
+  "derived_units": {
+    "*_price_yuan": "raw price / 1,000,000",
+    "volume_shares": "volume_trade / 100",
+    "value_trade_yuan": "value_trade / 100,000"
+  },
+  "files": [
+    {
+      "file": "159691_SZ_20260826_1m.csv",
+      "rows": 242
+    },
+    {
+      "file": "159518_SZ_20260824_1m.csv",
+      "rows": 242
+    },
+    {
+      "file": "159518_SZ_20260821_1m.csv",
+      "rows": 242
+    },
+    {
+      "file": "159518_SZ_20260813_1m.csv",
+      "rows": 242
+    },
+    {
+      "file": "513350_SH_20260821_1m.csv",
+      "rows": 242
+    }
+  ]
+}

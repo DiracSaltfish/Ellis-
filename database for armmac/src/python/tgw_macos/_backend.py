@@ -12,17 +12,25 @@ from typing import Any
 
 from ._protocol import (
     TgwProtocolError,
+    TgwTimeoutError,
     TgwTransportError,
     TgwWssClient,
+    build_code_table_request,
     build_etf_codelist_complete_request,
     build_etf_info_request,
+    build_ex_factor_request,
+    build_get_package_request,
     build_kline_request,
     build_query_complete_request,
+    build_secinfo_request,
     build_snapshot_request,
     build_third_info_request,
     kline_wire_period,
+    parse_code_table_packets,
     parse_etf_info_packets,
+    parse_ex_factor_packets,
     parse_kline_packets,
+    parse_secinfo_packets,
     parse_snapshot_packets,
     parse_third_info_packets,
 )
@@ -113,8 +121,16 @@ class BaseBackend:
     def unsubscribe(self, items: list[dict[str, Any]]) -> int:
         raise NotImplementedError
 
+    def build_query(self, kind: str, req: dict[str, Any]) -> tuple[int, bytes, Any, list[str]]:
+        """Synchronous submit phase: validate, build wire payload, pick route."""
+        raise NotImplementedError(f"{kind} internet query is not implemented yet")
+
+    def run_query(self, prepared: tuple[int, bytes, Any, list[str]]) -> Any:
+        """Exchange phase over a one-shot query WebSocket; returns parser output."""
+        raise NotImplementedError
+
     def query(self, kind: str, req: Any) -> Any:
-        raise NotImplementedError(f"{kind} wire request is not implemented yet")
+        return self.run_query(self.build_query(kind, req))
 
 
 class LiveBackend(BaseBackend):
@@ -197,10 +213,16 @@ class LiveBackend(BaseBackend):
             self.log("ERROR", f"unsubscribe failed: {type(exc).__name__}: {exc}")
             return -1
 
-    def query(self, kind: str, req: Any) -> Any:
+    def build_query(self, kind: str, req: dict[str, Any]) -> tuple[int, bytes, Any, list[str]]:
+        """Synchronous submit phase: validate, build wire payload, pick route.
+
+        The official wrapper reports submission failures synchronously and
+        delivers results later through the query SPI; splitting both phases
+        keeps the same observable contract on macOS.
+        """
         if self.state != BackendState.LOGGED_IN or self.cfg is None:
             raise TgwTransportError("backend is not logged in")
-        if kind not in {"third_info", "kline", "snapshot", "etf_info"}:
+        if kind not in {"third_info", "kline", "snapshot", "ex_factor"}:
             raise NotImplementedError(f"{kind} internet query is not implemented yet")
         if not isinstance(req, dict) or "task_id" not in req:
             raise ValueError("invalid internet query request")
@@ -217,8 +239,14 @@ class LiveBackend(BaseBackend):
                 self.client.username, self.client.token, request_id, req.get("request")
             )
             parser = parse_snapshot_packets
-        elif kind == "etf_info":
-            return self._query_etf_info(request_id, req.get("items"))
+        elif kind == "ex_factor":
+            if not isinstance(req.get("security_code"), str):
+                raise ValueError("invalid ex-factor request")
+            payload = build_ex_factor_request(
+                self.client.username, self.client.token, request_id,
+                req["security_code"],
+            )
+            parser = parse_ex_factor_packets
         else:
             kline_request = req.get("request")
             payload = build_kline_request(
@@ -238,8 +266,10 @@ class LiveBackend(BaseBackend):
         # Official query task ids begin at 1; map the first task to dgw1 and
         # alternate subsequent one-shot connections across the configured pool.
         start = (request_id - 1) % len(endpoints)
-        endpoints = endpoints[start:] + endpoints[:start]
+        return request_id, payload, parser, endpoints[start:] + endpoints[:start]
 
+    def run_query(self, prepared: tuple[int, bytes, Any, list[str]]) -> Any:
+        request_id, payload, parser, endpoints = prepared
         query_client: TgwWssClient | None = None
         last_connect_error: Exception | None = None
         for endpoint in endpoints:
@@ -287,13 +317,33 @@ class LiveBackend(BaseBackend):
             packets = query_client.request_many(
                 request_id, payload, done=complete, timeout=self.timeout
             )
-            query_client.send(build_query_complete_request(
-                self.client.username, self.client.token, request_id
-            ))
+            if any(packet.get("status") != 0 for packet in packets):
+                # Captured official behavior (2026-08-26): error responses are
+                # followed by a direct close; no ReqGetComplete is sent.
+                pass
+            else:
+                query_client.send(build_query_complete_request(
+                    self.client.username, self.client.token, request_id
+                ))
             query_client.wait_closed(min(2.0, self.timeout))
             return parser(packets)
         finally:
             query_client.close()
+
+    def query(self, kind: str, req: Any) -> Any:
+        if kind == "etf_info":
+            if not isinstance(req, dict) or "task_id" not in req:
+                raise ValueError("invalid internet query request")
+            return self._query_etf_info(int(req["task_id"]), req.get("items"))
+        if kind == "code_table":
+            if not isinstance(req, dict) or "task_id" not in req:
+                raise ValueError("invalid internet query request")
+            return self._query_code_table(int(req["task_id"]))
+        if kind == "securities_info":
+            if not isinstance(req, dict) or "task_id" not in req:
+                raise ValueError("invalid internet query request")
+            return self._query_securities_info(int(req["task_id"]), req.get("items"))
+        return self.run_query(self.build_query(kind, req))
 
     def _query_etf_info(self, request_id: int, items: Any) -> Any:
         """Run one ETF info exchange on the *persistent push* connection.
@@ -318,6 +368,141 @@ class LiveBackend(BaseBackend):
         except TgwTransportError:
             pass  # parse what we received even if the push reader just stopped
         return parse_etf_info_packets(packets, expected_request_id=request_id)
+
+    def _query_securities_info(self, request_id: int, items: Any) -> Any:
+        """Run one securities-info exchange on the *persistent push* connection.
+
+        Captured official behavior (2026-08-26): the request ReqGetCodeTableList
+        and its ReqGetCodelistComplete completion travel on /amd/dgw/push,
+        responses echo the request id with string tag "109", code_num in headers
+        and no packet counters. Only a single response frame has been observed;
+        that is all we accept.
+        """
+        if not isinstance(items, list):
+            raise ValueError("invalid securities-info request items")
+        payload = build_secinfo_request(
+            self.client.username, self.client.token, request_id, items
+        )
+        packets = self.client.request_many(
+            request_id, payload, done=lambda _message: True, timeout=self.timeout
+        )
+        try:
+            self.client.send(build_etf_codelist_complete_request(
+                self.client.username, self.client.token, request_id
+            ))
+        except TgwTransportError:
+            pass  # parse what we received even if the push reader just stopped
+        return parse_secinfo_packets(packets, expected_request_id=request_id)
+
+    def _query_endpoints(self, request_id: int) -> list[str]:
+        configured = os.environ.get(
+            "TGW_QUERY_ENDPOINTS", "/amd/dgw/dgw1_query,/amd/dgw/dgw2_query"
+        )
+        endpoints = [value.strip() for value in configured.split(",") if value.strip()]
+        if not endpoints:
+            raise ValueError("TGW_QUERY_ENDPOINTS contains no endpoint")
+        start = (request_id - 1) % len(endpoints)
+        return endpoints[start:] + endpoints[:start]
+
+    def _query_code_table(self, request_id: int) -> Any:
+        """Run one full-market code-table exchange on the one-shot dgw*_query
+        endpoint (captured 2026-08-26, not the push channel).
+
+        Flow mirrors the official client: ReqGetReduceCodeTable, then if a
+        packet is missing retry it once via ReqGetPackage {pack_num:"N,"},
+        then the channel-standard ReqGetComplete and a normal close.
+        """
+        if self.state != BackendState.LOGGED_IN or self.cfg is None:
+            raise TgwTransportError("backend is not logged in")
+        username = self.client.username
+        token = self.client.token
+        payload = build_code_table_request(username, token, request_id)
+        endpoints = self._query_endpoints(request_id)
+        query_client: TgwWssClient | None = None
+        last_connect_error: Exception | None = None
+        for endpoint in endpoints:
+            candidate = TgwWssClient(
+                endpoint=endpoint, timeout=self.timeout, heartbeat_sec=0
+            )
+            try:
+                candidate.connect(
+                    _as_text(self.cfg["server_vip"]),
+                    int(self.cfg["server_port"]),
+                    ca_file=self.ca_file,
+                    server_name=self.server_name,
+                )
+            except Exception as exc:
+                candidate.close()
+                last_connect_error = exc
+                continue
+            query_client = candidate
+            break
+        if query_client is None:
+            raise TgwTransportError("all TGW query endpoints failed") from last_connect_error
+
+        try:
+            packets = self._collect_paged_query(
+                query_client, request_id, username, token, payload
+            )
+            if any(packet.get("status") != 0 for packet in packets):
+                # Captured official behavior (2026-08-26): error responses are
+                # followed by a direct close; no completion is sent.
+                pass
+            else:
+                query_client.send(build_query_complete_request(username, token, request_id))
+            query_client.wait_closed(min(2.0, self.timeout))
+            return parse_code_table_packets(packets)
+        finally:
+            query_client.close()
+
+    def _collect_paged_query(self, query_client: TgwWssClient, request_id: int,
+                             username: str, token: str,
+                             payload: bytes) -> list[dict[str, Any]]:
+        """Collect a paged query response, retrying any missing packet once.
+
+        Mirrors the captured code-table flow: the first pass collects packets
+        until all_pack_num are present; if it times out with a gap, each missing
+        packet is requested once via ``ReqGetPackage {pack_num:"N,"}`` before
+        giving up.
+        """
+        seen: dict[int, dict[str, Any]] = {}
+        expected: int | None = None
+
+        def done(message: dict[str, Any]) -> bool:
+            nonlocal expected
+            if message.get("status") != 0:
+                return True
+            headers = message.get("headers")
+            if not isinstance(headers, dict):
+                return True
+            pack_num = headers.get("pack_num")
+            all_pack_num = headers.get("all_pack_num")
+            if not isinstance(pack_num, int) or not isinstance(all_pack_num, int):
+                return True
+            if expected is None:
+                expected = all_pack_num
+            elif expected != all_pack_num:
+                return True
+            seen[pack_num] = message
+            return len(seen) == expected
+
+        try:
+            query_client.request_many(request_id, payload, done=done, timeout=self.timeout)
+        except TgwTimeoutError:
+            missing = [n for n in range(1, (expected or 0) + 1) if n not in seen]
+            for pack_num in missing:
+                try:
+                    query_client.request_many(
+                        request_id,
+                        build_get_package_request(username, token, request_id, pack_num),
+                        done=done,
+                        timeout=self.timeout,
+                    )
+                except TgwTimeoutError:
+                    break
+        if expected is not None and set(seen) != set(range(1, expected + 1)):
+            raise TgwTimeoutError("code-table response is missing packets")
+        return [seen[pack_num] for pack_num in sorted(seen)]
 
     def close(self) -> None:
         self.client.close()

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tgw-macos-arm64"
-version = "1.0.9.2.5"
+version = "1.0.9.2.6"
 description = "Authorized macOS arm64 interoperability implementation for TGW internet mode"
 readme = "README.md"
 requires-python = ">=3.10"

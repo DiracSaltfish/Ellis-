@@ -1,6 +1,6 @@
 # TGW macOS ARM64 使用文档
 
-适用实现：`tgw_macos 1.0.9.2.macos.re5`；更新时间：2026-08-26。
+适用实现：`tgw_macos 1.0.9.2.macos.re6`；更新时间：2026-08-27。
 
 ## 1. 先明确可用边界
 
@@ -13,10 +13,11 @@ Apple Silicon 上原生运行 Python 与系统 arm64 库，不加载官方 Linux
 - internet mode 登录和关闭；
 - SZSE `159518` 的 L1 原始 full/delta 订阅；
 - HKT `02800` 的沪股通路由 L1 原始 full/delta 订阅；
-- SSE `510300` 的日 K 线、周 K 线与月 K 线同步查询；
+- SSE `510300` 的日 K 线、周 K 线、月 K 线、季 K 线与年 K 线同步查询；
 - SSE `510300` 的单 ETF 基础信息与成分股同步查询；
 - `A010061003` 的交易日历 ThirdInfo 同步查询；
-- SZSE `159518` 历史 L1 快照有同参数据证据，但公开错误与异步合约尚未验收，只能实验。
+- SZSE `159518` 历史 L1 快照：数据、空数据错误码（`-76`）与异步 `query_spi` 合约均已
+  Linux/Mac 同参对齐（限该市场/代码/data_type 子范围；异步多包交付语义未观测）。
 
 它还不具备无人值守生产 SDK 所需的自动重连、恢复订阅、类型化 SPI、完整错误码、长期
 压力验证和全接口覆盖。业务上线前请同时阅读 [`API_STATUS.md`](API_STATUS.md) 和
@@ -54,7 +55,7 @@ python -m unittest discover -s tests -v
 ```bash
 python -m pip install build
 python -m build --wheel
-python -m pip install dist/tgw_macos_arm64-1.0.9.2.5-py3-none-any.whl
+python -m pip install dist/tgw_macos_arm64-1.0.9.2.6-py3-none-any.whl
 ```
 
 wheel 标为 `py3-none-any` 是因为主线没有 CPython ABI 扩展；包自身仍会拒绝非 macOS
@@ -163,9 +164,10 @@ finally:
 
 ## 5. 已验证查询
 
-四个已开放查询 API 均为**同步调用**：没有 `query_spi` 时返回 `(result, error_code)`；当前成功
-路径 `error_code=0`。传入 `query_spi` 会明确抛 `NotImplementedError`，因为官方异步
-“先返回提交结果、稍后 SPI 回调”语义尚未实现。
+四个已开放查询 API 中，三个（K 线、ThirdInfo、ETF）为**同步调用**：没有 `query_spi` 时返回
+`(result, error_code)`，成功路径 `error_code=0`。`QuerySnapshot` 额外支持官方同步/异步两种
+错误合约（见 5.4）。除快照外传入 `query_spi` 会明确抛 `NotImplementedError`，因为那些接口的
+异步语义尚未取证实现。
 
 普通查询在 `return_df_format=True`（默认）时返回 `pandas.DataFrame`，`False` 返回
 `list[dict[str, object]]`，不需要 pandas，也最适合协议调试。ETF 查询是嵌套结果，格式见 5.3。
@@ -200,7 +202,7 @@ GetTaskID → 多次 SetThirdInfoParam → ReqGetThirdInfo
 日历分支只验证了 `function_id=A010061003`、`market=SSE` 和日期范围。其它 function id、
 市场以及分页大结果必须独立验证，不能因为走同一 ThirdInfo 通道就视为可用。
 
-### 5.2 日 K 线、周 K 线与月 K 线
+### 5.2 1 分钟、日、周、月、季与年 K 线
 
 ```python
 req = tgw.ReqKline().set_code("510300")
@@ -220,16 +222,21 @@ rows, error = tgw.QueryKline(req, return_df_format=False)
 assert error == 0
 ```
 
-示例使用日线。周线把 `req.cyc_type` 改为 `10009` 并设置目标周窗口；月线改为 `10010`
-并设置目标月窗口。已验证 request/wire：
+示例使用日线。经同参验证的 1 分钟样本使用 `req.cyc_type=10000`、深市 `market_type=102`、
+`begin_time=900`、`end_time=1500`；分钟时间必须传 HHmm 窗口，不能沿用日线的 0/0。
+周线把 `req.cyc_type` 改为 `10009` 并设置目标周窗口；月线改为 `10010` 并设置目标月窗口；
+季线改为 `10011` 并设置目标季窗口。已验证 request/wire：
 
 | 公开 API | wire method | wire 周期 | 响应 tag | 当前范围 |
-|---|---|---:|---:|---|
+|---|---|---|---:|---|
+| `cyc_type=10000` | `ReqGetKline` | `period_type=10000` | `10000` | SZSE `159691` 1 分钟线，2026-08-26 09:00–15:00 |
 | `cyc_type=10008` | `ReqGetKline` | `period_type=10100` | `10100` | SSE `510300` 日线 |
 | `cyc_type=10009` | `ReqGetKline` | `period_type=10101` | `10101` | SSE `510300` 周线 |
 | `cyc_type=10010` | `ReqGetKline` | `period_type=10102` | `10102` | SSE `510300` 月线 |
+| `cyc_type=10011` | `ReqGetKline` | `period_type=10103` | `10103` | SSE `510300` 季线（2026-08-26 实捕证明） |
+| `cyc_type=10012` | `ReqGetKline` | `period_type=10104` | `10104` | SSE `510300` 年线（2026-08-26 实捕证明） |
 
-三个周期的 wire 行均为 9 个 CSV 字段；公开行均为 11 字段 dict，并补
+六个已验证周期的 wire 行均为 9 个 CSV 字段；公开行均为 11 字段 dict，并补
 `orig_time=0`、`variety_category=0`。
 
 返回字段按顺序为：
@@ -239,14 +246,60 @@ assert error == 0
 | `market_type` | `int` |
 | `security_code` | `str` |
 | `orig_time` | `int`，当前官方/本地验证样本为常量 0 |
-| `kline_time` | `int`，日/周/月线当前样本均为 8 位日期；周/月锚点语义仍需更多样本 |
+| `kline_time` | `int`；1 分钟样本为 12 位 `yyyyMMddHHmm`，日/周/月/季/年样本为 8 位日期 |
 | `open_price` / `high_price` / `low_price` / `close_price` | `int`，原始协议缩放值 |
 | `volume_trade` | `int`，原始协议缩放值 |
 | `value_trade` | `int`，原始协议缩放值 |
 | `variety_category` | `int`，当前为常量 0 |
 
-不要在未核对手册缩放与目标品种前直接把整数当作元/股。除 `10008`、`10009`、`10010` 外的
-`cyc_type` 会明确失败。
+不要在未核对手册缩放与目标品种前直接把整数当作元/股。除 `10000`、`10008`、`10009`、
+`10010`、`10011`、`10012` 外的 `cyc_type`（其余分钟周期 `10001–10007`）会明确失败。
+
+#### 159691.SZ 已核验的单位输出（仅 2026-08-26 当日 1 分钟）
+
+`QueryKline` 的默认输出是协议原值，**不能**把 `open_price` 等整数直接显示为元，也不能把
+`volume_trade` 直接显示为股或手。对截图对应的已核验范围，可显式开启标准化输出：
+
+```python
+from decimal import Decimal
+import tgw_macos as tgw
+
+req = tgw.ReqKline().set_code("159691")
+req.market_type = tgw.MarketType.kSZSE
+req.cq_flag = req.cq_date = req.qj_flag = req.cyc_def = 0
+req.cyc_type = 10000
+req.auto_complete = 1
+req.begin_date = req.end_date = 20260826
+req.begin_time, req.end_time = 900, 1500
+
+rows, error = tgw.QueryKline(req, return_df_format=False, normalized=True)
+assert error == 0
+first = rows[0]
+close_yuan: Decimal = first["close_price_yuan"]
+shares: int = first["volume_shares"]
+amount_yuan: Decimal = first["value_trade_yuan"]
+```
+
+`normalized=True` 会在**发起网络请求前**检查代码、市场、复权/周期参数、日期和时间窗；任何
+偏离 `159691`、SZSE、`cyc_type=10000`、2026-08-26、09:00–15:00 的请求都会抛
+`NotImplementedError`。这不是通用换算器，目的是防止把未验证品种或日期静默地套用错误倍数。
+已有的原始行也可使用
+`tgw.NormalizeVerified159691SzseOneMinuteKlineRows(raw_rows)`；它会再次核对每行的范围和结构。
+
+标准化行的字段和单位如下。价格与金额使用 `Decimal`，而非 `float`；CSV 导出可直接写入其
+字符串形式，JSON 输出应使用 `str(value)` 或自定义 `Decimal` 编码器。
+
+| 标准化字段 | 类型 | 含义 / 精确换算 |
+|---|---|---|
+| `open_price_yuan` / `high_price_yuan` / `low_price_yuan` / `close_price_yuan` | `Decimal` | 原始价格 ÷ 1,000,000，人民币元 |
+| `volume_shares` | `int` | 原始 `volume_trade` ÷ 100，股 |
+| `value_trade_yuan` | `Decimal` | 原始 `value_trade` ÷ 100,000，人民币元 |
+| `raw_open_price` … `raw_value_trade` | `int` | 未修改的协议原值，仅用于审计或重新计算；业务展示勿使用 |
+| `market_type` / `security_code` / `kline_time` / `orig_time` / `variety_category` | 原类型 | 与原始行一致；`kline_time` 是 12 位 `yyyyMMddHHmm` |
+
+该组倍数通过同日 242 根完整分钟线与独立行情界面逐项交叉核对：开、高、低、最新价完全一致，
+并且按标准化行聚合出的成交额、总手和成交均价与界面四舍五入后完全一致。不要仅依据通用结构
+说明推断其它标的的缩放；其单位必须先独立验证。
 
 ### 5.3 ETF 基础信息与成分股（SSE 单 ETF）
 
@@ -276,7 +329,7 @@ list[tuple[dict[str, object], list[dict[str, object]]]]
 查询也会失败。异步 `IGMDETFInfoSpi` 尚未实现；SZSE、多个 item、空结果/错误码、多响应帧均
 没有在线证据，当前会显式拒绝或报协议错误。
 
-### 5.4 历史 L1 快照（实验）
+### 5.4 历史 L1 快照（同步 + 异步错误合约已对齐）
 
 ```python
 req = tgw.ReqDefault().set_code("159518")
@@ -288,23 +341,93 @@ req.data_type = 0
 req.level_type = 0
 
 rows, error = tgw.QuerySnapshot(req, return_df_format=False)
+assert error == 0 or error == tgw.ErrorCode.kDataEmpty
 ```
 
 唯一放行范围是 `SZSE 159518`、`data_type=0`、`level_type=0`。method 为
-`ReqGetSnapshot`，响应 tag 为 `11000`。官方 Linux 与 Mac 曾同参返回 11 行、57 个公开
-字段且类型一致，但该公开 API 仍有三个未完成合约：
+`ReqGetSnapshot`，数据响应 tag 为 `11000`。官方 Linux 与 Mac 已同参验证：数据窗 11 行 ×
+57 个公开字段且类型一致；空数据窗按官方语义返回 `(None, -76/kDataEmpty)`。
 
-1. 服务端 `kDataEmpty=-76` 等非零状态目前抛异常，尚未对齐官方 `(None, error_code)`；
-2. 异步 `query_spi` 未实现；
-3. 只验证了一个市场、代码、日期和窄窗口。
+异步模式与官方 wrapper 合约一致：
 
-因此它是开发/回归接口，不应作为稳定生产依赖。
+```python
+class SnapshotCollector:
+    def __call__(self, result, err_code):
+        # 数据批次: (list_or_DataFrame, None)
+        # 错误/空数据: (None, int 错误码)，如 (None, -76)
+        ...
+
+submitted, submit_err = tgw.QuerySnapshot(req, query_spi=SnapshotCollector(),
+                                          return_df_format=False)
+# 提交成功立即返回 (True, None)；本地校验失败同步抛错。
+```
+
+超时经回调交付 `(None, -83/kTimeout)`；内部异常按官方行为透传 `(None, str(exc))`。
+回调在后台线程触发，用户对象被直接调用。
+
+已知边界：
+
+1. 异步多包交付语义未观测——当前实现将收齐的全部行放入一次回调；官方 C++ 为每包一次；
+2. 空数据 wire 帧为字符串 tag `"DataEmpty"` + status=-100，客户端映射为公开 -76；
+   其它错误标签未捕获，出现即显式报协议错；
+3. 只验证了一个市场、代码、日期和窄窗口；DataFrame 列序与官方 `json_normalize`
+   的逐列一致性未验。
 
 57 个低层字段包括：`market_type`、`security_code`、`variety_category`、`orig_time`、
 `trading_phase_code`、六个基础价格、10 档 `bid_priceN/bid_volumeN/offer_priceN/
 offer_volumeN`、`num_trades`、`total_volume_trade`、`total_value_trade`、`IOPV`、
 `high_limited`、`low_limited`。返回的是官方低层整数缩放值；wire 尾部 16 个未证明槽位
 按设计丢弃，不会猜测字段含义。
+
+### 5.5 代码表 `QueryCodeTable`（`ARM_IMPLEMENTED`，2026-08-26）
+
+```python
+rows, err = tgw.QueryCodeTable(return_df_format=False)  # rows: list[dict]，6 列
+```
+
+公开接口无入参；返回 6 列 `security_code / symbol / english_name / market_type /
+security_type / currency`。Mac 同步返回**累计全部批次**（对齐官方异步总数，偏离官方
+同步 wrapper 的首批竞态）。注意事项：
+
+1. wire 已证：one-shot `dgw*_query` 通道、method `ReqGetReduceCodeTable`、
+   tag `11103`、行分隔符反引号、缺包时经 `ReqGetPackage` 补拉一次；
+2. 服务端全市场大表当前**持续缺第 3 包**且对补拉无响应：Linux 官方 SDK 同步返回
+   `-83 kTimeout`，Mac 因缺包超时抛 `TgwTimeoutError`（同因同果）；尚无成功同参样本，
+   状态 `ARM_IMPLEMENTED`；
+3. `query_spi` 传入显式抛 `NotImplementedError`；`OnStatus`/`FreeMemory` 未实现；
+4. 完成 method 未捕获（沿用 `ReqGetComplete`）；`currency`/`security_type` 空白串的
+   trim 行为待成功样本复核。
+
+### 5.6 证券基础信息 `QuerySecuritiesInfo`（SSE 单代码，2026-08-26）
+
+```python
+item = tgw.SubCodeTableItem()
+item.market = tgw.MarketType.kSSE   # 101
+item.security_code = "510300"
+rows, err = tgw.QuerySecuritiesInfo(item, return_df_format=False)
+```
+
+已验证范围：SSE `510300` 单 item 同步返回 1 行 **43 字段**（`MDCodeTableRecord`，
+pack(1) sizeof=555）。wire：常驻 push 通道 `ReqGetCodeTableList`、`Security="code|market"`、
+tag 字符串 `"109"`、`ReqGetCodelistComplete` 完成。注意事项：
+
+1. 全市场（market=kNone）、多 item、SZSE/NEEQ、异步 `query_spi` 均显式拒绝；
+2. 空结果/非零 status 的 wire 形状未取证；数值字段为原始缩放值，调用方需按手册换算；
+3. push 连接与订阅/ETF 共享生命周期，当前无自动重连。
+
+### 5.7 除权因子 `QueryExFactorTable`（`000001` 单代码，2026-08-26）
+
+```python
+rows, err = tgw.QueryExFactorTable("000001", return_df_format=False)
+```
+
+已验证范围：`000001` 单代码同步返回 33 行 5 字段（`inner_code`/`security_code` str、
+`ex_date` int、`ex_factor`/`cum_factor` float，double 18 位小数往返无损）。wire：
+one-shot `dgw*_query` 通道 `ReqGetExFactor`、tag `11102`、5 字段 CSV。注意事项：
+
+1. 无显式市场参数（代码默认路由，wire 无市场字段）；
+2. 空结果/非零 status 的 wire 形状未取证，parser 非零 status 一律报错；
+3. double 缩放（N38(15)）由调用方按手册处理；异步 `query_spi` 显式拒绝。
 
 ## 6. 已验证 L1 订阅
 
@@ -337,7 +460,63 @@ assert tgw.Subscribe(item) == 0
 直接传 `kHKEx=103` 会被官方客户端拒绝。公开 flag `12` 转换为 wire `16`，推送 tag 为
 `"16"`。`.SZ` 路由尚未 live 验证。
 
-### 6.3 原始事件“回调”逻辑
+### 6.3 批量订阅后同会话追加
+
+`Subscribe`/`UnSubscribe` 既接受单个 `SubscribeItem`，也接受 `list[SubscribeItem]`。
+已验证的 202 标的调用方式是每 20 个一批，全部成功后在**同一登录会话**对
+新标的再调一次 `Subscribe(extra)`：
+
+```python
+def l1_item(symbol: str):
+    item = tgw.SubscribeItem().set_code(symbol[:6])
+    item.market = (
+        tgw.MarketType.kSSE if symbol.endswith(".SH")
+        else tgw.MarketType.kSZSE
+    )
+    item.flag = tgw.SubscribeDataType.kSnapshot
+    item.category_type = 0
+    return item
+
+initial_items = [l1_item(symbol) for symbol in initial_202_symbols]
+subscribed = []
+try:
+    for offset in range(0, len(initial_items), 20):
+        batch = initial_items[offset:offset + 20]
+        if tgw.Subscribe(batch) != 0:
+            raise RuntimeError(f"subscription batch rejected at offset {offset}")
+        subscribed.extend(batch)
+
+    extra = l1_item("164824.SZ")
+    if tgw.Subscribe(extra) != 0:
+        raise RuntimeError("incremental subscription rejected")
+    subscribed.append(extra)
+
+    # ReceiveRawEvent() 持续返回原 202 标的和追加标的的独立 dict。
+    event = tgw.ReceiveRawEvent(timeout=5.0)
+finally:
+    for offset in range(0, len(subscribed), 20):
+        tgw.UnSubscribe(subscribed[offset:offset + 20])
+    tgw.Close()
+```
+
+2026-08-27 re6 wheel 实盘结果：11 个初始批次全部返回 0；追加 `164824.SZ`
+返回 0，调用耗时 33.787 ms。30 秒采集中共 1342 个事件（full 356 / delta 986），
+203 个标的全部出现且全部有 full，
+status 全为 0。这只证明该时段的 202+1 短时能力，不代表 1000 标的、长时或重连恢复已验收。
+
+同一日又对“从初始批次中单独移除”做了独立测试：202 标的按 20 分批后，
+`tgw.UnSubscribe(item_for_159866)` 返回 0，耗时 30.866 ms。移除前 10 秒中
+`159866.SZ` 有 4 条事件；返回后 3 秒在途宽限期为 0 条，后续 20 秒仍为 0 条，
+而其它标的同期继续产生 918 条事件。这证明当前服务会精确移除该代码，
+未观察到整批取消。业务层仍应允许少量在途帧，并以移除完成时刻+宽限窗口判定违例。
+加长复验第二次返回 0（31.180 ms），3 秒宽限+后 30 秒内目标仍为 0 条，剩余
+201/201 标的全部继续更新，共 1332 条事件。
+
+202 标的推送会触发服务端批量压缩帧：WebSocket payload 为 `0x59 + ZSTD`，
+解压后是多个以 ASCII `0x60` 分隔的 JSON object，末尾可有 C NUL。SDK 已在 reader
+内部拆分，调用方不得自行解压，也不会从 `ReceiveRawEvent` 收到 list/batch 包装。
+
+### 6.4 原始事件“回调”逻辑
 
 当前 `Subscribe(item, push_spi)` 不实现官方类型化异步 SPI；传非空 `push_spi` 会抛错。
 临时接口是从 reader 线程维护的有界队列中阻塞取事件：
@@ -386,7 +565,7 @@ while True:
 事件队列容量为 10,000，满时会丢弃最旧事件以保证 reader 不阻塞。因此业务需要监测处理
 延迟和丢包，不得假设队列是持久消息系统。
 
-### 6.4 取消与关闭
+### 6.5 取消与关闭
 
 ```python
 try:
@@ -464,9 +643,11 @@ wire 解码后生成“基础信息 dict + 成分股 list”的两级 Python 容
   `ReqGetCodelistComplete`；
 - ZSTD 帧既支持标准 magic，也支持厂商 `0x59 + ZSTD` 前缀；解压上限 64 MiB；
 - 协议会校验 status、tag、包号一致性、缺包、重复包和返回形状；
+- `GetErrorMsg` 覆盖官方全量公开错误码文案（如 `-76` → “数据为空”）；未收录码返回
+  "unknown error code"。快照查询的空数据/错误已按官方合约返回错误码而不是抛异常；
 - 登录/订阅失败通常返回 `False/-1` 并在 backend 记录 `last_error`；查询网络/协议失败会抛
   `TgwTransportError`、`TgwProtocolError` 或 `TgwTimeoutError`；这些类当前位于内部模块，
-  应用可先按 `RuntimeError/TimeoutError` 捕获；
+  应用可先按 `RuntimeError/TimeoutError` 捕获（快照异步模式例外：经回调交付，见 5.4）；
 - 服务端 `1000 / accept conn active close` 是主动关闭/准入或流控证据。停止密集重试，
   记录端点与时间，退避并保留 Linux 官方 SDK 回退路径。
 
