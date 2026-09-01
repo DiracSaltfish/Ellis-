@@ -1,0 +1,109 @@
+{
+  "policy": "statistics_only_no_automatic_production_approval",
+  "raw": {
+    "events": 59200,
+    "sessions": {
+      "99082262-dbed-4799-b461-591efa89b889": 16700,
+      "10af2d0b-4938-4176-9142-a03805aa05f9": 20120
+    },
+    "tags": {
+      "None": 22380,
+      "14": 36820
+    },
+    "full_delta": {
+      "full": 24380,
+      "delta": 34820
+    },
+    "adapter_sequence_gaps": 9,
+    "sdk_queue_high_water": 25,
+    "legacy_unwrapped_test_records": 22380,
+    "distinct_key_sets": 2,
+    "top_key_sets": [
+      [
+        "bid_price,high_price,last_price,low_price,num_trades,offer_price,orig_time,security_code,total_volume_trade",
+        56997
+      ],
+      [
+        "IOPV,bid_price,bid_volume,close_price,high_price,last_price,low_price,market_type,num_trades,offer_price,offer_volume,open_price,orig_time,pre_close_price,security_code,total_value_trade,total_volume_trade,trading_phase_code",
+        2203
+      ]
+    ],
+    "field_json_types": {
+      "IOPV": {
+        "int": 2203
+      },
+      "bid_price": {
+        "list": 59200
+      },
+      "bid_volume": {
+        "list": 2203
+      },
+      "close_price": {
+        "int": 2203
+      },
+      "high_price": {
+        "int": 59200
+      },
+      "last_price": {
+        "int": 59200
+      },
+      "low_price": {
+        "int": 59200
+      },
+      "market_type": {
+        "int": 2203
+      },
+      "num_trades": {
+        "int": 59200
+      },
+      "offer_price": {
+        "list": 59200
+      },
+      "offer_volume": {
+        "list": 2203
+      },
+      "open_price": {
+        "int": 2203
+      },
+      "orig_time": {
+        "int": 59200
+      },
+      "pre_close_price": {
+        "int": 2203
+      },
+      "security_code": {
+        "str": 59200
+      },
+      "total_value_trade": {
+        "int": 2203
+      },
+      "total_volume_trade": {
+        "int": 59200
+      },
+      "trading_phase_code": {
+        "str": 2203
+      }
+    }
+  },
+  "normalized": {
+    "events": 59200,
+    "symbols": 1001,
+    "quality_issues": {},
+    "book_order_errors": 0,
+    "nonmonotonic": {
+      "volume": 1202,
+      "trades": 1202
+    },
+    "latency_ms": {
+      "p50": 1.674,
+      "p95": 3.127,
+      "p99": 3.674,
+      "max": 120.551
+    },
+    "price_iopv_ratio": {
+      "min": 0.9998750010937404,
+      "median": 1.0,
+      "max": 1.0250674686656642
+    }
+  }
+}

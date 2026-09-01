@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "a": {
+    "host": "192.168.1.113",
+    "port": 8421
+  },
+  "qmt_profiles": [
+    {
+      "name": "QMT1",
+      "host": "192.168.1.112",
+      "port": 9527
+    },
+    {
+      "name": "QMT2",
+      "host": "192.168.1.111",
+      "port": 9527
+    }
+  ],
+  "sound_enabled": true,
+  "sound_preset": "classic",
+  "sound_repeat": 1,
+  "popup_enabled": true,
+  "summary_refresh_ms": 100
+}

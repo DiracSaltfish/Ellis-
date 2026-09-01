@@ -1,0 +1,12 @@
+/build/
+/runtime/*
+!/runtime/.gitkeep
+/logs/*.log
+/data/*.jsonl
+/data/*.zst
+/config/app.json
+/config/client-settings.json
+/config/tgw_account.ini
+/config/tgw_username_override
+.DS_Store
+*.user

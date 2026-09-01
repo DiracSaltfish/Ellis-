@@ -1,0 +1,8 @@
+{"component":"legacy","level":"INFO","message":"19195 listening on 0.0.0.0:19195","time":"2026-08-27T09:43:56.882"}
+{"allow_30s":true,"allow_5m":true,"component":"schedule","level":"INFO","message":"上午信号监控","quotes_desired":true,"time":"2026-08-27T09:43:56.882"}
+{"component":"core","fixed_symbols":202,"level":"INFO","message":"started","replay":false,"simulation":true,"time":"2026-08-27T09:43:56.882"}
+{"component":"adapter","level":"INFO","message":"connected","time":"2026-08-27T09:43:56.977"}
+{"component":"adapter","level":"INFO","message":"connected_to_core","queue_depth":0,"sequence":1,"time":"2026-08-27T09:43:56.977"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":20,"sequence":2,"time":"2026-08-27T09:43:56.979"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":403,"time":"2026-08-27T09:43:58.026"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":1904,"time":"2026-08-27T09:44:02.108"}

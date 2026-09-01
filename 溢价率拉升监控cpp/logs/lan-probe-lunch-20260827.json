@@ -1,0 +1,66 @@
+{
+  "ok": true,
+  "host": "192.168.1.113",
+  "port": 8421,
+  "symbol": "159866.SZ",
+  "observed_seconds": 300.014,
+  "disconnects": 0,
+  "summary": {
+    "messages": {
+      "sync_begin": 1,
+      "summary": 1741,
+      "sync_complete": 1,
+      "status": 60
+    },
+    "bytes": {
+      "sync_begin": 96,
+      "summary": 1068356,
+      "sync_complete": 64,
+      "status": 42292
+    },
+    "total_bytes": 1110808,
+    "bytes_per_second": 3702.52,
+    "sync_ms": 16.446
+  },
+  "detail": {
+    "messages": {
+      "detail_ack": 1,
+      "detail": 6
+    },
+    "bytes": {
+      "detail_ack": 59,
+      "detail": 6851
+    },
+    "total_bytes": 6910,
+    "bytes_per_second": 23.03,
+    "first_snapshot_ms": 8.6,
+    "first_snapshot_cached": true,
+    "subsequent_snapshots": 5,
+    "interarrival_ms": {
+      "min": 20031.33,
+      "p50": 59999.832,
+      "p95": 60039.371,
+      "max": 60053.695
+    }
+  },
+  "ping_rtt_ms": {
+    "min": 3.071,
+    "p50": 6.277,
+    "p95": 85.185,
+    "max": 98.808
+  },
+  "ping_count": 60,
+  "status_count": 60,
+  "latest_status": {
+    "phase": "午间仅记录",
+    "ready_symbols": 202,
+    "quarantined": 26,
+    "summary_clients": 4,
+    "detail_clients": 3,
+    "adapter_seq": 13240,
+    "adapter_gaps": 0,
+    "sdk_queue_depth": 0,
+    "core_latency_us": null,
+    "core_latency_max_us": null
+  }
+}

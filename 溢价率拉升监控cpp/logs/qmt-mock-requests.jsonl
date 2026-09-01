@@ -1,0 +1,10 @@
+{"received_at": 1787768086.8811631, "request": {"type": "sync_request", "target": "all"}}
+{"received_at": 1787768086.881491, "request": {"type": "etf_order", "action": "PURCHASE", "code": "159518.SZ", "qty": 1, "client_order_id": "p1"}}
+{"received_at": 1787768086.881727, "request": {"type": "etf_order", "action": "REDEEM", "code": "159518.SZ", "qty": 1, "client_order_id": "r1"}}
+{"received_at": 1787768086.8819132, "request": {"type": "order", "code": "159518.SZ", "side": "SELL", "price": 1.234567, "qty": 100000, "client_order_id": "s1"}}
+{"received_at": 1787768086.882093, "request": {"type": "cancel_order", "order_id": "9b47400ea7ed"}}
+{"received_at": 1787771338.9433181, "request": {"type": "sync_request", "target": "all"}}
+{"received_at": 1787771338.943715, "request": {"type": "etf_order", "action": "PURCHASE", "code": "159518.SZ", "qty": 1, "client_order_id": "smoke-purchase"}}
+{"received_at": 1787771338.943913, "request": {"type": "etf_order", "action": "REDEEM", "code": "159518.SZ", "qty": 1, "client_order_id": "smoke-redeem"}}
+{"received_at": 1787771338.9440792, "request": {"type": "order", "code": "159518.SZ", "side": "SELL", "price": 1.234567, "qty": 100000, "client_order_id": "smoke-sell"}}
+{"received_at": 1787771338.944257, "request": {"type": "cancel_order", "order_id": "c746b2b19175"}}

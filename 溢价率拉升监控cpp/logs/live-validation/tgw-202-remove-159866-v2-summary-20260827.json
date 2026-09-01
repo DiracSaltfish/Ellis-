@@ -1,0 +1,118 @@
+{
+  "started_ms": 1787798874759,
+  "sdk_version": "1.0.9.2.macos.re6",
+  "requested_symbols": 202,
+  "batch_size": 20,
+  "remove_symbol": "159866.SZ",
+  "login": true,
+  "batches": [
+    {
+      "offset": 0,
+      "size": 20,
+      "result": 0,
+      "latency_ms": 31.63
+    },
+    {
+      "offset": 20,
+      "size": 20,
+      "result": 0,
+      "latency_ms": 31.538
+    },
+    {
+      "offset": 40,
+      "size": 20,
+      "result": 0,
+      "latency_ms": 31.565
+    },
+    {
+      "offset": 60,
+      "size": 20,
+      "result": 0,
+      "latency_ms": 31.63
+    },
+    {
+      "offset": 80,
+      "size": 20,
+      "result": 0,
+      "latency_ms": 31.257
+    },
+    {
+      "offset": 100,
+      "size": 20,
+      "result": 0,
+      "latency_ms": 31.27
+    },
+    {
+      "offset": 120,
+      "size": 20,
+      "result": 0,
+      "latency_ms": 31.434
+    },
+    {
+      "offset": 140,
+      "size": 20,
+      "result": 0,
+      "latency_ms": 30.899
+    },
+    {
+      "offset": 160,
+      "size": 20,
+      "result": 0,
+      "latency_ms": 31.14
+    },
+    {
+      "offset": 180,
+      "size": 20,
+      "result": 0,
+      "latency_ms": 71.311
+    },
+    {
+      "offset": 200,
+      "size": 2,
+      "result": 0,
+      "latency_ms": 31.203
+    }
+  ],
+  "unsubscribe": {
+    "symbol": "159866.SZ",
+    "requested_ms": 1787798890430,
+    "completed_ms": 1787798890461,
+    "result": 0,
+    "latency_ms": 31.18
+  },
+  "phases": {
+    "baseline": {
+      "events": 702,
+      "full_events": 322,
+      "delta_events": 380,
+      "target_events": 3,
+      "unique_symbols": 196,
+      "status_counts": {
+        "0": 702
+      }
+    },
+    "grace": {
+      "events": 117,
+      "full_events": 4,
+      "delta_events": 113,
+      "target_events": 0,
+      "unique_symbols": 117,
+      "status_counts": {
+        "0": 117
+      }
+    },
+    "observe": {
+      "events": 1332,
+      "full_events": 5,
+      "delta_events": 1327,
+      "target_events": 0,
+      "unique_symbols": 201,
+      "status_counts": {
+        "0": 1332
+      }
+    }
+  },
+  "decoder_failures": [],
+  "error": null,
+  "finished_ms": 1787798923468
+}

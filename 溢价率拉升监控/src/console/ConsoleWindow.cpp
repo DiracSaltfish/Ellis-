@@ -62,10 +62,15 @@ QString priceText(const QJsonObject &object, const QString &key)
 
 QString modelText(const QString &model)
 {
-    if (model == QStringLiteral("premium")) return QStringLiteral("溢价率");
-    if (model == QStringLiteral("pull")) return QStringLiteral("盘口拉涨");
-    if (model == QStringLiteral("premium+pull")) return QStringLiteral("溢价率 + 盘口拉涨");
-    return model.isEmpty() ? QStringLiteral("—") : model;
+    if (model.isEmpty()) return QStringLiteral("—");
+    QStringList names;
+    for (const QString &part : model.split(u'+', Qt::SkipEmptyParts)) {
+        if (part == QStringLiteral("premium")) names.append(QStringLiteral("溢价率"));
+        else if (part == QStringLiteral("pull")) names.append(QStringLiteral("盘口拉涨"));
+        else if (part == QStringLiteral("radar")) names.append(QStringLiteral("快速拉涨雷达"));
+        else names.append(part);
+    }
+    return names.join(QStringLiteral(" + "));
 }
 
 QJsonObject signalRecord(QTableWidget *table, int row)
@@ -293,6 +298,7 @@ void ConsoleWindow::buildUi()
     historyModel_->addItem(QStringLiteral("溢价率模型"), QStringLiteral("premium"));
     historyModel_->addItem(QStringLiteral("盘口拉涨模型"), QStringLiteral("pull"));
     historyModel_->addItem(QStringLiteral("两模型同时触发"), QStringLiteral("premium+pull"));
+    historyModel_->addItem(QStringLiteral("含快速拉涨雷达"), QStringLiteral("contains:radar"));
     auto *refreshHistory = new QPushButton(QStringLiteral("刷新审计记录"));
     refreshHistory->setObjectName(QStringLiteral("historyRefresh"));
     auto *viewHistory = new QPushButton(QStringLiteral("查看选中详情"));
@@ -685,6 +691,19 @@ void ConsoleWindow::showSignalDetails(QTableWidget *table, int row)
     trigger->addRow(QStringLiteral("买一拉升 150秒 / 300秒"),
                     new QLabel(ppmText(signal, QStringLiteral("bid_rise_150s_ppm")) + QStringLiteral(" / ")
                                + ppmText(signal, QStringLiteral("bid_rise_300s_ppm"))));
+    trigger->addRow(QStringLiteral("快速买一 30 / 60 / 90秒"),
+                    new QLabel(ppmText(signal, QStringLiteral("bid_rise_30s_ppm")) + QStringLiteral(" / ")
+                               + ppmText(signal, QStringLiteral("bid_rise_60s_ppm")) + QStringLiteral(" / ")
+                               + ppmText(signal, QStringLiteral("bid_rise_90s_ppm"))));
+    trigger->addRow(QStringLiteral("固定动量 3 / 5分钟"),
+                    new QLabel(ppmText(signal, QStringLiteral("momentum_3m_ppm")) + QStringLiteral(" / ")
+                               + ppmText(signal, QStringLiteral("momentum_5m_ppm"))));
+    trigger->addRow(QStringLiteral("局部低点 A3 / A5"),
+                    new QLabel(ppmText(signal, QStringLiteral("adaptive_3m_ppm")) + QStringLiteral(" / ")
+                               + ppmText(signal, QStringLiteral("adaptive_5m_ppm"))));
+    trigger->addRow(QStringLiteral("分钟振幅 / 历史中位数"),
+                    new QLabel(ppmText(signal, QStringLiteral("minute_range_ppm")) + QStringLiteral(" / ")
+                               + ppmText(signal, QStringLiteral("minute_range_base_ppm"))));
     trigger->addRow(QStringLiteral("触发最新价 / 买一 / IOPV"),
                     new QLabel(priceText(signal, QStringLiteral("last_price_e6")) + QStringLiteral(" / ")
                                + priceText(signal, QStringLiteral("bid1_price_e6")) + QStringLiteral(" / ")
@@ -783,7 +802,12 @@ void ConsoleWindow::loadSignalHistory()
                 const QString symbol = object.value(QStringLiteral("symbol")).toString().toUpper();
                 const QString model = object.value(QStringLiteral("model")).toString();
                 if (!symbolFilter.isEmpty() && !symbol.contains(symbolFilter)) continue;
-                if (!modelFilter.isEmpty() && model != modelFilter) continue;
+                if (modelFilter.startsWith(QStringLiteral("contains:"))) {
+                    const QString required = modelFilter.mid(9);
+                    if (!model.split(u'+', Qt::SkipEmptyParts).contains(required)) continue;
+                } else if (!modelFilter.isEmpty() && model != modelFilter) {
+                    continue;
+                }
                 object.insert(QStringLiteral("_audit_file"), QFileInfo(path).fileName());
                 object.insert(QStringLiteral("_audit_line"), lineNumber);
                 records.append(object);

@@ -1,0 +1,45 @@
+{"component":"legacy","level":"INFO","message":"19195 listening on 0.0.0.0:19195","time":"2026-08-27T02:03:43.366"}
+{"allow_30s":false,"allow_5m":false,"component":"schedule","level":"INFO","message":"盘外人工行情","quotes_desired":true,"time":"2026-08-27T02:03:43.366"}
+{"component":"core","fixed_symbols":202,"level":"INFO","message":"started","replay":false,"simulation":true,"time":"2026-08-27T02:03:43.366"}
+{"component":"adapter","level":"INFO","message":"connected","time":"2026-08-27T02:03:47.947"}
+{"component":"adapter","level":"INFO","message":"connected_to_core","queue_depth":0,"sequence":1,"time":"2026-08-27T02:03:47.947"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":19,"sequence":3,"time":"2026-08-27T02:03:47.948"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":7063,"time":"2026-08-27T02:04:08.193"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":7184,"time":"2026-08-27T02:04:08.531"}
+{"component":"adapter","level":"WARN","message":"disconnected","time":"2026-08-27T02:04:50.527"}
+{"component":"legacy","level":"INFO","message":"19195 listening on 0.0.0.0:19195","time":"2026-08-27T02:12:28.192"}
+{"allow_30s":false,"allow_5m":false,"component":"schedule","level":"INFO","message":"盘外人工行情","quotes_desired":true,"time":"2026-08-27T02:12:28.193"}
+{"component":"core","fixed_symbols":202,"level":"INFO","message":"started","replay":false,"simulation":true,"time":"2026-08-27T02:12:28.193"}
+{"component":"adapter","level":"INFO","message":"connected","time":"2026-08-27T02:12:34.793"}
+{"component":"adapter","level":"INFO","message":"connected_to_core","queue_depth":0,"sequence":1,"time":"2026-08-27T02:12:34.794"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":20,"sequence":2,"time":"2026-08-27T02:12:34.795"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":1643,"time":"2026-08-27T02:12:39.482"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":1704,"time":"2026-08-27T02:12:39.618"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":5325,"time":"2026-08-27T02:12:50.021"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":5326,"time":"2026-08-27T02:12:50.023"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":6027,"time":"2026-08-27T02:12:52.037"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":6028,"time":"2026-08-27T02:12:52.037"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":6049,"time":"2026-08-27T02:12:52.085"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":6050,"time":"2026-08-27T02:12:52.089"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":6051,"time":"2026-08-27T02:12:52.092"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":6052,"time":"2026-08-27T02:12:52.094"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":6753,"time":"2026-08-27T02:12:54.109"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":6754,"time":"2026-08-27T02:12:54.109"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":6755,"time":"2026-08-27T02:12:54.110"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":6756,"time":"2026-08-27T02:12:54.110"}
+{"component":"adapter","level":"WARN","message":"disconnected","time":"2026-08-27T02:13:23.033"}
+{"component":"legacy","level":"INFO","message":"19195 listening on 0.0.0.0:19195","time":"2026-08-27T02:13:27.943"}
+{"allow_30s":false,"allow_5m":false,"component":"schedule","level":"INFO","message":"盘外人工行情","quotes_desired":true,"time":"2026-08-27T02:13:27.943"}
+{"component":"core","fixed_symbols":202,"level":"INFO","message":"started","replay":false,"simulation":true,"time":"2026-08-27T02:13:27.943"}
+{"component":"adapter","level":"INFO","message":"connected","time":"2026-08-27T02:13:32.260"}
+{"component":"adapter","level":"INFO","message":"connected_to_core","queue_depth":0,"sequence":1,"time":"2026-08-27T02:13:32.260"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":8,"sequence":14,"time":"2026-08-27T02:13:32.261"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":1463,"time":"2026-08-27T02:13:36.431"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":1464,"time":"2026-08-27T02:13:36.434"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":1465,"time":"2026-08-27T02:13:36.437"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":1466,"time":"2026-08-27T02:13:36.438"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":2167,"time":"2026-08-27T02:13:38.458"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":2168,"time":"2026-08-27T02:13:38.458"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":2169,"time":"2026-08-27T02:13:38.459"}
+{"component":"adapter","level":"INFO","message":"subscription_set_updated","queue_depth":0,"sequence":2170,"time":"2026-08-27T02:13:38.459"}
+{"component":"adapter","level":"WARN","message":"disconnected","time":"2026-08-27T02:14:30.577"}

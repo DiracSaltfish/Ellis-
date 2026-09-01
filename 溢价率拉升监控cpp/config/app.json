@@ -1,0 +1,27 @@
+{
+  "mode": "live",
+  "listen_host": "0.0.0.0",
+  "monitor_port": 8421,
+  "legacy_l1_port": 19195,
+  "adapter_socket": "runtime/tgw.sock",
+  "watchlist": "config/watchlist.json",
+  "l1_hotlist": "config/l1_hotlist.json",
+  "enable_hkt_l1": true,
+  "security_names": "config/security_names.tsv",
+  "data_dir": "data",
+  "log_dir": "logs",
+  "market_retention_sessions": 5,
+  "log_retention_days": 30,
+  "max_monitor_clients": 256,
+  "max_detail_symbols_per_client": 4,
+  "max_l1_clients": 256,
+  "max_l1_symbols_per_client": 256,
+  "max_upstream_symbols": 1000,
+  "dynamic_unsubscribe_grace_sec": 60,
+  "capture_dynamic_market_data": false,
+  "allow_unverified_tgw_numeric_mapping": true,
+  "qmt_profiles": [
+    {"name": "QMT1", "host": "192.168.1.112", "port": 9527},
+    {"name": "QMT2", "host": "192.168.1.113", "port": 9527}
+  ]
+}
