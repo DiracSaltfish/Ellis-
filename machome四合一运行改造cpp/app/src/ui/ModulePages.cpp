@@ -1345,7 +1345,7 @@ void PremiumPage::applyEvent(const QJsonObject &message) {
     }
     else if (kind.contains(QStringLiteral("summary"), Qt::CaseInsensitive)) {
         const QString symbol = firstValue(
-            payload, {QStringLiteral("symbol"), QStringLiteral("code")}, {});
+            payload, {QStringLiteral("symbol"), QStringLiteral("s"), QStringLiteral("code")}, {});
         if (!symbol.isEmpty()) pendingSummaries_.insert(symbol, payload);
         if (summaryRenderTimer_ && !summaryRenderTimer_->isActive()) {
             summaryRenderTimer_->start();
@@ -1454,7 +1454,7 @@ bool PremiumPage::addSignal(const QJsonObject &payload) {
 }
 
 void PremiumPage::upsertSummary(const QJsonObject &payload) {
-    const QString symbol = firstValue(payload, {QStringLiteral("symbol"), QStringLiteral("code")}, {});
+    const QString symbol = firstValue(payload, {QStringLiteral("symbol"), QStringLiteral("s"), QStringLiteral("code")}, {});
     if (symbol.isEmpty()) return;
     int row = summaryRows_.value(symbol, -1);
     if (row < 0) {
@@ -1464,11 +1464,36 @@ void PremiumPage::upsertSummary(const QJsonObject &payload) {
     }
     setCell(summariesTable_, row, 0, symbol, payload);
     setCell(summariesTable_, row, 1, firstValue(payload, {QStringLiteral("name"), QStringLiteral("display_name")}));
-    setCell(summariesTable_, row, 2, firstValue(payload, {QStringLiteral("last"), QStringLiteral("price")}));
-    setCell(summariesTable_, row, 3, firstValue(payload, {QStringLiteral("iopv"), QStringLiteral("nav")}));
-    setCell(summariesTable_, row, 4, firstValue(payload, {QStringLiteral("premium_pct"), QStringLiteral("premium_rate"), QStringLiteral("premium")}));
-    setCell(summariesTable_, row, 5, firstValue(payload, {QStringLiteral("timestamp"), QStringLiteral("updated_at"), QStringLiteral("ts")}));
-    setCell(summariesTable_, row, 6, firstValue(payload, {QStringLiteral("state"), QStringLiteral("status")}));
+    const auto price = [&payload](const QString &key, int decimals, const QStringList &legacy) {
+        if (!payload.contains(key)) return firstValue(payload, legacy);
+        const auto value = payload.value(key);
+        return value.isDouble() && value.toDouble() > 0
+            ? QString::number(value.toDouble() / 1'000'000.0, 'f', decimals)
+            : QStringLiteral("—");
+    };
+    setCell(summariesTable_, row, 2, price(QStringLiteral("last_price_e6"), 3,
+                                          {QStringLiteral("last"), QStringLiteral("price")}));
+    setCell(summariesTable_, row, 3, price(QStringLiteral("iopv_e6"), 4,
+                                          {QStringLiteral("iopv"), QStringLiteral("nav")}));
+    setCell(summariesTable_, row, 4, payload.contains(QStringLiteral("display_premium_ppm"))
+        ? premiumPpmText(payload, QStringLiteral("display_premium_ppm"))
+        : firstValue(payload, {QStringLiteral("premium_pct"), QStringLiteral("premium_rate"), QStringLiteral("premium")}));
+    const auto exchangeTime = QDateTime::fromString(
+        QString::number(payload.value(QStringLiteral("orig_time")).toInteger()),
+        QStringLiteral("yyyyMMddHHmmsszzz"));
+    setCell(summariesTable_, row, 5, exchangeTime.isValid()
+        ? exchangeTime.toString(QStringLiteral("MM-dd HH:mm:ss.zzz"))
+        : firstValue(payload, {QStringLiteral("timestamp"), QStringLiteral("updated_at"), QStringLiteral("ts")}));
+    QString state = firstValue(payload, {QStringLiteral("state"), QStringLiteral("status")});
+    if (payload.contains(QStringLiteral("source_ready"))) {
+        state = payload.value(QStringLiteral("source_ready")).toBool()
+            ? QStringLiteral("数据就绪") : QStringLiteral("等待数据");
+        if (payload.value(QStringLiteral("replay")).toBool()) state += QStringLiteral(" · 回放");
+        if (payload.contains(QStringLiteral("mapping_verified"))
+            && !payload.value(QStringLiteral("mapping_verified")).toBool())
+            state += QStringLiteral(" · 映射未验证");
+    }
+    setCell(summariesTable_, row, 6, state);
 }
 
 void PremiumPage::flushPendingSummaries() {

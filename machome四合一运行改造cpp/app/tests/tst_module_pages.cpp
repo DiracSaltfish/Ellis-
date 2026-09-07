@@ -189,6 +189,41 @@ private slots:
         QCOMPARE(log->document()->maximumBlockCount(), 500);
     }
 
+    void premiumPanoramaDisplaysNativeWireSummary() {
+        hub::ModuleConfig config;
+        config.id = QStringLiteral("premium");
+        config.adapter = QStringLiteral("premium");
+        hub::PremiumPage page(config);
+        QSignalSpy commands(&page, &hub::ModulePage::commandRequested);
+        auto *table = page.findChild<QTableWidget *>(QStringLiteral("premiumSummariesTable"));
+        QVERIFY(table);
+        // Same schema as the native A engine: s, e6 prices, ppm, orig_time.
+        QJsonObject payload{{"s", "159506.SZ"}, {"name", "测试ETF"},
+                            {"last_price_e6", 1297000}, {"iopv_e6", 1301400},
+                            {"display_premium_ppm", -3381},
+                            {"orig_time", qint64(20260907134500000LL)},
+                            {"source_ready", true}, {"mapping_verified", false}};
+        page.applyEvent({{"event_kind", "premium.summary"}, {"payload", payload}});
+        QTRY_COMPARE_WITH_TIMEOUT(table->rowCount(), 1, 1500);
+        QCOMPARE(table->item(0, 0)->text(), QStringLiteral("159506.SZ"));
+        QCOMPARE(table->item(0, 1)->text(), QStringLiteral("测试ETF"));
+        QCOMPARE(table->item(0, 2)->text(), QStringLiteral("1.297"));
+        QCOMPARE(table->item(0, 3)->text(), QStringLiteral("1.3014"));
+        QCOMPARE(table->item(0, 4)->text(), QStringLiteral("-0.338%"));
+        QCOMPARE(table->item(0, 5)->text(), QStringLiteral("09-07 13:45:00.000"));
+        QVERIFY(table->item(0, 6)->text().contains(QStringLiteral("映射未验证")));
+        payload.insert(QStringLiteral("symbol"), QStringLiteral("159506.SZ"));
+        payload.insert(QStringLiteral("last_price_e6"), 1298000);
+        payload.insert(QStringLiteral("iopv_e6"), QJsonValue::Null);
+        payload.insert(QStringLiteral("source_ready"), false);
+        page.applyEvent({{"event_kind", "premium.summary"}, {"payload", payload}});
+        QTRY_COMPARE_WITH_TIMEOUT(table->item(0, 2)->text(), QStringLiteral("1.298"), 1500);
+        QCOMPARE(table->rowCount(), 1);
+        QCOMPARE(table->item(0, 3)->text(), QStringLiteral("—"));
+        QVERIFY(table->item(0, 6)->text().contains(QStringLiteral("等待数据")));
+        QVERIFY(commands.isEmpty());
+    }
+
     void emitsWatchlistAndNameCommands() {
         hub::ModuleConfig config;
         config.id = QStringLiteral("redemption");
