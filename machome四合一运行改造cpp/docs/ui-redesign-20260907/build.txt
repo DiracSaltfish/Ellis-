@@ -1,0 +1,51 @@
+[  0%] Built target machome-hub-common_autogen_timestamp_deps
+[  0%] Built target machome-hub-common_autogen
+[ 40%] Built target machome-hub-common
+[ 40%] Built target tst-module-pages_autogen_timestamp_deps
+[ 60%] Automatic MOC for target tst-module-pages
+[ 60%] Built target tst-module-pages_autogen
+[ 80%] Building CXX object CMakeFiles/tst-module-pages.dir/src/ui/UiText.cpp.o
+[ 80%] Linking CXX executable tst-module-pages
+[100%] Built target tst-module-pages
+[  0%] Built target machome-hub-common_autogen_timestamp_deps
+[  0%] Built target machome-hub-common_autogen
+[ 50%] Built target machome-hub-common
+[ 50%] Built target hub-ui-preview_autogen_timestamp_deps
+[ 50%] Automatic MOC for target hub-ui-preview
+[ 50%] Built target hub-ui-preview_autogen
+[ 50%] Building CXX object CMakeFiles/hub-ui-preview.dir/src/ui/UiText.cpp.o
+[ 50%] Linking CXX executable hub-ui-preview
+[100%] Built target hub-ui-preview
+[  0%] Built target machome-hub-common_autogen_timestamp_deps
+[  0%] Built target machome-webull-browser-helper_autogen_timestamp_deps
+[  0%] Built target machome-wind-tbapi-probe_autogen_timestamp_deps
+[  0%] Built target machome-tgw-cpp_autogen_timestamp_deps
+[  2%] Built target machome-hub-common_autogen
+[  3%] Built target machome-wind-tbapi-probe_autogen
+[  3%] Built target machome-webull-browser-helper_autogen
+[  3%] Built target machome-tgw-cpp_autogen
+[  3%] Built target machome-wind-tbapi-probe
+[  3%] Built target machome-webull-browser-helper
+[  5%] Built target machome-tgw-cpp
+[  7%] Built target machome-hub-common
+[  7%] Built target machome-wind-probe-helper_autogen_timestamp_deps
+[  7%] Built target machome-premium-tgw-helper_autogen_timestamp_deps
+[  7%] Built target machome-hub-modules_autogen_timestamp_deps
+[  8%] Built target machome-wind-probe-helper_autogen
+[  8%] Built target machome-premium-tgw-helper_autogen
+[  8%] Built target machome-wind-probe-helper
+[ 10%] Built target machome-hub-modules_autogen
+[ 12%] Built target machome-premium-tgw-helper
+[ 20%] Built target machome-hub-modules
+[ 20%] Built target machome-ibkr-bridge_autogen_timestamp_deps
+[ 20%] Built target machome-hub-agent_autogen_timestamp_deps
+[ 20%] Built target machome-hub-agent_autogen
+[ 21%] Built target machome-ibkr-bridge_autogen
+[ 24%] Built target machome-hub-agent
+[ 97%] Built target machome-ibkr-bridge
+[ 97%] Built target machome-hub-ui_autogen_timestamp_deps
+[ 97%] Automatic MOC for target machome-hub-ui
+[ 97%] Built target machome-hub-ui_autogen
+[ 97%] Building CXX object CMakeFiles/machome-hub-ui.dir/src/ui/UiText.cpp.o
+[ 97%] Linking CXX executable "Machome 四合一运行中心.app/Contents/MacOS/Machome 四合一运行中心"
+[100%] Built target machome-hub-ui

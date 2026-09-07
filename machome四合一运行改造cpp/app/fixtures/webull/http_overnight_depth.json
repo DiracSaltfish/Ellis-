@@ -1,0 +1,27 @@
+{
+  "provenance": "sanitized WebTrade overnight-depth shape; no account, cookie or token data",
+  "captured_at": "2026-09-04T01:31:00.000Z",
+  "body": {
+    "data": {
+      "depth": {
+        "ntvAggBidList": [
+          {"price": "40.10", "volume": "100"},
+          {"price": "40.100", "volume": "25"},
+          {"price": "40.09", "volume": "80"}
+        ],
+        "ntvAggAskList": [
+          {"price": "40.12", "volume": "90"},
+          {"price": "40.11", "volume": "60"},
+          {"price": "40.110", "volume": "15"}
+        ]
+      }
+    }
+  },
+  "expected": {
+    "best_bid": "40.1",
+    "best_ask": "40.11",
+    "bid_volume": "125",
+    "ask_volume": "75",
+    "state": "normal"
+  }
+}

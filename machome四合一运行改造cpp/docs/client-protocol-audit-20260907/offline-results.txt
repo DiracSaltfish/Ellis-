@@ -1,0 +1,20 @@
+PASS V31 parses R4 summary serializer
+PASS symbol and int64 timestamps survive JSON wire
+PASS E6/PPM and momentum fields agree
+PASS V31 parses R4 ten-level E2 book
+PASS V31 signal sequence/backfill/replay survive R4 serializer
+PASS snapshot file supplied
+PASS open saved R4 inspection snapshot (no network)
+PASS V12 parses all seven ETF rows from saved R4 snapshot
+PASS V12 parses actual R4 PCF detail and basket unit
+PASS V12 parses actual R4 PCF detail and basket unit
+PASS V12 parses actual R4 PCF detail and basket unit
+PASS V12 parses actual R4 PCF detail and basket unit
+PASS V12 parses actual R4 PCF detail and basket unit
+PASS V12 parses actual R4 PCF detail and basket unit
+PASS V12 parses actual R4 PCF detail and basket unit
+PASS all seven saved PCF payloads checked
+PASS V12 parses R4 change envelope with real server changeDetails
+PASS CONFIRMED GAP: V12 replay flag lost; alert text identical to live change
+PASS V12 accepts R4 history shape without optional count/limit/symbol fields
+Completed 19 checks. Pure QtCore; no business connections or orders.

@@ -1,0 +1,12 @@
+filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
+filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
+github.com/extrame/ole2 v0.0.0-20160812065207-d69429661ad7 h1:n+nk0bNe2+gVbRI8WRbLFVwwcBQ0rr5p+gzkKb6ol8c=
+github.com/extrame/ole2 v0.0.0-20160812065207-d69429661ad7/go.mod h1:GPpMrAfHdb8IdQ1/R2uIRBsNfnPnwsYE9YYI5WyY1zw=
+github.com/extrame/xls v0.0.1 h1:jI7L/o3z73TyyENPopsLS/Jlekm3nF1a/kF5hKBvy/k=
+github.com/extrame/xls v0.0.1/go.mod h1:iACcgahst7BboCpIMSpnFs4SKyU9ZjsvZBfNbUxZOJI=
+github.com/go-sql-driver/mysql v1.9.3 h1:U/N249h2WzJ3Ukj8SowVFjdtZKfu9vlLZxjPXV1aweo=
+github.com/go-sql-driver/mysql v1.9.3/go.mod h1:qn46aNg1333BRMNU69Lq93t8du/dwxI64Gl8i5p1WMU=
+golang.org/x/net v0.55.0 h1:bcvxaJn3e1U6InsFWt1JUq1aSjnRxLzT2rtD2KfkDF8=
+golang.org/x/net v0.55.0/go.mod h1:L5U2KuzuOe1lY7Z+aWVIKK6qEeJXnXV9yzGA+WCHJww=
+golang.org/x/text v0.37.0 h1:Cqjiwd9eSg8e0QAkyCaQTNHFIIzWtidPahFWR83rTrc=
+golang.org/x/text v0.37.0/go.mod h1:a5sjxXGs9hsn/AJVwuElvCAo9v8QYLzvavO5z2PiM38=

@@ -1,0 +1,14 @@
+# QuerySnapshot 深交所 ETF L1 对齐证据
+
+- Scope: 互联网模式、SZSE `159518`、单历史交易日 20260825、时间窗 93000000–93030000（HHmmssSSS）、`data_type=0`、`level_type=0`（构造默认）、`return_df_format=False`。不覆盖 data_type=1/2、指数/期权/期货/港股快照，不覆盖其他日期或全日窗口。
+- PDF: C++ 手册 PDF 页 34（正文 26）`QuerySnapshot/ReqDefault`；AmazingData 手册 PDF 页 25–26（正文 21–22）`query_snapshot`；输出结构 `Snapshot` 见 PDF 页 140–141（正文 136–137）。
+- Header delta: V1.0.8 `tgw_struct.h` L158–176 的 `ReqDefault` 比 PDF 表格多 `uint16_t level_type`（构造默认 0），本地 pack(1) 大小 55、`level_type` offset=53，已加契约测试锁定。官方 Python SWIG 对象确认 `data_type/level_type` 可写且默认 0。
+- Linux oracle: 2026-08-26 Linux x86 官方 SDK（galaxyrelay 用户、venv python、凭据仅来自 relay.env）：登录成功、错误码整数 0、返回 list 长度 11；每行 57 个公开字段，全部 int/str 标量；不变量：`variety_category` 恒 0（与日线 wrapper 常量行为一致）、`orig_time` 17 位数字、`trading_phase_code` 恒 `T0`、`market_type` 恒 102。未输出任何价格/数量值。
+- Wire: query 路径 `/amd/dgw/dgw1_query`；method=`ReqGetSnapshot`（捕获与发行库二进制字符串表双重印证）；params key 顺序固定为 `security_code, market_type, date, begin_time, end_time, data_type, QueryBandWidth`；**`level_type` 不上线**（至少对 data_type=0）。响应 tag=`11000`（≙ PDB `amd::mdga::MDDatatype.kSnapshot=11000`，与日线 tag=10100 先例同构），status=0，观测单包 `pack_num=all_pack_num=1`；`data` 为字符串数组，每行 **36 个 CSV 字段**，其中 pos10–13 为竖线打包的 10 档数组（bid_price/bid_volume/offer_price/offer_volume）。pos0–19 与 `MDSnapshotL1` 一一对应（code/market/orig_time/phase + 六价格 + 四打包数组 + num_trades/volume/value/IOPV/涨跌停）；缩放沿用头文件注释：价格 ÷1e6、量 ÷100、金额 ÷1e5。pos20–35 为尾部附加槽（ETF 下 PE/PB 类为空串、pos29=1、pos30 固定 1e8 等），语义未证明，官方容器也不暴露，解析器按设计丢弃。完成后发 `ReqGetComplete` 再正常关闭。
+- Wrapper semantics: 官方 `Tools_SnapshotL1ToJson` 输出 57 key（结构体序）， AmazingData 层 `convert_history_tick_stock` 做 offer→ask 改名、÷1e6/÷100/÷1e5 缩放并按 `Snapshot.model_fields` 输出 34 列；本任务 Arm 对齐到低层 57-key 容器为止。
+- Arm: `_protocol.py` 新增 `SNAPSHOT_WIRE_TAG=11000`、`build_snapshot_request`（data_type≠0 显式 NotImplementedError；level_type 不发送）、`parse_snapshot_packets/_decode_snapshot_row`（36 字段校验、打包数组校验、tag/status/包号完整性复用 `_ordered_query_packets`）；`_backend.py` query 分支接入 snapshot；`interface.py` `QuerySnapshot` 补 task_id 包装/pandas/spi 回调；`live_smoke.py` 新增 `--snapshot/--date/--begin-time/--end-time`。
+- Tests: `python -m unittest discover -s tests -v` 共 18 项：17 通过、1 项因运行时无 zstd 跳过（与前轮一致）。新增：ReqDefault offset/level_type 差异、envelope key 顺序、57-key 解析与字段序、data_type=1 拒绝、多包乱序重组/缺包/重复包/错 tag/错 status/字段数/坏打包数组/data 容器共 7 类错误形状。
+- Live diff: 同参数 Linux vs macOS arm64 各一次：错误码 0/0，行数 11/11，列集合 57/57 完全一致（sorted keys 相同），类型 int+str 一致，`variety_category` 恒 0 一致。此前查询通道曾出现服务端 `1000 / accept conn active close` 回收；本次单次尝试成功，未做密集重试。
+- Cleanup: 远端 oracle 副本、interpose `.so/.c`、捕获文件均已删除；本地临时捕获与分析摘要已删除；`galaxy-relay` 任务前后均为 inactive。
+- Proposed status: `LIVE_ALIGNED(SZSE ETF L1 snapshot query, data_type=0)`。
+- Open risks: 尾部 wire 槽 pos20–35 未解释（候选 average_price/PE/PB 等仅为假设，需股票代码对照实验验证）；多包分页只在协议层测试，线上未观测 >1 包样本；非深市 ETF/其他交易日未验证；查询通道准入回收机制未知，仍可能按 IP/账号触发；AmazingData 高层 DataFrame 转换（34 列 Snapshot）尚未在 Arm 实现。

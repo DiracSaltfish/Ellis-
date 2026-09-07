@@ -1,0 +1,117 @@
+{
+  "workers": [
+    {
+      "worker": "sina",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "xop-family",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "xop-smart",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "xop-overnight",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "lof-162411",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "basket-159605",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "silver",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "china-internet",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "india",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "rebuild",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "health-monitor",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "anchor-backfill",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "india-final-nav",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "china-history",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "month-history",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "nasdaq",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "sp500",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "nikkei225",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "germany",
+      "exit_code": 0,
+      "error": ""
+    },
+    {
+      "worker": "index-preopen-business-regression",
+      "exit_code": 0,
+      "details": "....2026-09-07T11:40:54+08:00 SH513000 Nikkei 225 PCF/coefficient unavailable: PCF pending\n2026-09-07T11:40:54+08:00 SH513520 Nikkei 225 PCF/coefficient unavailable: PCF pending\n2026-09-07T11:40:54+08:00 SH513880 Nikkei 225 PCF/coefficient unavailable: PCF pending\n2026-09-07T11:40:54+08:00 SZ159866 Nikkei 225 PCF/coefficient unavailable: PCF pending\n.\n----------------------------------------------------------------------\nRan 5 tests in 0.005s\n\nOK\n"
+    },
+    {
+      "worker": "runtime-timezone-and-ca",
+      "exit_code": 0,
+      "error": "",
+      "details": {
+        "runtime_check": true,
+        "timezone": "Asia/Shanghai",
+        "ca_certificates": 144
+      }
+    }
+  ],
+  "old_sources_denied": true,
+  "external_python_denied": true,
+  "network_denied": true
+}

@@ -2,6 +2,7 @@
 
 #include "common/PersistenceWriter.h"
 #include "server/LegacyL1Server.h"
+#include "server/PushPlusNotifier.h"
 
 #include <QCoreApplication>
 #include <QCryptographicHash>
@@ -127,6 +128,11 @@ CoreServer::~CoreServer()
     monitorServer_.close();
     for (QThread *thread : workerThreads_) thread->quit();
     for (QThread *thread : workerThreads_) thread->wait(3000);
+    if (pushPlus_ && pushPlusThread_.isRunning()) {
+        QMetaObject::invokeMethod(pushPlus_, &PushPlusNotifier::stop, Qt::BlockingQueuedConnection);
+    }
+    pushPlusThread_.quit();
+    pushPlusThread_.wait(3000);
     persistenceThread_.quit();
     persistenceThread_.wait(3000);
     if (adapterServer_.isListening()) QLocalServer::removeServer(adapterServer_.serverName());
@@ -297,6 +303,30 @@ bool CoreServer::start(QString *error)
     connect(&persistenceThread_, &QThread::finished, persistence_, &QObject::deleteLater);
     persistenceThread_.start();
     QMetaObject::invokeMethod(persistence_, &PersistenceWriter::prune, Qt::QueuedConnection);
+
+    QString pushPlusError;
+    const PushPlusConfig pushPlusConfig = PushPlusNotifier::fromApplicationConfig(
+        config_, rootDirectory_, &pushPlusError);
+    if (!pushPlusError.isEmpty()) {
+        pushPlusStatus_.insert(QStringLiteral("configuration_error"), pushPlusError);
+        writeOperational(QStringLiteral("ERROR"), QStringLiteral("pushplus"),
+                         QStringLiteral("PushPlus notifier disabled by invalid configuration"),
+                         {{QStringLiteral("error"), pushPlusError}});
+    } else if (pushPlusConfig.enabled) {
+        pushPlus_ = new PushPlusNotifier(pushPlusConfig);
+        pushPlus_->moveToThread(&pushPlusThread_);
+        connect(this, &CoreServer::pushPlusSignal, pushPlus_, &PushPlusNotifier::enqueueSignal,
+                Qt::QueuedConnection);
+        connect(pushPlus_, &PushPlusNotifier::statusChanged, this,
+                [this](const QJsonObject &status) { pushPlusStatus_ = status; }, Qt::QueuedConnection);
+        connect(pushPlus_, &PushPlusNotifier::operationalEvent, this,
+                [this](const QString &level, const QString &message, const QJsonObject &fields) {
+                    writeOperational(level, QStringLiteral("pushplus"), message, fields);
+                }, Qt::QueuedConnection);
+        connect(&pushPlusThread_, &QThread::finished, pushPlus_, &QObject::deleteLater);
+        pushPlusThread_.start();
+        QMetaObject::invokeMethod(pushPlus_, &PushPlusNotifier::start, Qt::QueuedConnection);
+    }
 
     for (int index = 0; index < WorkerCount; ++index) {
         auto *thread = new QThread(this);
@@ -887,6 +917,7 @@ void CoreServer::publishSnapshot(const QuoteSnapshot &incoming, const QJsonObjec
             writeOperational(QStringLiteral("CRITICAL"), QStringLiteral("persistence"),
                              QStringLiteral("persistence queue reached 10000; signal history write dropped, realtime continues"));
         }
+        if (pushPlus_) Q_EMIT pushPlusSignal(auditSignal);
     }
 }
 
@@ -1013,7 +1044,7 @@ QJsonObject CoreServer::statusObject() const
     for (const QString &symbol : hotSymbols_) if (cache_.contains(symbol)) ++readyHot;
     QSet<QString> pinned(fixedSymbols_.begin(), fixedSymbols_.end());
     pinned.unite(QSet<QString>(hotSymbols_.begin(), hotSymbols_.end()));
-    return {{"type", "status"}, {"server_time", QDateTime::currentDateTime().toString(Qt::ISODateWithMs)},
+    QJsonObject status{{"type", "status"}, {"server_time", QDateTime::currentDateTime().toString(Qt::ISODateWithMs)},
             {"adapter_connected", !adapterSocket_.isNull()}, {"adapter_session", adapterSession_},
             {"upstream_healthy", upstreamHealthy_}, {"upstream_status", upstreamStatus_},
             {"adapter_seq", static_cast<qint64>(lastAdapterSequence_)}, {"adapter_gaps", static_cast<qint64>(adapterGapCount_)},
@@ -1035,6 +1066,8 @@ QJsonObject CoreServer::statusObject() const
             {"l1_clients", legacy_ ? legacy_->clientCount() : 0}, {"phase", scheduleState_.label},
             {"signals_enabled", simulation_ || replay_ || scheduleState_.allow30SecondSignal},
             {"force_quotes", forceQuotes_}, {"simulation", simulation_}, {"replay", replay_}};
+    status.insert(QStringLiteral("pushplus"), pushPlusStatus_);
+    return status;
 }
 
 void CoreServer::writeOperational(const QString &level, const QString &component, const QString &message,

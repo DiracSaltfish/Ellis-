@@ -1,0 +1,8 @@
+{
+  "baseline_files": 264,
+  "identical_files": 262,
+  "adapted_files": [
+    "cmd/web/main.go",
+    "scripts/upload_health_monitor.py"
+  ]
+}

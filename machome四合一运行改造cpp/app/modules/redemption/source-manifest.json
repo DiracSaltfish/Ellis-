@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "module": "native-redemption",
+  "captured_at": "2026-09-04",
+  "baseline_access": "read-only",
+  "sources": [
+    {"name": "etf_monitor_server.py", "purpose": "state, schedule, history", "sha256": "1bc67c8b184a9587a126f2d013a9d94b5d448691dd43713446c7fa344fbf3f5f"},
+    {"name": "etf_pcf_service.py", "purpose": "PCF and opportunity rules", "sha256": "7ad971b1ac773b356d20b2d0903a501f0513aebc5dca990b6143ec4f13261fa2"},
+    {"name": "szse_pcf.py", "purpose": "SZSE PCF URLs, parser, throttling and cooldown", "sha256": "01c3cf111c1e8bf544bee0e06b1b58450a2d6c85c22a667f136503aa7f73bd54"},
+    {"name": "wind_tbapi_frame_parser.py", "purpose": "capture contract", "sha256": "33283f083d7fc7302b324b3044b230012eb7b059509bcda38cc558d8d7933d7f"},
+    {"name": "wind_etf_realtime_ui.py", "purpose": "safe Wind lifecycle", "sha256": "00aa46ac09d84fe987234b0c7c7d47dc912a8ff4528278bc8b7abecb96664a45"},
+    {"name": "config/etf_monitor_server.json", "purpose": "seven-symbol production watchlist and schedule settings", "sha256": "1ede8a7338bc65b6d8fc639560fabaa11abf718850f056cf261c97e9e9ff6057"}
+  ],
+  "runtime_dependency_on_baseline": false,
+  "default_production_mutation": false
+}

@@ -26,6 +26,7 @@ namespace premium {
 
 class LegacyL1Server;
 class PersistenceWriter;
+class PushPlusNotifier;
 
 class QuoteWorker final : public QObject {
     Q_OBJECT
@@ -60,6 +61,7 @@ Q_SIGNALS:
     void persistRaw(const QByteArray &line, const QDate &partition);
     void persistNormalized(const QByteArray &line, const QDate &partition);
     void persistSignal(const QByteArray &line);
+    void pushPlusSignal(const QJsonObject &signal);
 
 private:
     struct DetailClient {
@@ -149,6 +151,11 @@ private:
     std::atomic<int> persistencePeak_{0};
     bool historicalWritesStopped_ = false;
     QFile operationsLog_;
+
+    QThread pushPlusThread_;
+    PushPlusNotifier *pushPlus_ = nullptr;
+    QJsonObject pushPlusStatus_{{QStringLiteral("enabled"), false},
+                                {QStringLiteral("started"), false}};
 };
 
 } // namespace premium

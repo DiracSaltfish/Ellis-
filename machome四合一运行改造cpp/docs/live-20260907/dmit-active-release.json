@@ -1,0 +1,13 @@
+{
+  "deployed_at": 1788751807.3311117,
+  "binary_sha256": "db80a8a350dfca471d6f6e34d36739ac737bb5eb93c485db0ba326dde149a3fc",
+  "previous_binary_sha256": "cb30c6d693c4aa6c9170ee55b495c58b4df2777e472fdd9a4d13fb58ac53dd58",
+  "backup": "/var/www/newnavnav/backups/codex-hub-reconcile-20260907-1130",
+  "verified_source_archive": "/var/www/newnavnav/backups/codex-hub-reconcile-20260907-1130/candidate/verified-source.tar.gz",
+  "manifest": "/var/www/newnavnav/backups/codex-hub-reconcile-20260907-1130/candidate/manifest.json",
+  "monitor_notifications_enabled": false,
+  "health": {
+    "ok": true
+  },
+  "pid": "179210"
+}

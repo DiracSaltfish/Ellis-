@@ -1,0 +1,47 @@
+schema_version: 1
+plan: four-module-native-consolidation
+execution: module_parallel_then_root_review
+workspace: /Users/ellis/工具程序开发/machome四合一运行改造cpp
+detailed_checklist: plans/native-consolidation-work-packages.yaml
+production_deployment_allowed: false
+baseline_access: read_only
+common_rules:
+  - Modify only the workspace path above.
+  - Never modify, start, stop, install, or reconfigure any baseline program or machome deployment.
+  - Do not use baseline absolute paths, symlinks, imports, executables, or libraries at runtime.
+  - Write new business data only below ~/Library/Application Support/MachomeHub/data/<module>.
+  - Default all uploads, notifications, orders, and other production mutations to disabled or record-only.
+  - Provide sanitized fixtures, golden replay, schedule-boundary, disconnect, and malformed-input tests.
+  - Use IModuleEngine semantics and keep each engine on its own Agent QThread.
+tasks:
+  - id: MODULE-UPLOAD
+    owner: delegated_agent_1
+    depends_on: []
+    scope: Complete native UploadEngine, schedules, repositories, uploaders, native UI, and native IBKR ownership.
+    internal_checklist: [G-00, G-01, G-02, G-03, G-04, G-05, U-01, U-02, U-03, U-04, U-05, U-06]
+    completion_gate: Upload works with all legacy newnavnav source and deployment paths unavailable and all golden tests pass without production writes.
+  - id: MODULE-PREMIUM-A
+    owner: delegated_agent_2
+    depends_on: []
+    scope: Complete native Premium A server and A UI while retaining B-client protocol compatibility and excluding all B trading implementation.
+    internal_checklist: [P-01, P-02, P-03, P-04]
+    completion_gate: Premium A works with the old deployment unavailable, 8421 and 19195 compatibility passes, and no B trading code is linked.
+  - id: MODULE-WEBULL
+    owner: delegated_agent_3
+    depends_on: []
+    scope: Complete self-contained WebullEngine, bundled headless browser helper, native UI, schedule, storage, and 18765 compatibility.
+    internal_checklist: [W-01, W-02, W-03]
+    completion_gate: Webull works without the old source, venv, runner, or LaunchAgent and helper failure is isolated.
+  - id: MODULE-REDEMPTION
+    owner: delegated_agent_4
+    depends_on: []
+    scope: Complete native RedemptionEngine, bundled Wind probe helper, PCF, QMT, native UI, schedules, and 6787 compatibility.
+    internal_checklist: [R-01, R-02, R-03, R-04, R-05]
+    completion_gate: Redemption works without ETFMonitorHost or old Python paths; fake-QMT safety and Wind isolation tests pass.
+integration_review:
+  id: ROOT-INTEGRATION-REVIEW
+  owner: root_agent
+  delegated: false
+  depends_on: [MODULE-REDEMPTION]
+  internal_checklist: [I-01, I-02, I-03]
+  scope: Review and integrate all four modules, deduplicate shared services, run isolation and soak tests, and build a signed candidate without deploying it.

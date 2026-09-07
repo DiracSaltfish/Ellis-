@@ -1,0 +1,37 @@
+{
+  "provenance": {
+    "source": "synthetic from baseline field contract",
+    "timezone": "Asia/Shanghai",
+    "phase": "morning_signals",
+    "sanitized": true
+  },
+  "frame": {
+    "security_code": "159866.SZ",
+    "market_type": 102,
+    "orig_time": 20260827095409000,
+    "last_price": 1684000,
+    "open_price": 1675000,
+    "high_price": 1689000,
+    "low_price": 1674000,
+    "pre_close_price": 1680000,
+    "close_price": 0,
+    "bid_price": [1684000, 1683000, 1682000, 1681000, 1680000, 0, 0, 0, 0, 0],
+    "offer_price": [1685000, 1686000, 1687000, 1688000, 1689000, 0, 0, 0, 0, 0],
+    "bid_volume": [75300000, 62120000, 60810000, 77300000, 58570000, 0, 0, 0, 0, 0],
+    "offer_volume": [76430000, 77910000, 50810000, 56290000, 68430000, 0, 0, 0, 0, 0],
+    "total_volume_trade": 3897510000,
+    "total_value_trade": 6556934250000,
+    "num_trades": 2759,
+    "trading_phase_code": "T0",
+    "IOPV": 1634000,
+    "high_limited": 1848000,
+    "low_limited": 1512000
+  },
+  "expected": {
+    "symbol": "159866.SZ",
+    "last_price_e6": 1684000,
+    "bid1_price_e6": 1684000,
+    "iopv_e6": 1634000,
+    "quality_issue_count": 0
+  }
+}

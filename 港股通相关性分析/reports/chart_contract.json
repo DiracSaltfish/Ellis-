@@ -1,0 +1,16 @@
+{
+  "question": "Compare unhedged, fixed HHI+HTI and selected price residual volatility at each horizon",
+  "takeaway": "HHI+HTI lowers observed OOS volatility; automatic selection does not consistently improve it",
+  "family": "bar",
+  "variant": "grouped",
+  "rows": 12,
+  "grain": "model and holding horizon",
+  "surface": "standalone PNG and notebook",
+  "renderer": "matplotlib",
+  "palette": "hard two-root cap: blue #2864B4 and gold #B78A27; neutral #CBD2DA",
+  "non_color": "legend order and hatched automatic selection",
+  "source": "reports/model_comparison.csv",
+  "time_window": "2026-06-10..2026-08-03; 37 OOS days",
+  "units": "standard deviation of holding-period returns, bp",
+  "qa": "inspect exported PNG at full resolution; zero baseline; no annualization or cumulation of overlapping returns"
+}

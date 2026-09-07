@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "socket_path": "~/Library/Application Support/MachomeHub/data/upload/runtime/ibkr-quotes.sock",
+  "health_file": "~/Library/Application Support/MachomeHub/data/upload/health/ibkr-native-bridge.json",
+  "tws": {
+    "host": "127.0.0.1",
+    "port": 7496,
+    "client_id": 41,
+    "market_data_type": 3,
+    "reconnect_minimum_ms": 1000,
+    "reconnect_maximum_ms": 30000,
+    "connect_timeout_ms": 10000,
+    "heartbeat_interval_ms": 5000,
+    "heartbeat_stale_ms": 20000
+  },
+  "connection_schedule": {
+    "enabled": true,
+    "timezone": "Asia/Shanghai",
+    "weekdays": [1, 2, 3, 4, 5],
+    "start_time": "09:00",
+    "stop_time": "15:06"
+  },
+  "limits": {
+    "maximum_clients": 32,
+    "maximum_request_bytes": 65536,
+    "maximum_subscriptions": 512
+  },
+  "subscriptions": [
+    {
+      "id": "XOP.SMART",
+      "symbol": "XOP",
+      "security_type": "STK",
+      "exchange": "SMART",
+      "primary_exchange": "ARCA",
+      "currency": "USD",
+      "generic_ticks": "236"
+    },
+    {
+      "id": "INDA.SMART",
+      "symbol": "INDA",
+      "security_type": "STK",
+      "exchange": "SMART",
+      "primary_exchange": "ARCA",
+      "currency": "USD",
+      "generic_ticks": ""
+    }
+  ]
+}

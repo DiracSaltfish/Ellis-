@@ -1,0 +1,62 @@
+{
+  "scalar_checks": [
+    {
+      "date": "20260303",
+      "minute": 850,
+      "check": "independent_scalar_pcf_valuation",
+      "status": "passed"
+    },
+    {
+      "date": "20260710",
+      "minute": 850,
+      "check": "independent_scalar_pcf_valuation",
+      "status": "passed"
+    },
+    {
+      "date": "20260803",
+      "minute": 850,
+      "check": "independent_scalar_pcf_valuation",
+      "status": "passed"
+    }
+  ],
+  "bootstrap": [
+    {
+      "horizon": 5,
+      "model": "HHI_HTI_fixed_pair",
+      "ci95": [
+        0.4877829827369524,
+        0.5772366802578418
+      ]
+    },
+    {
+      "horizon": 15,
+      "model": "HHI_HTI_fixed_pair",
+      "ci95": [
+        0.6102169715894038,
+        0.7200979521296351
+      ]
+    },
+    {
+      "horizon": 30,
+      "model": "HHI_HTI_fixed_pair",
+      "ci95": [
+        0.6641487241601935,
+        0.7729202274988977
+      ]
+    },
+    {
+      "horizon": 60,
+      "model": "HHI_HTI_fixed_pair",
+      "ci95": [
+        0.5974255507098633,
+        0.8067544735633496
+      ]
+    }
+  ],
+  "conclusion": "Preliminary price risk evidence; excluded complex entitlement days and explicit stale-mark assumptions remain.",
+  "not_claimed": [
+    "executable arbitrage profits",
+    "full universe coverage",
+    "full corporate action certification"
+  ]
+}

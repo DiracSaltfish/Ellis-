@@ -1,0 +1,24 @@
+********* Start testing of ModulePagesTests *********
+Config: Using QtTest library 6.10.2, Qt 6.10.2 (arm64-little_endian-lp64 shared (dynamic) release build; by Apple LLVM 17.0.0 (clang-1700.6.3.2)), macos 27.0.0
+PASS   : ModulePagesTests::initTestCase()
+QWARN  : ModulePagesTests::overviewDoesNotReportMissingTelemetryAsHealthy() qt.qpa.fonts: Populating font family aliases took 151 ms. Replace uses of missing font family "Sans Serif" with one that exists to avoid this cost. 
+PASS   : ModulePagesTests::overviewDoesNotReportMissingTelemetryAsHealthy()
+PASS   : ModulePagesTests::webullNoDataIsNotLabeledExpired()
+PASS   : ModulePagesTests::displayTranslationPreservesProtocolValues()
+PASS   : ModulePagesTests::mapsAuthoritativeRealtimeNestedSchema()
+PASS   : ModulePagesTests::premiumTelemetryUpdatesStateWithoutSpammingTheLog()
+PASS   : ModulePagesTests::emitsWatchlistAndNameCommands()
+PASS   : ModulePagesTests::displaysExplicitUploadScheduleExpectation()
+PASS   : ModulePagesTests::uploadMatrixRunsExactlyOneNativeJob()
+PASS   : ModulePagesTests::qmtDetailKeepsBackendsIndependentAndRequiresDoubleClick()
+PASS   : ModulePagesTests::loadsAndExportsPremiumHistoryOffTheUiThread()
+QWARN  : ModulePagesTests::premiumDetailWindowUsesLiveTenLevelEventsAndUnsubscribes() This plugin does not support propagateSizeHints()
+QWARN  : ModulePagesTests::premiumDetailWindowUsesLiveTenLevelEventsAndUnsubscribes() This plugin does not support propagateSizeHints()
+PASS   : ModulePagesTests::premiumDetailWindowUsesLiveTenLevelEventsAndUnsubscribes()
+PASS   : ModulePagesTests::boundsPremiumHistoryLargeRecordsAndReturnedBytes()
+PASS   : ModulePagesTests::boundsPremiumHistoryRecordCount()
+PASS   : ModulePagesTests::rejectsOversizedPremiumHistoryExport()
+PASS   : ModulePagesTests::rejectsPremiumHistoryExportOverAggregateBudget()
+PASS   : ModulePagesTests::cleanupTestCase()
+Totals: 17 passed, 0 failed, 0 skipped, 0 blacklisted, 2014ms
+********* Finished testing of ModulePagesTests *********

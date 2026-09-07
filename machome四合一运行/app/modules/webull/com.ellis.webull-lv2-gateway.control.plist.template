@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+      Replacement template: this deliberately keeps the production label so
+      the Hub lifecycle contract does not change. Never load it alongside the
+      legacy plist. The shared gateway.lock is a second line of defence, not a
+      migration mechanism.
+    -->
+    <key>Label</key>
+    <string>com.ellis.webull-lv2-gateway</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/ellis/Desktop/ETF交割/WebullData/webull_lv2_gateway/.venv/bin/python</string>
+        <string>/Users/ellis/工具程序开发/machome四合一运行/app/modules/webull/webull_control_runner.py</string>
+        <string>--gateway-source</string>
+        <string>/Users/ellis/Desktop/ETF交割/WebullData/webull_lv2_gateway</string>
+        <string>--config</string>
+        <string>/Users/ellis/Desktop/ETF交割/WebullData/webull_lv2_gateway/config.json</string>
+        <string>--control-token-file</string>
+        <string>/Users/ellis/Desktop/ETF交割/WebullData/webull_lv2_gateway/runtime/control.token</string>
+        <string>--control-port</string>
+        <string>18766</string>
+        <string>--no-create-control-token</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/ellis/Desktop/ETF交割/WebullData/webull_lv2_gateway</string>
+    <key>LimitLoadToSessionType</key>
+    <string>Aqua</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+    <!-- GatewayRuntime shutdown may wait for collector and API threads. -->
+    <key>ExitTimeOut</key>
+    <integer>40</integer>
+    <!-- Decimal 63 is octal 077: newly created runtime/log files default owner-only. -->
+    <key>Umask</key>
+    <integer>63</integer>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PYTHONUNBUFFERED</key>
+        <string>1</string>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/Users/ellis/Desktop/ETF交割/WebullData/webull_lv2_gateway/logs/launchd.control.stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/ellis/Desktop/ETF交割/WebullData/webull_lv2_gateway/logs/launchd.control.stderr.log</string>
+</dict>
+</plist>

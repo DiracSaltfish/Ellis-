@@ -1,0 +1,275 @@
+# macOS ARM64 重写版：开发状态、风险与接手说明
+
+更新时间：2026-08-30；当前实现：`1.0.9.2.macos.re7`。
+
+## 1. 来源与性质
+
+厂商没有发布 macOS arm64 wheel。当前实现依据用户授权可访问的数据库账号与 SDK 资料，
+从以下证据重建：
+
+1. TGW/AmazingData 开发手册；
+2. V1.0.8 Linux/Windows 公开 C++ 头文件与官方 Python wrapper 行为；
+3. Linux x86_64 官方 SDK 的最小只读 oracle；
+4. 经脱敏的 TLS/WebSocket 请求方法、key/type、枚举转换、tag、分页和压缩形状；
+5. Windows PDB、字符串表、Python bytecode 与反编译结果，用于解释控制流和结构差异。
+
+这不是把 x86_64 机器码自动翻译成 arm64，也不是重新链接官方 `.so/.dll`。真正可联网主线
+是重新编写的 Python TLS/WebSocket 协议客户端，在 Apple Silicon 上使用原生 Python、
+OpenSSL 与 libzstd。它只能声称对已逐项取证的行为兼容，不能声称是官方 SDK 或完整等价物。
+
+## 2. 新工程的权威边界
+
+今后的 Mac 开发只在：
+
+```text
+/Users/ellis/工具程序开发/database for armmac_V2
+```
+
+旧 `/Users/ellis/工具程序开发/数据库桥接` 保留为历史来源，不再写入新代码、文档、构建
+产物、临时抓包或凭据。新目录已经排除旧工程约 383 MiB 的反编译缓存、PDB、x86/Windows
+二进制、`.pyc`、原始 session/capture 和真实账号配置。
+
+目录职责：
+
+```text
+src/python/tgw_macos/                 当前可运行 Mac 主线
+examples/                             用户示例
+tests/                                合成协议/ABI 回归
+tools/                                Mac 脱敏烟测
+tools/oracle/                         Linux 官方 SDK 对照与安全分析工具
+docs/MACOS_SDK_USAGE.md               使用者文档
+docs/API_STATUS.md                    逐接口状态
+docs/evidence/                        逐接口脱敏证据
+docs/internal/                        历史逆向/协议定位笔记（非状态权威）
+native/experimental/                  原生 C++ 骨架源码
+runtime/arm64/experimental/           原生骨架二进制
+experimental/amazingdata_compat/      未验高层兼容源码
+reference/                            手册与 V1.0.8 公开头文件
+certs/                                可审计的厂商公开 CA 副本
+```
+
+状态权威顺序：`API_STATUS.md` → 对应 `docs/evidence` → 本文 → `docs/internal`。内部历史笔记
+中曾出现“静态完成 100%”等表述，只表示当时的字符串/结构定位，不代表动态 API 完成度。
+
+## 3. 当前实现架构
+
+```text
+public ctypes/API
+  Cfg / SubscribeItem / SubCodeTableItem / ReqKline / ReqDefault
+  Login / Query* / Subscribe / ReceiveRawEvent / Close
+                         │
+                         ▼
+LiveBackend：生命周期、query endpoint、完成/关闭
+                         │
+                         ▼
+TgwWssClient：TLS + WebSocket + request correlation
+  push reader/heartbeat │ one-shot query clients
+                         ▼
+envelope builders + parsers + ZSTD/full/delta raw delivery
+```
+
+- 默认 backend 是 `live-wss`；模拟 backend 只有显式 `TGW_BACKEND=sim` 时启用。
+- 公共订阅值与 wire 值分层，只允许已证明的 `10→14`、`12→16`。
+- 公开 `GetTaskID` 遵循 `MMDDHHmmSS + 同秒序号`；push 订阅 request id 从
+  1,000,000 开始；ETF/证券信息 codelist 另用官方实捕的 `1,2,...` wire id。
+- query parser 校验 status/tag/包号，再解析业务行；未知分支明确失败。
+- CA 与主机名验证仍开启；兼容性放宽仅在专用 TLS context。
+
+## 4. 已完成并有动态证据的范围
+
+### 4.1 会话
+
+- internet TLS/WebSocket `/amd/dgw/push`；
+- `ReqLogon/OnRspLogon` 真实服务端鉴权和 token；
+- heartbeat、WebSocket ping/pong、分片帧与正常 close；
+- 基础 `Close`，backend 内存中的密码/登录响应清空并释放全局 backend；同解释器下一次
+  `Login` 会新建 transport。Mac 两轮 live 为 `[True,True]` 且 backend identity 不同；
+  Linux 官方为 `[True,False]`（5 秒冷却亦同），所以仍标
+  `ARM_IMPLEMENTED(re-entry; Mac live passed)`，不冒充 Linux 同参。
+
+### 4.2 查询
+
+- ThirdInfo 交易日历：`function_id=A010061003`；实验高层 `BaseData.get_calendar`
+  默认 SH/隐式 str 已修复全量分页，Linux/Mac 同为 8,714 条、升序唯一 `list[int]`；
+- 1 分钟 K 线：SZSE `159691`、`10000→10000`，特定 2026-08-26 样本已核验单位；
+  日/周/月/季/年 K 线：SSE `510300`，`10008→period_type/tag 10100`、`10009→10101`、
+  `10010→10102`、`10011→10103`、`10012→10104`（季/年已实捕证明并完成 Linux/Mac 同参）；
+- ETF 成分：SSE `510300` 与 SZSE `159919` 各单 item 同步查询；前者为
+  1×35 + 300×13，后者为 1×35 + 301×13；wire 走常驻 push 的
+  `ReqGetETFCodeTableList`/tag `"111"`；
+- 证券信息：SSE `510300`、SZSE `159919` 各单项，以及固定输入顺序的沪深双项同步查询；
+  单项 1 行、双项 2 行，均为 43 字段（`MDCodeTableRecord` pack(1) sizeof=555）；wire 走
+  常驻 push 的单条 `ReqGetCodeTableList`/tag `"109"`，双项 `code_num=2`；官方/Mac 都按
+  服务端顺序 `[102,101]` 返回。全市场、其它组合/顺序、NEEQ、异步显式拒绝；
+- 除权因子：`000001` 单代码同步查询；Linux/Mac 同参 33 行 5 字段（double 18 位小数
+  往返无损，cum_factor 单调违例 2 处两侧吻合）；wire 走 one-shot `ReqGetExFactor`/
+  tag `11102`；空结果/异步面未验；
+- 历史快照：SZSE `159518` 既有范围及 SSE `510300` 的 2026-08-25 单日窄窗口，均为
+  `data_type=0`、`level_type=0` 的 57-key 低层结果；SSE 样本 Linux/Mac 均为 11 行。
+  SZSE 另验公开错误合约（同步 `(None,-76)`、异步 `query_spi` 回调）；多包异步、其它
+  目标/日期/data_type 未验。
+- 代码表：`QueryCodeTable` 已完成 wire 取证与 Mac 实现（one-shot `dgw*_query` 通道、
+  `ReqGetReduceCodeTable`、tag `11103`、反引号 6 字段、缺包 `ReqGetPackage` 补拉）；
+  服务端全市场大表持续缺第 3 包且对补拉无响应，Linux `-83` 与 Mac 缺包超时同因同果，
+  无成功同参样本 → 状态 `ARM_IMPLEMENTED`，待服务端分流后闭环。
+- 3 分钟：`QueryKline` `cyc_type=10001` 已完成 PDF/HDR/官方 Python 静态三方核对；
+  Linux 独立账号在登录阶段因 `-95` 数据权限被拒、未发查询，所以没有猜测
+  wire period/tag，Mac 仍显式不支持。
+- `BaseData.get_code_info(EXTRA_ETF)` 已观测 Linux 官方三市场空代码
+  `QuerySecuritiesInfo`（102→101→2）、最终 1,631 行/7 列输出；Mac 缺全市场
+  wire/分页/完成语义，仅保留离线 normalizer 与明确 `NotImplementedError`。
+
+### 4.3 订阅
+
+- SZSE `159518` L1：公开 flag 10 → wire/tag 14；Mac 60 秒 19 条，full 2、delta 17；
+- HKT `02800.SH`：市场 101、公开 flag 12 → wire/tag 16；Mac 30 秒 6 条，full 1、delta 5；
+- 支持普通 JSON、ZSTD、`0x59 + ZSTD` 解压；批量推送解压后的多个 JSON
+  以 ASCII `0x60` 分隔，reader 会拆成独立 dict 后再进入原有请求/事件路由；
+- 2026-08-27 re6 wheel 实盘：202 标的按 20 分 11 批订阅均返回 0，同会话追加
+  `164824.SZ` 返回 0（33.787 ms）；30 秒内 203/203 标的均收到 full，无未知/缺失标的；
+- 同日单独移除原 202 批次中 `159866.SZ`：`UnSubscribe(item)` 返回 0
+  （30.866 ms）；移除前 10 秒该标的有 4 条事件，3 秒在途宽限和随后 20 秒观察均为
+  0 条，同期其它标的继续产生 918 条事件；
+- 加长复验再次返回 0（31.180 ms）；3 秒宽限+后 30 秒目标仍为 0 条，其它
+  201/201 标的全部继续更新（1332 事件），排除了整批误取消；
+- 提供 `ReceiveRawEvent`，但只交付数字 key 的 raw full/delta；203 标的短时
+  覆盖不等于 1000 标的、长时或断线恢复验收。
+
+### 4.4 静态/测试
+
+- pack(1) 大小：`ColocaCfg=22`、`Cfg=145`、`LogonResponse=14`、
+  `SubscribeItem=42`、`SubCodeTableItem=36`、`ReqKline=71`、`ReqDefault=55`；
+- `ReqDefault.level_type` 的发行包差异已锁定；
+- `QueryCodeTable` 已完成 PDF、V1.0.8 HDR、官方 Python wrapper 静态契约核对，并完成
+  wire 取证与 Mac 实现（同步全量累计、`query_spi` 显式拒绝）；`QueryETFInfo` 在静态
+  核对之上已完成 SSE/SZSE 各一个单 ETF 在线闭环；
+- envelope、枚举转换、ZSTD fixture、多包排序/缺包/重复包/错 tag/status、CSV 形状均有
+  合成测试；
+- 2026-08-30 主验收运行 177 项 unittest：177 通过、2 项因当前解释器未安装 pandas
+  跳过；`compileall` 通过。覆盖 task-id 并发、codelist 独立 wire id、ThirdInfo 分页、
+  日历高层合约、`get_code_info` 离线 7 列合约、GetVersion/Close 生命周期、SSE Snapshot
+  白名单及证券信息固定沪深双项；
+- 已构建 `dist/tgw_macos_arm64-1.0.9.2.7-py3-none-any.whl`；内含 CA，并通过隔离目录安装、
+  版本/导出/关键请求构造 smoke；SHA-256 为
+  `7bd1b3586f108f0354b5605b370d2860ba61eff2bfe3f6ffc28bfddc5df9cdfd`。re6 旧包保留，
+  未覆盖历史产物。
+- 真实账号、token、MAC 和原始价格不在 fixture 中。
+
+证据位于 `docs/evidence/`。任何范围扩展必须新建或更新对应证据文件，不能只改状态表。
+
+## 5. 二进制与“原生服务”的真实状态
+
+`runtime/arm64/experimental/lib/libtgw_core.dylib` 和 `bin/tgw_demo` 确实是 Mach-O arm64，
+但它们只有 TCP probe 和本地生命周期骨架。C++ `Handshake()` 会做本地状态迁移，未发送
+TGW 登录协议；`Subscribe/QueryKline` 也只记录日志。它们不能证明服务端鉴权、不能返回
+行情，禁止用于生产。
+
+当前真实服务能力在纯 Python wheel 中。若未来要获得完整 C++ 原生服务，必须把已验证的
+TLS/WSS、request correlation、ZSTD、query lifecycle 和 parser 逐层迁移到 C++，并再次
+做 Linux/Mac 同参验证；不能因为 dylib 可加载就切换 backend。
+
+## 6. 生产阻塞项与已知问题
+
+### P0：使用前必须理解
+
+1. **无自动重连与订阅恢复。** reader 退出后不会重新登录/订阅；业务应退出进程并由
+   supervisor 指数退避重启，重启后等待新 full。
+2. **推送未类型化。** ETF/HKT `data` 仍是数字 key；字段映射、价格/数量缩放和多标的
+   身份隔离未完成。
+3. **delta 未由 SDK 合并。** 使用者必须从 full 建立状态；丢包或重连后旧状态无效。
+4. **事件队列可能丢最旧消息。** 容量 10,000，消费过慢时会主动腾位；没有 gap sequence
+   或持久化保证。
+5. **全局单例无法可靠重登。** `Close()` 后应重启解释器，正式 Session API 尚未实现。
+6. **TLS 服务端陈旧。** 当前兼容 TLSv1–1.2/低 security-level cipher；虽仍验证 CA 与
+   主机名，但这是服务端升级前不可消除的风险。
+7. **持续性证据太短。** ETF 最长 60 秒、HKT 45/30 秒，没有小时级、交易日级、断网、
+   睡眠唤醒、带宽压力或资源泄漏验证。
+
+### P1：公开合约差异
+
+1. 官方类型化 push SPI (`OnMDSnapshot/OnMDHKTSnapshot`) 未实现；传 `push_spi` 明确报错。
+2. 官方异步 query SPI 仅 `QuerySnapshot` 已实现并对齐（2026-08-26）；K 线/ThirdInfo/ETF
+   传 `query_spi` 仍明确报错。
+3. 查询非零 status 对齐进度：快照空数据已按官方语义返回 `(None,-76)`（含异步回调）；K 线/
+   ThirdInfo 的非零 status 仍转为异常，未对齐官方错误码返回。
+4. `GetErrorMsg` 已逐码调用 Linux 官方纯本地接口，31/31 文案与未知码 fallback 对齐；
+   各错误码的线上触发条件仍未逐项验证。
+   日志 SPI、`FreeMemory`、回调数据所有权不完整。
+5. `GetTaskID` 已对齐本地时间格式、同秒连续、跨秒重置与线程并发唯一；但官方
+   同秒 1,000,000 后行为、时钟回拨与跨进程唯一性未观测。
+6. 服务端曾对 query WSS 返回 `1000 / accept conn active close`（2026-08-26 快照复验中再次
+   出现 3 次，低频间隔后恢复）；准入、频率、IP/账号并发规则未知，不能密集重试。
+
+### P2：覆盖率
+
+- QueryKline 只有 1 分钟和日/周/月/季/年的特定独立子范围；3 分钟仅静态契约；
+- QueryETFInfo 只有 SSE `510300` 与 SZSE `159919` 各单 item 同步子范围；多 item、
+  空结果/错误、多帧与异步 SPI 未验证；
+- QuerySnapshot 只有 SZSE `159518` 和 SSE `510300` 两个精确窄窗口样本；
+- ThirdInfo 只有日历 function id；
+- HKT 只有 `.SH` 路由；
+- 其它订阅 flag、指数、期权、期货、代码表、因子、财务、回放等均未动态对齐；
+- coloc/QTCP/RTCP 不在当前范围；
+- `experimental/amazingdata_compat` 中只有 `BaseData.get_calendar` 默认 SH/隐式 str
+  分支已在线对齐；其余仍未验或显式阻塞，整个高层目录仍不随 wheel 安装。
+
+## 7. 后续修复优先级
+
+推荐顺序：
+
+1. 引入显式 `Session` 对象以支持并发/多会话所有权；全局 API 的关闭后新建 transport
+   已修复且 Mac 两轮 live 通过，但需继续定位 Linux 官方第二轮 `False` 的 wrapper/服务端原因；
+   保持已分离的公开 task id、订阅 request id 与 codelist wire id；
+2. 实现连接状态事件、指数退避重连、订阅清单恢复和“必须等 full”状态机；
+3. 为 tag 14/16 建立完整数字 key → 官方结构映射和缩放测试；
+4. 在 SDK 内按 `(market, code, tag)` 合并 delta，增加 gap/overflow 指标；
+5. 对齐 query 空结果/非零错误码，并决定实现真异步 SPI 或固定只提供同步 API；
+6. 做 1 小时、半日、完整交易日 soak，监测 RSS、线程、队列、最后事件间隔和重连；
+7. 先解决 3 分钟账号数据权限；重做不依赖官方析构的 `get_code_info`
+   脱敏 capture；再按一接口/一枚举粒度扩展 QueryCodeTable、QueryKline 其它分钟、
+   QueryETFInfo 空/错误/异步、HKT `.SZ` 等；
+8. 最后才把 Python 已验协议迁移到 C++ 原生层。
+
+## 8. Agent 接手工作流
+
+新 Agent 必须先读根目录 `AGENTS.md` 和 `docs/AGENT_PARITY_WORKFLOW.md`。一个任务只领取
+`API_STATUS.md` 的一个明确子范围，并按下列顺序：
+
+1. 从 `reference/manuals` 找完整 PDF 页，从 `reference/vendor-headers/v1.0.8` 核对
+   pack/type/default/适用模式；
+2. 在 `ssh bj` 上确认 `galaxy-relay` 初始状态；只有工作流允许时运行一次官方 Linux SDK
+   最小只读 oracle，凭据只从远端受保护配置读取；
+3. 如需 wire 取证，只保留 path/method/key/type/enum/tag/pack/data shape，随后删除原始捕获；
+4. 只实现已证明分支，未知输入 `NotImplementedError`；
+5. 加结构、envelope、parser、错误形状、多包和返回容器测试；
+6. 用两个授权账号做 Linux/Mac 同参单次验证，避免同账号互踢；
+7. 写 `docs/evidence/<接口>.md`，包含命令类别、shape、测试、清理、拟议状态和开放风险；
+8. 确认远端服务恢复初始状态，删除临时脚本、interposer、`.so` 和 capture；
+9. 交给验收者复跑。执行 Agent 不自行扩大中央状态。
+
+验收最低命令：
+
+```bash
+python -m unittest discover -s tests -v
+python -m compileall -q src/python examples tools
+python -m build --wheel
+unzip -l dist/*.whl
+file runtime/arm64/experimental/lib/libtgw_core.dylib \
+     runtime/arm64/experimental/bin/tgw_demo
+```
+
+验收者还必须检查 wheel 包含 CA、没有配置/凭据/抓包、未验证输入明确失败，并抽查本次新增
+证据是否真的是 Linux/Mac 同参。
+
+## 9. 文档追加规则
+
+后续每验证一个新方法或子范围：
+
+- 在 `docs/evidence/` 新增独立证据，不把多个不相关接口混在一份报告；
+- 更新 `API_STATUS.md` 的**限定范围**；
+- 在 `MACOS_SDK_USAGE.md` 增加可运行示例、结构、返回字段、回调和清理逻辑；
+- 在本文的已知问题/优先级中关闭或新增条目；
+- 记录版本与日期，但不写账号、endpoint、token、MAC、价格、原始返回或完整 capture；
+- 没有资源、重连、持续运行验收时，最多标 `LIVE_ALIGNED`，不能标 `PILOT_READY`。
+
+这样后续 Agent 能从证据而不是从“某次似乎成功”的口头结论继续修复。

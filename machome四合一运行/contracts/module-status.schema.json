@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.machome/contracts/module-status.v1.schema.json",
+  "title": "Machome Hub module snapshot v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "protocol",
+    "type",
+    "module_id",
+    "instance_id",
+    "sequence",
+    "control_revision",
+    "timestamp",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "protocol": {"const": "module.status.v1"},
+    "type": {"const": "snapshot"},
+    "module_id": {"enum": ["upload", "premium", "webull", "redemption"]},
+    "instance_id": {"type": "string", "minLength": 8, "maxLength": 80},
+    "sequence": {"type": "integer", "minimum": 0},
+    "control_revision": {"type": "integer", "minimum": 0},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "display_name",
+        "adapter",
+        "lifecycle",
+        "work_state",
+        "desired_state",
+        "ownership",
+        "control_enabled",
+        "headline",
+        "last_error",
+        "process",
+        "telemetry",
+        "capabilities"
+      ],
+      "properties": {
+        "display_name": {"type": "string", "minLength": 1, "maxLength": 128},
+        "adapter": {"enum": ["upload", "premium", "webull", "realtime"]},
+        "lifecycle": {
+          "enum": ["unknown", "starting", "running", "degraded", "stopping", "stopped", "failed"]
+        },
+        "work_state": {
+          "enum": ["active", "scheduled_idle", "paused", "warming", "degraded", "blocked", "unknown"]
+        },
+        "desired_state": {"enum": ["observe", "managed"]},
+        "ownership": {"enum": ["shadow", "logic", "owner"]},
+        "control_enabled": {"type": "boolean"},
+        "headline": {"type": "string", "maxLength": 512},
+        "last_error": {"type": "string", "maxLength": 4096},
+        "process": {"type": "object", "additionalProperties": true},
+        "telemetry": {"type": "object", "additionalProperties": true},
+        "unresolved_outcomes": {"type": "integer", "minimum": 0},
+        "safety_interlock": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["outcome_unresolved", "message"],
+          "properties": {
+            "outcome_unresolved": {"type": "boolean"},
+            "message": {"type": "string", "maxLength": 1024}
+          }
+        },
+        "capabilities": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["commands"],
+          "properties": {
+            "commands": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"$ref": "module-command.schema.json#/$defs/action"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -20,6 +20,20 @@
   "dynamic_unsubscribe_grace_sec": 60,
   "capture_dynamic_market_data": false,
   "allow_unverified_tgw_numeric_mapping": true,
+  "pushplus": {
+    "enabled": false,
+    "startup_notification": false,
+    "env_file": "~/.newnavnav-monitor.env",
+    "endpoint": "https://www.pushplus.plus/send",
+    "channel": "wechat",
+    "batch_window_ms": 15000,
+    "max_requests_per_minute": 4,
+    "daily_request_limit": 180,
+    "request_timeout_ms": 10000,
+    "max_signal_age_seconds": 120,
+    "max_batch_signals": 100,
+    "state_file": "runtime/pushplus-notifier-state.json"
+  },
   "qmt_profiles": [
     {"name": "QMT1", "host": "192.168.1.112", "port": 9527},
     {"name": "QMT2", "host": "192.168.1.111", "port": 9527}

@@ -1,0 +1,110 @@
+[
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/common/BridgeFrame.h",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/common/BridgeFrame.h",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/common/BridgeFrame.cpp",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/common/BridgeFrame.cpp",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/common/MarketSchedule.h",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/common/MarketSchedule.h",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/common/MarketSchedule.cpp",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/common/MarketSchedule.cpp",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/common/MarketTypes.h",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/common/MarketTypes.h",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/common/MarketTypes.cpp",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/common/MarketTypes.cpp",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/common/PersistenceWriter.h",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/common/PersistenceWriter.h",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/common/PersistenceWriter.cpp",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/common/PersistenceWriter.cpp",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/common/SignalEngine.h",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/common/SignalEngine.h",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/common/SignalEngine.cpp",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/common/SignalEngine.cpp",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/common/SnapshotParser.h",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/common/SnapshotParser.h",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/common/SnapshotParser.cpp",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/common/SnapshotParser.cpp",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/server/LegacyL1Server.h",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/server/LegacyL1Server.h",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/server/LegacyL1Server.cpp",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/server/LegacyL1Server.cpp",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/server/PushPlusNotifier.h",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/server/PushPlusNotifier.h",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": true
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/server/PushPlusNotifier.cpp",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/server/PushPlusNotifier.cpp",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": false
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/server/CoreServer.h",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/server/CoreServer.h",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": false
+  },
+  {
+    "source": "/Users/ellis/工具程序开发/溢价率拉升监控cpp/src/server/CoreServer.cpp",
+    "destination": "machome四合一运行改造cpp/app/modules/premium/engine/server/CoreServer.cpp",
+    "baseline_hash_matches_manifest": true,
+    "namespace_include_normalized_equal": false
+  }
+]

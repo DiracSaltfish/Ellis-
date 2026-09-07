@@ -1,0 +1,273 @@
+--- /Users/ellis/工具程序开发/溢价率拉升监控cpp/src/server/PushPlusNotifier.cpp
++++ machome四合一运行改造cpp/app/modules/premium/engine/server/PushPlusNotifier.cpp
+@@ -149,9 +149,9 @@
+         rootDirectory);
+ 
+     QString environmentPath = object.value(QStringLiteral("env_file")).toString().trimmed();
+-    const QString processEnvironmentPath = qEnvironmentVariable("PREMIUM_PUSHPLUS_ENV_FILE").trimmed();
+-    if (!processEnvironmentPath.isEmpty()) environmentPath = processEnvironmentPath;
+-    if (environmentPath.isEmpty()) environmentPath = QStringLiteral("~/.newnavnav-monitor.env");
++    if (environmentPath.isEmpty()) {
++        environmentPath = QStringLiteral("runtime/pushplus.env");
++    }
+     environmentPath = expandedPath(environmentPath, rootDirectory);
+ 
+     QString environmentError;
+--- /Users/ellis/工具程序开发/溢价率拉升监控cpp/src/server/CoreServer.h
++++ machome四合一运行改造cpp/app/modules/premium/engine/server/CoreServer.h
+@@ -8,6 +8,7 @@
+ 
+ #include <QFile>
+ #include <QHash>
++#include <QJsonArray>
+ #include <QJsonObject>
+ #include <QLocalServer>
+ #include <QPointer>
+@@ -56,12 +57,30 @@
+                         bool forceQuotesOverride, QObject *parent = nullptr);
+     ~CoreServer() override;
+     bool start(QString *error = nullptr);
++    [[nodiscard]] QJsonObject currentStatus() const;
++    [[nodiscard]] QJsonArray currentWatchlist() const;
++    [[nodiscard]] QJsonArray currentHotlist() const;
++    [[nodiscard]] QJsonObject latestRawRecord() const { return latestRawRecord_; }
++    [[nodiscard]] QList<QJsonObject> currentSummaries() const;
++    [[nodiscard]] QJsonObject currentDetail(const QString &symbol) const;
++    bool replaceWatchlistNative(const QJsonArray &symbols, QJsonObject *result,
++                                QString *error = nullptr);
++    bool replaceHotlistNative(const QJsonArray &symbols, QJsonObject *result,
++                              QString *error = nullptr);
++    // Mirrors the original A-side --force-quotes switch at runtime. This only
++    // changes quote subscription desire; the production signal time gates in
++    // MarketSchedule remain in force.
++    void setForceQuotesNative(bool enabled);
+ 
+ Q_SIGNALS:
+     void persistRaw(const QByteArray &line, const QDate &partition);
+     void persistNormalized(const QByteArray &line, const QDate &partition);
+     void persistSignal(const QByteArray &line);
+     void pushPlusSignal(const QJsonObject &signal);
++    void nativeStatusChanged(const QJsonObject &status);
++    void nativeSummaryPublished(const QJsonObject &summary);
++    void nativeDetailPublished(const QJsonObject &detail);
++    void nativeSignalPublished(const QJsonObject &signal);
+ 
+ private:
+     struct DetailClient {
+--- /Users/ellis/工具程序开发/溢价率拉升监控cpp/src/server/CoreServer.cpp
++++ machome四合一运行改造cpp/app/modules/premium/engine/server/CoreServer.cpp
+@@ -385,6 +385,52 @@
+                      {{"fixed_symbols", fixedSymbols_.size()}, {"l1_hot_symbols", hotSymbols_.size()},
+                       {"hkt_enabled", hktEnabled_}, {"simulation", simulation_}, {"replay", replay_}});
+     return true;
++}
++
++QJsonObject CoreServer::currentStatus() const
++{
++    return statusObject();
++}
++
++void CoreServer::setForceQuotesNative(bool enabled)
++{
++    if (forceQuotes_ == enabled) return;
++    forceQuotes_ = enabled;
++    updateSchedule();
++}
++
++QJsonArray CoreServer::currentWatchlist() const
++{
++    return QJsonArray::fromStringList(fixedSymbols_);
++}
++
++QJsonArray CoreServer::currentHotlist() const
++{
++    return QJsonArray::fromStringList(hotSymbols_);
++}
++
++QList<QJsonObject> CoreServer::currentSummaries() const
++{
++    QList<QJsonObject> result;
++    result.reserve(cache_.size());
++    for (const QuoteSnapshot &snapshot : cache_) {
++        if (!fixedSymbols_.contains(snapshot.symbol)) continue;
++        QJsonObject object = snapshot.toSummaryJson();
++        object.insert(QStringLiteral("type"), QStringLiteral("summary"));
++        object.insert(QStringLiteral("backfill"), true);
++        result.append(object);
++    }
++    return result;
++}
++
++QJsonObject CoreServer::currentDetail(const QString &symbol) const
++{
++    const QString normalized = normalizeSymbol(symbol);
++    if (!cache_.contains(normalized)) return {};
++    QJsonObject object = cache_.value(normalized).toDetailJson();
++    object.insert(QStringLiteral("type"), QStringLiteral("detail"));
++    object.insert(QStringLiteral("cached"), true);
++    return object;
+ }
+ 
+ void CoreServer::acceptAdapter()
+@@ -655,6 +701,126 @@
+     return true;
+ }
+ 
++bool CoreServer::replaceWatchlistNative(const QJsonArray &symbols,
++                                        QJsonObject *result, QString *error)
++{
++    const int maximum = config_.value(QStringLiteral("max_upstream_symbols")).toInt(1000);
++    if (symbols.isEmpty() || symbols.size() > maximum) {
++        if (error) *error = QStringLiteral("watchlist size must be 1..%1").arg(maximum);
++        return false;
++    }
++    QStringList replacement;
++    for (const QJsonValue &value : symbols) {
++        const QString normalized = normalizeSymbol(value.toString());
++        if (!isDomesticSymbol(normalized) || replacement.contains(normalized)) {
++            if (error) *error = QStringLiteral("invalid or duplicate monitored symbol: %1")
++                                    .arg(value.toString());
++            return false;
++        }
++        replacement.append(normalized);
++    }
++    QSet<QString> unique(replacement.begin(), replacement.end());
++    unique.unite(QSet<QString>(hotSymbols_.begin(), hotSymbols_.end()));
++    if (unique.size() > maximum) {
++        if (error) *error = QStringLiteral("combined pinned symbol limit exceeded");
++        return false;
++    }
++    QString legacyError;
++    if (!legacy_ || !legacy_->replacePinnedSymbols(replacement, hotSymbols_, &legacyError)) {
++        if (error) *error = legacyError.isEmpty()
++            ? QStringLiteral("L1 gateway unavailable") : legacyError;
++        return false;
++    }
++    QString persistenceError;
++    if (!persistSymbolList(QStringLiteral("watchlist"),
++                           QStringLiteral("config/watchlist.json"),
++                           replacement, &persistenceError)) {
++        legacy_->replacePinnedSymbols(fixedSymbols_, hotSymbols_);
++        if (error) *error = persistenceError;
++        return false;
++    }
++    const QSet<QString> oldSet(fixedSymbols_.begin(), fixedSymbols_.end());
++    const QSet<QString> newSet(replacement.begin(), replacement.end());
++    const QSet<QString> removed = oldSet - newSet;
++    if (oldSet != newSet) ++publicationGeneration_;
++    fixedSymbols_ = replacement;
++    for (const QString &symbol : removed) {
++        for (QuoteWorker *worker : workers_) {
++            QMetaObject::invokeMethod(worker, [worker, symbol] {
++                worker->resetSignalSymbol(symbol);
++            }, Qt::QueuedConnection);
++        }
++        signalHistory_.erase(
++            std::remove_if(signalHistory_.begin(), signalHistory_.end(),
++                           [&symbol](const QJsonObject &event) {
++                return event.value(QStringLiteral("symbol")).toString() == symbol;
++            }), signalHistory_.end());
++        const QJsonObject removedEvent{{QStringLiteral("type"), QStringLiteral("symbol_removed")},
++                                       {QStringLiteral("symbol"), symbol}};
++        Q_EMIT nativeSummaryPublished(removedEvent);
++        broadcastSummary(removedEvent);
++    }
++    sendAdapterControl(legacy_->maintainedSymbols());
++    if (result) {
++        *result = {{QStringLiteral("type"), QStringLiteral("watchlist_ack")},
++                   {QStringLiteral("accepted"), true},
++                   {QStringLiteral("count"), fixedSymbols_.size()},
++                   {QStringLiteral("symbols"), QJsonArray::fromStringList(fixedSymbols_)}};
++    }
++    return true;
++}
++
++bool CoreServer::replaceHotlistNative(const QJsonArray &symbols,
++                                      QJsonObject *result, QString *error)
++{
++    const int maximum = config_.value(QStringLiteral("max_upstream_symbols")).toInt(1000);
++    if (symbols.size() > maximum) {
++        if (error) *error = QStringLiteral("L1 hot-list limit exceeded");
++        return false;
++    }
++    QStringList replacement;
++    for (const QJsonValue &value : symbols) {
++        const QString normalized = normalizedHotSymbol(value.toString());
++        if ((!isDomesticSymbol(normalized) && !isExactHktSymbol(normalized))
++            || (isExactHktSymbol(normalized) && !hktEnabled_)
++            || replacement.contains(normalized)) {
++            if (error) *error = QStringLiteral("invalid or duplicate L1 symbol: %1")
++                                    .arg(value.toString());
++            return false;
++        }
++        replacement.append(normalized);
++    }
++    QSet<QString> unique(fixedSymbols_.begin(), fixedSymbols_.end());
++    unique.unite(QSet<QString>(replacement.begin(), replacement.end()));
++    if (unique.size() > maximum) {
++        if (error) *error = QStringLiteral("combined pinned symbol limit exceeded");
++        return false;
++    }
++    QString legacyError;
++    if (!legacy_ || !legacy_->replacePinnedSymbols(fixedSymbols_, replacement, &legacyError)) {
++        if (error) *error = legacyError.isEmpty()
++            ? QStringLiteral("L1 gateway unavailable") : legacyError;
++        return false;
++    }
++    QString persistenceError;
++    if (!persistSymbolList(QStringLiteral("l1_hotlist"),
++                           QStringLiteral("config/l1_hotlist.json"),
++                           replacement, &persistenceError)) {
++        legacy_->replacePinnedSymbols(fixedSymbols_, hotSymbols_);
++        if (error) *error = persistenceError;
++        return false;
++    }
++    hotSymbols_ = replacement;
++    sendAdapterControl(legacy_->maintainedSymbols());
++    if (result) {
++        *result = {{QStringLiteral("type"), QStringLiteral("l1_hotlist_ack")},
++                   {QStringLiteral("accepted"), true},
++                   {QStringLiteral("count"), hotSymbols_.size()},
++                   {QStringLiteral("symbols"), QJsonArray::fromStringList(hotSymbols_)}};
++    }
++    return true;
++}
++
+ void CoreServer::replaceWatchlist(QWebSocket *socket, const QJsonArray &symbols)
+ {
+     QJsonObject response{{"type", "watchlist_ack"}, {"accepted", false}};
+@@ -870,6 +1036,10 @@
+     lastCoreLatencyNs_ = snapshot.receiveWallNs > 0 ? std::max<qint64>(0, snapshot.publishWallNs - snapshot.receiveWallNs) : 0;
+     maxCoreLatencyNs_ = std::max(maxCoreLatencyNs_, lastCoreLatencyNs_);
+     cache_.insert(snapshot.symbol, snapshot);
++    QJsonObject nativeDetail = snapshot.toDetailJson();
++    nativeDetail.insert(QStringLiteral("type"), QStringLiteral("detail"));
++    nativeDetail.insert(QStringLiteral("cached"), false);
++    Q_EMIT nativeDetailPublished(nativeDetail);
+     legacy_->setMarketOnline(true);
+     legacy_->publish(snapshot);
+ 
+@@ -879,6 +1049,7 @@
+         summary.insert(QStringLiteral("type"), QStringLiteral("summary"));
+         summary.insert(QStringLiteral("rise_30s_ppm"), rise30sPpm);
+         summary.insert(QStringLiteral("rise_300s_ppm"), rise300sPpm);
++        Q_EMIT nativeSummaryPublished(summary);
+         broadcastSummary(summary);
+     }
+     const bool retainMarketEvent = shouldPersistMarketEvent(snapshot.symbol);
+@@ -902,6 +1073,7 @@
+ 
+     if (monitored && hasSignal) {
+         signalHistory_.append(auditSignal);
++        Q_EMIT nativeSignalPublished(auditSignal);
+         const QDateTime cutoff = QDateTime::currentDateTime().addSecs(-1800);
+         while (!signalHistory_.isEmpty()
+                && QDateTime::fromString(signalHistory_.front().value(QStringLiteral("occurred_at")).toString(), Qt::ISODateWithMs) < cutoff) {
+@@ -1026,6 +1198,7 @@
+                           {"hk_quotes_desired", next.hkQuotesDesired}, {"allow_30s", next.allow30SecondSignal},
+                           {"allow_5m", next.allow300SecondSignal}});
+     } else scheduleState_ = next;
++    Q_EMIT nativeStatusChanged(statusObject());
+ }
+ 
+ QJsonObject CoreServer::statusObject() const

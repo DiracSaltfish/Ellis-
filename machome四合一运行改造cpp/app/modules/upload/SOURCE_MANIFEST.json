@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "module": "native-upload",
+  "captured_at": "2026-09-04",
+  "baseline": "baseline://newnavnav",
+  "baseline_access": "read-only",
+  "migration": "native C++ reimplementation with record-only production mutations by default",
+  "sources": [
+    {"path": "internal/privatevaluation/engine.go", "sha256": "e3f4a5895bec150b1e9e3ab1e41ddba9a6ced74efeaf48c777500dedef85fffd"},
+    {"path": "internal/privatevaluation/model.go", "sha256": "cc3663c42b3563be5d0308959d3464ef7962fbf54e3b230b65f8a1b4d027f300"},
+    {"path": "internal/ingest/sina/client.go", "sha256": "40d9506dad75d3d3c5853c1487ded2804e0b5572fb4e6d7385d4aeaab9760412"},
+    {"path": "internal/ingest/safe/client.go", "sha256": "3c1df96bf1f59bf1b90b8eeb3c4b978a9db05e741a77fe82fb1d55b780fc6990"},
+    {"path": "internal/purchasesync/client.go", "sha256": "58fc5444b3bb7cdd400b95a58a334c0e710716f00af326c574f9ea72dedc9006"},
+    {"path": "internal/navsync/eastmoney.go", "sha256": "965d81fee480f852b2bba1b7cc39809adca27f46735652a0044ab55762d5609d"},
+    {"path": "internal/sharesync/sse_client.go", "sha256": "d723ac2f55a6e01ec351ac24fa84a20c516b578275d2f26073405f0dcac9f5e0"},
+    {"path": "scripts/private_xop_family_uploader.py", "sha256": "a258824a0c2e4d5835d5eefa35445c574ca24f36296c617b2759d11f707ea716"},
+    {"path": "scripts/private_nasdaq_valuation_uploader.py", "sha256": "5c2c6003bb8bf147c4942aab5a5c0bfc77a7431b05ccb828b0465d0a173f64d6"},
+    {"path": "scripts/ib_us_uploader_support.py", "sha256": "8aeaaf9c01e48053460f34d4fab125ea82291711c3df85c8796fc9c6da7bc08d"}
+  ],
+  "runtime_dependency_on_baseline": false,
+  "default_production_mutation": false
+}

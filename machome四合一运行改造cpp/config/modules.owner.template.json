@@ -1,0 +1,270 @@
+{
+  "_not_runnable": true,
+  "_template_notice": "本文件是 owner 终态填写清单，不是生产配置。四个 ownership 故意使用非法占位值，可执行文件与 SHA-256 也故意无效；不得整份改为 owner 后一次上线。",
+  "_operator_must": [
+    "只复制到新的维护窗口候选配置，不覆盖 modules.json",
+    "每次只把一个模块的 ownership 改为 owner，其余三个保持 shadow/logic",
+    "对最终新 label 的 plist 逐个执行 owner_handoff.py inspect-plist，原样复制输出的 program/arguments/hash/expected_artifacts；Python 项必须额外绑定入口脚本和部署 manifest",
+    "owner 模式不得加入 open_legacy_ui；旧 UI 会自动拉起旧 supervisor，二级查看使用四合一内建页面",
+    "在旧 owner 已安全停止且 label 权威 not-found 后才用 prepare-marker 生成少于等于 15 分钟的一次性标记",
+    "先用同版本 machome-hub-agent --check-config 校验候选配置，再按 docs/10_owner接管与回退演练.md 执行"
+  ],
+  "schema_version": 1,
+  "agent_socket": "~/Library/Application Support/MachomeHub/runtime/agent.sock",
+  "audit_database": "~/Library/Application Support/MachomeHub/state/audit.db",
+  "frame_limit_bytes": 1048576,
+  "modules": [
+    {
+      "id": "upload",
+      "display_name": "Upload 网站",
+      "adapter": "upload",
+      "enabled": true,
+      "control_enabled": false,
+      "ownership": "OWNER_TEMPLATE_NOT_RUNNABLE",
+      "allowed_actions": [
+        "refresh",
+        "acknowledge_uncertain",
+        "start_service",
+        "stop_service",
+        "restart_service"
+      ],
+      "approval_required_actions": [
+        "acknowledge_uncertain",
+        "start_service",
+        "stop_service",
+        "restart_service"
+      ],
+      "settings": {
+        "web_base_url": "http://127.0.0.1:8080",
+        "health_endpoint": "/api/v1/health",
+        "api_contract": "newnavnav-web-v1",
+        "health_directory": "/Users/ellis/NAVNAV/scripts/.runtime/upload_health",
+        "poll_interval_ms": 2000,
+        "request_timeout_ms": 3000,
+        "worker_stale_ms": 35000,
+        "workers_expected": true,
+        "worker_monitor_schedule": {
+          "contract": "newnavnav-upload-health-monitor-v1",
+          "timezone": "Asia/Shanghai",
+          "weekdays": [1, 2, 3, 4, 5],
+          "sources": [
+            {
+              "source": "home-mac",
+              "windows": [
+                {"start": "09:20", "end": "11:30"},
+                {"start": "13:01", "end": "14:57"}
+              ]
+            },
+            {
+              "source": "mac-home-private-xop-family-uploader",
+              "windows": [{"start": "09:37", "end": "15:00"}]
+            },
+            {
+              "source": "mac-home-private-nikkei225-pcf-n225m-uploader",
+              "windows": [{"start": "09:37", "end": "14:40"}]
+            },
+            {
+              "source": "mac-home-private-germany-pcf-fdxm-xetra1735-uploader",
+              "windows": [{"start": "09:37", "end": "15:00"}]
+            },
+            {
+              "source": "mac-home-private-164824-t2-inda-uploader",
+              "windows": [{"start": "09:37", "end": "15:00"}]
+            },
+            {
+              "source": "mac-home-private-161226-silver-uploader",
+              "windows": [
+                {"start": "09:37", "end": "10:15"},
+                {"start": "10:31", "end": "11:30"},
+                {"start": "13:31", "end": "15:00"}
+              ]
+            }
+          ]
+        },
+        "process_probe_ms": 5000,
+        "owner_readiness": {
+          "settle_ms": 1500,
+          "timeout_ms": 60000,
+          "conditions": [
+            {"path": "site.healthy", "equals": true},
+            {"path": "site.identity_verified", "equals": true},
+            {"path": "worker_health.ack_fresh", "equals": true}
+          ]
+        },
+        "owner_lease": {
+          "lock_path": "~/Library/Application Support/MachomeHub/runtime/owners/upload.owner.lock",
+          "handoff_marker": "~/Library/Application Support/MachomeHub/runtime/owners/upload.handoff.json",
+          "owner_id": "__REPLACE_WITH_APPROVED_OWNER_ID__",
+          "generation": 0,
+          "handoff_token_sha256": "__REPLACE_FROM_PREPARE_MARKER_RECEIPT__",
+          "previous_owner_processes": [],
+          "previous_owner_labels": [
+            "com.newnavnav.web",
+            "com.newnavnav.sina-quote-uploader",
+            "com.newnavnav.private-xop-family-uploader",
+            "com.newnavnav.private-nasdaq-valuation-uploader",
+            "com.newnavnav.private-sp500-valuation-uploader",
+            "com.newnavnav.private-nikkei225-valuation-uploader",
+            "com.newnavnav.private-germany-valuation-uploader",
+            "com.newnavnav.private-161226-silver-uploader",
+            "com.newnavnav.private-china-internet-valuation-uploader",
+            "com.newnavnav.private-164824-valuation-uploader",
+            "com.newnavnav.private-intraday-rebuild-agent",
+            "com.newnavnav.upload-health-monitor"
+          ]
+        }
+      },
+      "_launchd_identity_notice": "下列是全量终态目标。新 label 必须与旧 label 不同；每个单元必须整体替换为 inspect-plist 对最终新 plist 的输出，Python unit 使用 --python-unit/--python-entry/--deployment-manifest，非 Python 也应用 --artifact 绑定部署 manifest。",
+      "launchd_units": [
+        {"id": "web", "label": "com.ellis.machome-hub.upload.web", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.upload.web.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 1000, "required": true},
+        {"id": "sina", "label": "com.ellis.machome-hub.upload.sina", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.upload.sina.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_PYTHON_ENTRY_SCRIPT__", "sha256": "__REPLACE_ENTRY_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 500, "required": true},
+        {"id": "xop", "label": "com.ellis.machome-hub.upload.xop", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.upload.xop.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_PYTHON_ENTRY_SCRIPT__", "sha256": "__REPLACE_ENTRY_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 500, "required": true},
+        {"id": "nasdaq", "label": "com.ellis.machome-hub.upload.nasdaq", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.upload.nasdaq.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_PYTHON_ENTRY_SCRIPT__", "sha256": "__REPLACE_ENTRY_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 500, "required": false},
+        {"id": "sp500", "label": "com.ellis.machome-hub.upload.sp500", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.upload.sp500.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_PYTHON_ENTRY_SCRIPT__", "sha256": "__REPLACE_ENTRY_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 500, "required": false},
+        {"id": "nikkei225", "label": "com.ellis.machome-hub.upload.nikkei225", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.upload.nikkei225.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_PYTHON_ENTRY_SCRIPT__", "sha256": "__REPLACE_ENTRY_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 500, "required": true},
+        {"id": "germany", "label": "com.ellis.machome-hub.upload.germany", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.upload.germany.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_PYTHON_ENTRY_SCRIPT__", "sha256": "__REPLACE_ENTRY_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 500, "required": true},
+        {"id": "silver", "label": "com.ellis.machome-hub.upload.silver", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.upload.silver.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_PYTHON_ENTRY_SCRIPT__", "sha256": "__REPLACE_ENTRY_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 500, "required": true},
+        {"id": "china-internet", "label": "com.ellis.machome-hub.upload.china-internet", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.upload.china-internet.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_PYTHON_ENTRY_SCRIPT__", "sha256": "__REPLACE_ENTRY_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 500, "required": false},
+        {"id": "164824", "label": "com.ellis.machome-hub.upload.164824", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.upload.164824.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_PYTHON_ENTRY_SCRIPT__", "sha256": "__REPLACE_ENTRY_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 500, "required": false},
+        {"id": "intraday-rebuild", "label": "com.ellis.machome-hub.upload.intraday-rebuild", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.upload.intraday-rebuild.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_PYTHON_ENTRY_SCRIPT__", "sha256": "__REPLACE_ENTRY_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 0, "required": false},
+        {"id": "health-monitor", "label": "com.ellis.machome-hub.upload.health-monitor", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.upload.health-monitor.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_PYTHON_ENTRY_SCRIPT__", "sha256": "__REPLACE_ENTRY_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 500, "required": true}
+      ]
+    },
+    {
+      "id": "premium",
+      "display_name": "溢价率上升监控 A 端",
+      "adapter": "premium",
+      "enabled": true,
+      "control_enabled": false,
+      "ownership": "OWNER_TEMPLATE_NOT_RUNNABLE",
+      "allowed_actions": ["refresh", "acknowledge_uncertain", "premium_sync", "premium_raw_snapshot", "premium_detail_subscribe", "premium_detail_unsubscribe", "premium_set_watchlist", "premium_set_l1_hotlist", "start_service", "stop_service", "restart_service"],
+      "approval_required_actions": ["acknowledge_uncertain", "start_service", "stop_service", "restart_service"],
+      "settings": {
+        "host": "127.0.0.1",
+        "summary_port": 8421,
+        "l1_port": 19195,
+        "summary_protocol": "ws-json-v1",
+        "l1_protocol": "qmt-l1-ndjson-v1",
+        "poll_interval_ms": 1000,
+        "maximum_message_bytes": 524288,
+        "process_probe_ms": 5000,
+        "legacy_app": "/Users/ellis/Applications/ETF溢价率拉升监控/etf-premium-console.app",
+        "signal_directory": "/Users/ellis/Applications/ETF溢价率拉升监控/share/etf-premium-monitor/data",
+        "owner_readiness": {
+          "settle_ms": 2000,
+          "timeout_ms": 90000,
+          "conditions": [
+            {"path": "premium_readiness.ready", "equals": true},
+            {"path": "freshness.summary_fresh", "equals": true},
+            {"path": "freshness.l1_fresh", "equals": true}
+          ]
+        },
+        "owner_lease": {
+          "lock_path": "~/Library/Application Support/MachomeHub/runtime/owners/premium.owner.lock",
+          "handoff_marker": "~/Library/Application Support/MachomeHub/runtime/owners/premium.handoff.json",
+          "owner_id": "__REPLACE_WITH_APPROVED_OWNER_ID__",
+          "generation": 0,
+          "handoff_token_sha256": "__REPLACE_FROM_PREPARE_MARKER_RECEIPT__",
+          "previous_owner_processes": [
+            "/Users/ellis/Applications/ETF溢价率拉升监控/etf-premium-console.app/Contents/MacOS/etf-premium-console"
+          ],
+          "previous_owner_labels": []
+        }
+      },
+      "_launchd_identity_notice": "core/TGW 是一个依赖组；先制作并审批两个新 label 的最终 plist，再用 inspect-plist 整体替换下列身份占位字段。",
+      "launchd_units": [
+        {"id": "core", "label": "com.ellis.machome-hub.premium.core", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.premium.core.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_BUILD_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 1200, "required": true},
+        {"id": "tgw", "label": "com.ellis.machome-hub.premium.tgw", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.premium.tgw.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_BUILD_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 1500, "required": true}
+      ]
+    },
+    {
+      "id": "webull",
+      "display_name": "Webull 行情转发",
+      "adapter": "webull",
+      "engine": "native",
+      "enabled": true,
+      "control_enabled": false,
+      "ownership": "OWNER_TEMPLATE_NOT_RUNNABLE",
+      "allowed_actions": ["refresh", "acknowledge_uncertain", "webull_get_book", "webull_set_mode", "webull_collector_start", "webull_collector_stop", "webull_restart_browser", "webull_show_login"],
+      "approval_required_actions": ["acknowledge_uncertain", "webull_set_mode", "webull_collector_start", "webull_collector_stop", "webull_restart_browser", "webull_show_login"],
+      "settings": {
+        "api_base_url": "http://127.0.0.1:18765/v2",
+        "api_protocol": 2,
+        "stream_url": "ws://127.0.0.1:18765/v2/stream",
+        "api_enabled": true,
+        "api_port": 18765,
+        "data_root": "~/Library/Application Support/MachomeHub/data/webull",
+        "default_symbol": "XOP",
+        "ticker_id": "913243629",
+        "depth_size": 50,
+        "freshness_ms": 90000,
+        "record_only": true,
+        "live_browser_enabled": false,
+        "owner_readiness": {
+          "settle_ms": 2000,
+          "timeout_ms": 90000,
+          "allow_scheduled_idle": true,
+          "conditions": [
+            {"path": "status.api_live", "equals": true},
+            {"path": "status.api_ready", "equals": true},
+            {"path": "status.data_fresh", "equals": true},
+            {"path": "status.service", "equals": "webull-lv2-gateway"},
+            {"path": "book.fresh", "equals": true}
+          ]
+        }
+      },
+      "_native_notice": "Webull 由 Agent 内原生 Engine 和包内 browser helper 管理；没有独立 UI、LaunchAgent 或旧程序运行时依赖。"
+    },
+    {
+      "id": "redemption",
+      "display_name": "实时申购赎回数据监控",
+      "adapter": "realtime",
+      "enabled": true,
+      "control_enabled": false,
+      "ownership": "OWNER_TEMPLATE_NOT_RUNNABLE",
+      "allowed_actions": ["refresh", "acknowledge_uncertain", "redemption_get_history", "redemption_get_pcf", "redemption_set_watchlist", "redemption_set_symbol_name", "redemption_monitor_start", "redemption_monitor_stop", "redemption_wind_start", "redemption_wind_shutdown_cleanup", "redemption_pcf_refresh", "redemption_qmt_connect", "redemption_qmt_disconnect", "redemption_qmt_sync", "redemption_qmt_order", "start_service", "stop_service", "restart_service"],
+      "approval_required_actions": ["acknowledge_uncertain", "redemption_monitor_stop", "redemption_wind_shutdown_cleanup", "redemption_qmt_disconnect", "redemption_qmt_order", "start_service", "stop_service", "restart_service"],
+      "settings": {
+        "api_base_url": "http://127.0.0.1:6787",
+        "stream_url": "ws://127.0.0.1:6787/ws/v1/changes",
+        "poll_interval_ms": 1000,
+        "request_timeout_ms": 3000,
+        "control_timeout_ms": 120000,
+        "maximum_response_bytes": 8388608,
+        "required_protocol": 1,
+        "legacy_app": "/Users/ellis/Applications/ETF监控主机.app",
+        "process_probe_ms": 5000,
+        "qmt_backends": [
+          {"id": "QMT1", "host": "192.168.1.112", "port": 9527, "enabled": true, "auto_connect": false, "reconnect_interval_ms": 5000, "heartbeat_interval_ms": 5000, "silence_timeout_ms": 15000, "order_throttle_ms": 5000},
+          {"id": "QMT2", "host": "192.168.1.111", "port": 9527, "enabled": true, "auto_connect": false, "reconnect_interval_ms": 5000, "heartbeat_interval_ms": 5000, "silence_timeout_ms": 15000, "order_throttle_ms": 5000}
+        ],
+        "owner_readiness": {
+          "settle_ms": 2000,
+          "timeout_ms": 120000,
+          "conditions": [
+            {"path": "health.ok", "equals": true},
+            {"path": "health._hub_health_contract_verified", "equals": true},
+            {"path": "snapshot._hub_snapshot_contract_verified", "equals": true},
+            {"path": "service_identity.instance_verified", "equals": true}
+          ]
+        },
+        "owner_lease": {
+          "lock_path": "~/Library/Application Support/MachomeHub/runtime/owners/redemption.owner.lock",
+          "handoff_marker": "~/Library/Application Support/MachomeHub/runtime/owners/redemption.handoff.json",
+          "owner_id": "__REPLACE_WITH_APPROVED_OWNER_ID__",
+          "generation": 0,
+          "handoff_token_sha256": "__REPLACE_FROM_PREPARE_MARKER_RECEIPT__",
+          "previous_owner_processes": [],
+          "previous_owner_labels": [
+            "com.etfdelivery.mac-home",
+            "com.etfdelivery.monitor-server"
+          ]
+        }
+      },
+      "_launchd_identity_notice": "新 label 必须与 com.etfdelivery.mac-home 不同；切换前同时排除旧 standalone monitor-server、6787 占用和第二组 Wind 订阅。",
+      "launchd_units": [
+        {"id": "monitor-host", "label": "com.ellis.machome-hub.redemption.monitor-host", "plist": "~/Library/Application Support/MachomeHub/owner-plists/com.ellis.machome-hub.redemption.monitor-host.plist", "expected_program": "__REPLACE_FROM_INSPECT_PLIST__", "expected_arguments": ["__REPLACE_FROM_INSPECT_PLIST__"], "artifact_sha256": "__REPLACE_PROGRAM_SHA256__", "expected_artifacts": [{"path": "__REPLACE_EXPECTED_PROGRAM__", "sha256": "__REPLACE_PROGRAM_SHA256__"}, {"path": "__REPLACE_PYTHON_ENTRY_SCRIPT_OR_PACKAGED_PAYLOAD__", "sha256": "__REPLACE_ENTRY_SHA256__"}, {"path": "__REPLACE_DEPLOYMENT_MANIFEST__", "sha256": "__REPLACE_MANIFEST_SHA256__"}], "start_delay_ms": 2500, "required": true}
+      ]
+    }
+  ]
+}

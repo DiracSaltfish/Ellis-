@@ -1,0 +1,72 @@
+[
+    {
+        "detail": {
+            "error": "当前原生 UploadEngine 仅允许 sink_mode=record_only",
+            "state": "blocked"
+        },
+        "gap_reproduced": true,
+        "id": "U01-live-sink-blocked"
+    },
+    {
+        "detail": {
+            "after_restart": [
+                "159217.SZ"
+            ],
+            "before_restart": [
+                "510300.SH"
+            ],
+            "command_succeeded": true
+        },
+        "gap_reproduced": true,
+        "id": "P01-watchlist-reverted-after-restart"
+    },
+    {
+        "detail": {
+            "v1_status": 404,
+            "v2_status": 200
+        },
+        "gap_reproduced": true,
+        "id": "W01-v1-route-missing"
+    },
+    {
+        "detail": {
+            "hello_received": true,
+            "pong_received": false,
+            "wait_ms": 300
+        },
+        "gap_reproduced": true,
+        "id": "W02-application-ping-ignored"
+    },
+    {
+        "detail": {
+            "observation_ms": 200,
+            "requests_before_any_response": 2
+        },
+        "gap_reproduced": true,
+        "id": "R01-pcf-global-serialization-missing"
+    },
+    {
+        "detail": {
+            "enabled": true,
+            "opportunity": {
+                "actionable": true,
+                "basket_unit": 1000000,
+                "buy_delta": 0,
+                "full_baskets": 1,
+                "kind": "creation",
+                "label": "盘中申购机会",
+                "net_baskets": 1,
+                "net_shares": 0,
+                "reason": "赎回份额净增 1.00 篮子，释放申购容量（完整 1 篮子）",
+                "released_capacity_shares": 1000000,
+                "sell_delta": 1000000
+            },
+            "record_only": true,
+            "sent": false,
+            "symbol": "159518"
+        },
+        "gap_reproduced": true,
+        "id": "R02-backend-notification-record-only"
+    }
+]
+

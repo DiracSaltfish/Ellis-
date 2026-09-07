@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "kind": "machome_hub_build_manifest",
+  "build_id": "@MACHOME_HUB_BUILD_ID@",
+  "version": "@PROJECT_VERSION@",
+  "built_at": "@MACHOME_HUB_BUILD_TIME@",
+  "build_type": "@MACHOME_HUB_BUILD_TYPE@",
+  "source": {
+    "content_sha256": "@MACHOME_SOURCE_SHA256@",
+    "git_commit": "@MACHOME_HUB_GIT_COMMIT_FULL@",
+    "git_commit_short": "@MACHOME_HUB_GIT_COMMIT@",
+    "git_dirty": @MACHOME_HUB_GIT_DIRTY_JSON@
+  },
+  "components": [
+    "Machome 四合一运行中心",
+    "machome-hub-agent"@MACHOME_HUB_OPTIONAL_COMPONENTS@
+  ],
+  "features": {"live_qmt_orders_compiled": @MACHOME_LIVE_QMT_JSON@},
+  "contains_deployment_secrets": false
+}

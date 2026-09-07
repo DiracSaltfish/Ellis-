@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "agent_socket": "/private/tmp/machome-hub-local-test/agent.sock",
+  "audit_database": "/private/tmp/machome-hub-local-test/audit.db",
+  "frame_limit_bytes": 1048576,
+  "modules": [
+    {
+      "id": "upload",
+      "display_name": "Upload 网站",
+      "adapter": "upload",
+      "enabled": true,
+      "control_enabled": true,
+      "ownership": "logic",
+      "allowed_actions": ["refresh", "acknowledge_uncertain"],
+      "approval_required_actions": ["acknowledge_uncertain"],
+      "settings": {
+        "web_base_url": "http://127.0.0.1:18080",
+        "health_endpoint": "/api/v1/health",
+        "api_contract": "newnavnav-web-v1",
+        "health_directory": "/private/tmp/machome-hub-local-test/upload_health",
+        "poll_interval_ms": 400,
+        "request_timeout_ms": 1000,
+        "worker_stale_ms": 35000,
+        "workers_expected": true,
+        "process_probe_ms": 1000
+      }
+    },
+    {
+      "id": "premium",
+      "display_name": "溢价率上升监控 A 端",
+      "adapter": "premium",
+      "enabled": true,
+      "control_enabled": true,
+      "ownership": "logic",
+      "allowed_actions": ["refresh", "acknowledge_uncertain", "premium_sync", "premium_raw_snapshot", "premium_detail_subscribe", "premium_detail_unsubscribe", "premium_set_watchlist", "premium_set_l1_hotlist"],
+      "approval_required_actions": ["acknowledge_uncertain"],
+      "settings": {
+        "host": "127.0.0.1",
+        "summary_port": 18421,
+        "l1_port": 19196,
+        "summary_protocol": "ws-json-v1",
+        "l1_protocol": "qmt-l1-ndjson-v1",
+        "poll_interval_ms": 400,
+        "maximum_message_bytes": 524288,
+        "process_probe_ms": 1000
+      }
+    },
+    {
+      "id": "webull",
+      "display_name": "Webull 行情转发",
+      "adapter": "webull",
+      "enabled": true,
+      "control_enabled": true,
+      "ownership": "logic",
+      "allowed_actions": ["refresh", "acknowledge_uncertain", "webull_get_book", "webull_set_mode", "webull_collector_start", "webull_collector_stop", "webull_restart_browser", "webull_show_login"],
+      "approval_required_actions": ["acknowledge_uncertain", "webull_set_mode", "webull_collector_start", "webull_collector_stop", "webull_restart_browser", "webull_show_login"],
+      "settings": {
+        "api_base_url": "http://127.0.0.1:18766/v2",
+        "api_protocol": 2,
+        "stream_url": "ws://127.0.0.1:18766/v2/stream",
+        "control_base_url": "http://127.0.0.1:18766/v1",
+        "control_protocol": 1,
+        "token_file": "/private/tmp/machome-hub-local-test/webull.token",
+        "control_token_file": "/private/tmp/machome-hub-local-test/webull-control.token",
+        "default_symbol": "XOP",
+        "poll_interval_ms": 400,
+        "request_timeout_ms": 1000,
+        "freshness_ms": 5000,
+        "process_probe_ms": 1000
+      }
+    },
+    {
+      "id": "redemption",
+      "display_name": "实时申购赎回数据监控",
+      "adapter": "realtime",
+      "enabled": true,
+      "control_enabled": true,
+      "ownership": "logic",
+      "allowed_actions": ["refresh", "acknowledge_uncertain", "redemption_get_history", "redemption_get_pcf", "redemption_set_watchlist", "redemption_set_symbol_name", "redemption_monitor_start", "redemption_monitor_stop", "redemption_wind_start", "redemption_wind_shutdown_cleanup", "redemption_pcf_refresh", "redemption_qmt_connect", "redemption_qmt_disconnect", "redemption_qmt_sync", "redemption_qmt_order"],
+      "approval_required_actions": ["acknowledge_uncertain", "redemption_monitor_stop", "redemption_wind_shutdown_cleanup", "redemption_qmt_disconnect", "redemption_qmt_order"],
+      "settings": {
+        "api_base_url": "http://127.0.0.1:16787",
+        "stream_url": "ws://127.0.0.1:16787/ws/v1/changes",
+        "poll_interval_ms": 400,
+        "request_timeout_ms": 1000,
+        "control_timeout_ms": 5000,
+        "maximum_response_bytes": 8388608,
+        "required_protocol": 1,
+        "process_probe_ms": 1000,
+        "qmt_backends": [
+          {"id": "QMT1", "host": "127.0.0.1", "port": 19527, "enabled": true, "auto_connect": false,
+           "reconnect_interval_ms": 500, "heartbeat_interval_ms": 1000, "silence_timeout_ms": 5000,
+           "order_throttle_ms": 5000},
+          {"id": "QMT2", "host": "127.0.0.1", "port": 19528, "enabled": true, "auto_connect": false,
+           "reconnect_interval_ms": 500, "heartbeat_interval_ms": 1000, "silence_timeout_ms": 5000,
+           "order_throttle_ms": 5000}
+        ]
+      }
+    }
+  ]
+}

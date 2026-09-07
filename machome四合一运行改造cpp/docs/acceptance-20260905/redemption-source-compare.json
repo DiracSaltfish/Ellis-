@@ -1,0 +1,26 @@
+[
+  {
+    "file": "/Users/ellis/Desktop/ETF交割/实时申购赎回数据/etf_monitor_server.py",
+    "matches_frozen_baseline": true
+  },
+  {
+    "file": "/Users/ellis/Desktop/ETF交割/实时申购赎回数据/etf_pcf_service.py",
+    "matches_frozen_baseline": true
+  },
+  {
+    "file": "/Users/ellis/Desktop/ETF交割/实时申购赎回数据/szse_pcf.py",
+    "matches_frozen_baseline": true
+  },
+  {
+    "file": "/Users/ellis/Desktop/ETF交割/实时申购赎回数据/wind_tbapi_frame_parser.py",
+    "matches_frozen_baseline": true
+  },
+  {
+    "file": "/Users/ellis/Desktop/ETF交割/实时申购赎回数据/wind_etf_realtime_ui.py",
+    "matches_frozen_baseline": true
+  },
+  {
+    "file": "/Users/ellis/Desktop/ETF交割/实时申购赎回数据/config/etf_monitor_server.json",
+    "matches_frozen_baseline": true
+  }
+]

@@ -1,0 +1,2 @@
+# Preserve the vendor's original bytes for ABI/reference checksums.
+"database for armmac_V2/reference/vendor-headers/**" -text

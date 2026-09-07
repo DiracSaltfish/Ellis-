@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "copied_on": "2026-09-04",
+  "baseline": "baseline://WebullData/webull_lv2_gateway",
+  "migration": "clean-room C++/stdlib reimplementation; baseline files were read-only",
+  "sources": [
+    {"path": "src/webull_lv2_gateway/models.py", "sha256": "b86c703ee6756a278a73a3b817a17a998ebca311f07095cdbc4fc509bba010df"},
+    {"path": "src/webull_lv2_gateway/store.py", "sha256": "a5d3f0d273e6f2e768361a1c18a2c9ff85f888d0ae3b37ef85a5549630ab7d3e"},
+    {"path": "src/webull_lv2_gateway/scheduler.py", "sha256": "0431d8ce401a6ee1e6df6e825e2340d1c69d230c5f1f8dd03d1975f1fcbb9534"},
+    {"path": "src/webull_lv2_gateway/runtime.py", "sha256": "9e77cf2d68a2800dfd1ae10df33aa6159e9e2363bab5959b084e10c4f013aab1"},
+    {"path": "src/webull_lv2_gateway/collector.py", "sha256": "5988591f113e91297fe444573b30c0ffdb44cbb826a938bccb76db31d279e1e1"},
+    {"path": "src/webull_lv2_gateway/api_server.py", "sha256": "4570f8f3d5c666a3825126254db4026103ba1f16b81b3e212c6ab978721f12f9"},
+    {"path": "src/webull_lv2_gateway/webull_mqtt.py", "sha256": "f7820ef668966f5f056b9d8dd7d00034e2defb7b7dbfade43accf76260f1867e"},
+    {"path": "src/webull_lv2_gateway/login_monitor.py", "sha256": "4e643253e44ee6197fe3a44e2561f4bdd5f88c740760bf2f41ce0ecd02e5d543"}
+  ]
+}

@@ -18,3 +18,47 @@ tmp/
 **/*.app/
 **/*.dSYM/
 **/*.o
+
+# Local package archives, dependency caches, and runtime state.
+**/dist-*/
+**/node_modules
+**/.pytest_cache/
+**/.runtime/
+**/*.log
+**/.env
+**/.env.*
+!**/.env.example
+
+# Rebuilt by components/upload/build-component.py.
+/machome四合一运行改造cpp/app/components/upload/machome-upload-web
+
+# Keep deployment source, checksums and written conclusions; retain raw live
+# snapshots, rollback copies and packaged applications on this machine only.
+/machome四合一运行改造cpp/docs/**/*.tgz
+/machome四合一运行改造cpp/docs/**/*.tar.gz
+/machome四合一运行改造cpp/docs/live-20260907/dmit-candidate/newnavnav-web
+/machome四合一运行改造cpp/docs/live-20260907/dmit-candidate/frontend-dist/
+/machome四合一运行改造cpp/docs/live-20260907/*inspection.json
+/machome四合一运行改造cpp/docs/live-20260907/machome-latest-audit.json
+/machome四合一运行改造cpp/docs/live-20260907/persistent-takeover.json
+/machome四合一运行改造cpp/docs/live-20260907/webull-navigation*.json
+/machome四合一运行改造cpp/docs/client-protocol-audit-20260907/redemption-r4-snapshot.json
+/machome四合一运行改造cpp/docs/ui-redesign-20260907/before/
+/machome四合一运行改造cpp/docs/ui-redesign-20260907/deployment/
+/machome四合一运行改造cpp/docs/ui-redesign-20260907/previews/
+
+# Raw market captures and generated research exports remain local.
+/database for armmac_V2/outputs/
+/港股通相关性分析/batch_archive_*/**
+!/港股通相关性分析/batch_archive_*/**/
+!/港股通相关性分析/batch_archive_*/**/*.py
+!/港股通相关性分析/batch_archive_*/**/*.md
+/港股通相关性分析/outputs/**
+!/港股通相关性分析/outputs/**/
+!/港股通相关性分析/outputs/**/*.py
+!/港股通相关性分析/outputs/**/*.md
+!/港股通相关性分析/outputs/**/*.ipynb
+/港股通相关性分析/data/
+/analysis_520600/*.csv
+/analysis_520600/*.json
+/analysis_520600/periodic_reports/

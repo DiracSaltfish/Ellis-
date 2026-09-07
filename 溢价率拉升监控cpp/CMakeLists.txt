@@ -108,10 +108,12 @@ add_executable(etf-premium-core
     src/server/CoreServer.cpp
     src/server/LegacyL1Server.h
     src/server/LegacyL1Server.cpp
+    src/server/PushPlusNotifier.h
+    src/server/PushPlusNotifier.cpp
     src/server/main.cpp
 )
 target_include_directories(etf-premium-core PRIVATE src)
-target_link_libraries(etf-premium-core PRIVATE premium_common Qt6::WebSockets)
+target_link_libraries(etf-premium-core PRIVATE premium_common Qt6::Network Qt6::WebSockets)
 
 add_executable(etf-premium-console MACOSX_BUNDLE
     src/console/ConsoleWindow.h
@@ -189,6 +191,12 @@ if(PREMIUM_BUILD_TESTS)
     target_include_directories(premium-legacy-l1-tests PRIVATE src)
     target_link_libraries(premium-legacy-l1-tests PRIVATE premium_common Qt6::Test Qt6::Network)
     add_test(NAME premium-legacy-l1-tests COMMAND premium-legacy-l1-tests)
+
+    add_executable(premium-pushplus-tests
+        src/server/PushPlusNotifier.h src/server/PushPlusNotifier.cpp tests/test_pushplus.cpp)
+    target_include_directories(premium-pushplus-tests PRIVATE src)
+    target_link_libraries(premium-pushplus-tests PRIVATE Qt6::Core Qt6::Network Qt6::Test)
+    add_test(NAME premium-pushplus-tests COMMAND premium-pushplus-tests)
 
     if(PREMIUM_BUILD_NATIVE_TGW)
         add_test(NAME premium-session-boundary-tests

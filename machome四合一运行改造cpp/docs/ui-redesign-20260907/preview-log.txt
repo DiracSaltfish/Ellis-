@@ -1,0 +1,11 @@
+qt.qpa.fonts: Populating font family aliases took 126 ms. Replace uses of missing font family "Sans Serif" with one that exists to avoid this cost. 
+overview 1440x940
+upload 1440x940
+premium 1440x940
+webull 1440x940
+redemption 1440x940
+overview 1120x760
+upload 1120x760
+premium 1120x760
+webull 1120x760
+redemption 1120x760

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.machome/contracts/module-event.v1.schema.json",
+  "title": "Machome Hub module event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "protocol",
+    "type",
+    "event_id",
+    "module_id",
+    "instance_id",
+    "sequence",
+    "timestamp",
+    "event_kind",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "protocol": {"const": "module.event.v1"},
+    "type": {"const": "event"},
+    "event_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{7,79}$"
+    },
+    "module_id": {"enum": ["upload", "premium", "webull", "redemption"]},
+    "instance_id": {"type": "string", "minLength": 8, "maxLength": 80},
+    "sequence": {"type": "integer", "minimum": 0},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "event_kind": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,127}$"},
+    "audit_event_id": {"type": "integer", "minimum": 1},
+    "audit_epoch": {"type": "string", "minLength": 8, "maxLength": 80},
+    "client_delivery_generation": {"type": "integer", "minimum": 1},
+    "audit_persisted": {"type": "boolean"},
+    "replayed": {"type": "boolean"},
+    "payload": {
+      "type": "object",
+      "maxProperties": 256,
+      "additionalProperties": true
+    }
+  }
+}

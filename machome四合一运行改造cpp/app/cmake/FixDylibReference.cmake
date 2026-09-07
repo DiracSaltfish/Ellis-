@@ -1,0 +1,44 @@
+if(NOT DEFINED MACHOME_EXECUTABLE OR NOT EXISTS "${MACHOME_EXECUTABLE}")
+    message(FATAL_ERROR "MACHOME_EXECUTABLE must name an existing Mach-O executable")
+endif()
+if(NOT DEFINED MACHOME_DYLIB OR NOT EXISTS "${MACHOME_DYLIB}")
+    message(FATAL_ERROR "MACHOME_DYLIB must name an existing dylib")
+endif()
+
+file(REAL_PATH "${MACHOME_DYLIB}" MACHOME_DYLIB_REAL)
+get_filename_component(MACHOME_DYLIB_NAME "${MACHOME_DYLIB_REAL}" NAME)
+execute_process(
+    COMMAND /usr/bin/otool -L "${MACHOME_EXECUTABLE}"
+    RESULT_VARIABLE MACHOME_OTOOL_RESULT
+    OUTPUT_VARIABLE MACHOME_OTOOL_OUTPUT
+    ERROR_VARIABLE MACHOME_OTOOL_ERROR)
+if(NOT MACHOME_OTOOL_RESULT EQUAL 0)
+    message(FATAL_ERROR "otool failed: ${MACHOME_OTOOL_ERROR}")
+endif()
+
+string(REPLACE "\n" ";" MACHOME_OTOOL_LINES "${MACHOME_OTOOL_OUTPUT}")
+set(MACHOME_CURRENT_REFERENCE "")
+foreach(MACHOME_OTOOL_LINE IN LISTS MACHOME_OTOOL_LINES)
+    string(STRIP "${MACHOME_OTOOL_LINE}" MACHOME_OTOOL_LINE)
+    if(MACHOME_OTOOL_LINE MATCHES "^(.*${MACHOME_DYLIB_NAME}) \\(compatibility version")
+        set(MACHOME_CURRENT_REFERENCE "${CMAKE_MATCH_1}")
+        break()
+    endif()
+endforeach()
+if(NOT MACHOME_CURRENT_REFERENCE)
+    message(FATAL_ERROR
+        "Could not find ${MACHOME_DYLIB_NAME} in ${MACHOME_EXECUTABLE}")
+endif()
+
+if(NOT MACHOME_CURRENT_REFERENCE STREQUAL MACHOME_DYLIB_REAL)
+    execute_process(
+        COMMAND /usr/bin/install_name_tool -change
+            "${MACHOME_CURRENT_REFERENCE}" "${MACHOME_DYLIB_REAL}" "${MACHOME_EXECUTABLE}"
+        RESULT_VARIABLE MACHOME_INSTALL_NAME_RESULT
+        ERROR_VARIABLE MACHOME_INSTALL_NAME_ERROR)
+    if(NOT MACHOME_INSTALL_NAME_RESULT EQUAL 0)
+        message(FATAL_ERROR "install_name_tool failed: ${MACHOME_INSTALL_NAME_ERROR}")
+    endif()
+    message(STATUS
+        "Rewrote ${MACHOME_DYLIB_NAME} reference to its selected SDK-compatible copy")
+endif()

@@ -1,0 +1,62 @@
+{
+  "frontend/src/lib/privateTypes.ts": {
+    "before": "fd5adca6f96a632540feb05294725fa1047c051cf9b21c7ae9266ca8f6397575",
+    "after": "de81a4fbacf730c51f80ce7439c7fae0eedfd90d57c2deb03341f0f32c200c03"
+  },
+  "frontend/src/private/PrivateFundDetail.vue": {
+    "before": "1cfb823e589adb76d851b1378a45e9906c9bf0b8758245846941883f43714df8",
+    "after": "b699e2b0927417b0e88d74ad8fe6c10f86148808cf43c0a21096539c8c9e406c"
+  },
+  "internal/hkconnectfx/chinamoney.go": {
+    "before": "7f3807d5be3748433a71f0d4bde1f5ce1b0b4950ed4ace4b12509e88b1b38247",
+    "after": "d6771384c45aa0d37bcf6d114cdb32f4fe0aa52bfe3f09d6aff91ea191ad028a"
+  },
+  "internal/hkconnectfx/chinamoney_test.go": {
+    "before": "56e7d61f92897de1b1fb7a8b992e5f9f8ba8c28efab9dcdcff0049a546e57737",
+    "after": "6f6e5cddba19ab1181a5ef6e208730a189ffc959226cbeaecef6b762e6b5a060"
+  },
+  "internal/hkconnectfx/service.go": {
+    "before": "323e5ba0a8ceb6f16752bd13e8e32527f3af5933fb85352cb32e94b40e37d79f",
+    "after": "52178e53e16b0cfa1f08ba9963ed52c118d4605b818d662f73971712a5d16c31"
+  },
+  "internal/hkconnectfx/spot_retention.go": {
+    "before": null,
+    "after": "c50258163ca281b0d90c6ce5e14015d5dc23638cf46d431eeb9eed0a006b4ee8"
+  },
+  "internal/hkconnectfx/spot_retention_test.go": {
+    "before": null,
+    "after": "845466de6b49d404f47c67a0025c3093c42c93889839cf7493014aacd694efe3"
+  },
+  "internal/privatevaluation/engine.go": {
+    "before": "e3f4a5895bec150b1e9e3ab1e41ddba9a6ced74efeaf48c777500dedef85fffd",
+    "after": "270d91dbdc62d0fcb6eeec39fb35d4d1dd88e7a3b5cf8410f48893b6f6cebf01"
+  },
+  "internal/privatevaluation/model.go": {
+    "before": "cc3663c42b3563be5d0308959d3464ef7962fbf54e3b230b65f8a1b4d027f300",
+    "after": "b36d1854379f72b9173e0cd85f921945391c8af99e19cb32b4fd6a2784210bbe"
+  },
+  "internal/privatevaluation/preopen_test.go": {
+    "before": null,
+    "after": "4a323f890b1a0bb55a54e191ff0d634fe5842d18bebfc9fe88ec931b92fd39fb"
+  },
+  "internal/privatevaluation/service.go": {
+    "before": "7a7b8445398411bb610f259231f5e0a780e2aa06404d3c274c69e7ce22d137dd",
+    "after": "512b7ca5c6162c15068fa916810ae5ad262d1f19a8ee13797896b5044f842d47"
+  },
+  "scripts/.runtime/upload_health/xop-family.json": {
+    "before": "cb6502957cf50531a810b2c92893f68c0d437d3a265d87ffca45384bd2aaa5fb",
+    "after": "334d2e2188cb6fb8ac6f2b034497f7b74bbab49e7bc36ddec6382c54005dfb8f"
+  },
+  "scripts/private_nasdaq_valuation_uploader.py": {
+    "before": "5c2c6003bb8bf147c4942aab5a5c0bfc77a7431b05ccb828b0465d0a173f64d6",
+    "after": "64e4d40e5ab7dee86976d24c2647eb031b02f4c6f25d9cb1cbc701c064acd5b7"
+  },
+  "scripts/private_valuation_uploader.py": {
+    "before": "0d98e733011ec552ef8d917e4ee5e207c03afdbcc12027c7b94c3e0f3654e86a",
+    "after": "55c5d1abc858f397ceebcba83c016b57777d1048eeef37a5a9520d281e55bdfb"
+  },
+  "scripts/test_index_preopen.py": {
+    "before": null,
+    "after": "cfd1c146fbe11a144ed7948fed318edfd0b8bd342f8738eb657caf39befd4780"
+  }
+}

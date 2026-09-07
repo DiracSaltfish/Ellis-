@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-09-05T04:44:45.172686+00:00",
+  "bundle": "/Users/ellis/工具程序开发/machome四合一运行改造cpp/app/dist-candidate-20260905/Machome 四合一运行中心.app",
+  "zip": "/Users/ellis/工具程序开发/machome四合一运行改造cpp/app/dist-candidate-20260905/Machome-Operations-Hub-macOS.zip",
+  "zip_sha256": "377edab08c9a4909e1ee89791f0bf820080588add8edc14357bcf3646739e9f8",
+  "build_manifest": {
+    "schema_version": 1,
+    "kind": "machome_hub_build_manifest",
+    "build_id": "1.0.0-unversioned-dirty-20260905T043959Z",
+    "version": "1.0.0",
+    "built_at": "2026-09-05T04:39:59Z",
+    "build_type": "Release",
+    "source": {
+      "content_sha256": "a903b01e6d6b6fe9bd33e97cac7f2ba49cc58a1fd2cd61f8f486a98742ffb79e",
+      "git_commit": "unversioned",
+      "git_commit_short": "unversioned",
+      "git_dirty": true
+    },
+    "components": [
+      "Machome 四合一运行中心",
+      "machome-hub-agent",
+      "machome-webull-browser-helper",
+      "machome-wind-probe-helper",
+      "machome-wind-tbapi-probe",
+      "machome-ibkr-bridge",
+      "machome-premium-tgw-helper",
+      "machome-upload-component",
+      "machome-upload-web"
+    ],
+    "features": {
+      "live_qmt_orders_compiled": true
+    },
+    "contains_deployment_secrets": false
+  },
+  "source_matches_packaged": true
+}

@@ -1,0 +1,96 @@
+{
+  "stage": "COMPLETED_INITIAL_PRICE_PILOT",
+  "target": "520600.SH",
+  "target_kind": "fixed_quantity_pcf_risk_basket",
+  "secondary_comparators": [
+    "513090.SH",
+    "513180.SH"
+  ],
+  "secondary_note": "513180 is a QDII comparator, not certified Stock Connect ETF membership",
+  "proposed_window": {
+    "start": "2026-03-03",
+    "end": "2026-08-03",
+    "common_file_dates": 100
+  },
+  "currency_primary": "CNY_SSE_REALIZED_SETTLEMENT",
+  "currency_secondary": "HKD_INTRADAY_RETURNS",
+  "candidate_futures": [
+    "HSI",
+    "HHI",
+    "HTI"
+  ],
+  "candidate_hk_etfs": [
+    "02800.HK",
+    "02828.HK",
+    "03032.HK",
+    "03033.HK",
+    "02845.HK"
+  ],
+  "hedge_mapping_status": "OOS_PRICE_RISK_VALIDATED_WITH_CAVEATS",
+  "max_legs": 2,
+  "horizons_minutes": [
+    5,
+    15,
+    30,
+    60
+  ],
+  "outer_train_days": 60,
+  "inner_validation_days": 10,
+  "outer_test_days": 1,
+  "allow_no_hedge": true,
+  "max_forward_fill_seconds": null,
+  "costs": null,
+  "gates": [],
+  "execution_backtest_additional_gates": [
+    "FX",
+    "BID_ASK_DEPTH",
+    "BORROW_AND_FEES",
+    "ARBITRAGE_SETTLEMENT_EVENTS"
+  ],
+  "user_assumptions": {
+    "all_hk_components_forced_cash_substitution": true,
+    "minute_prices_sufficient": true,
+    "volume_and_tick_not_required": true,
+    "suspension_and_actions_obtained_by_agent": true
+  },
+  "session": {
+    "minute_labels": [
+      780,
+      899
+    ],
+    "available_times": [
+      "13:01",
+      "15:00"
+    ],
+    "timezone": "Asia/Hong_Kong",
+    "timestamp_assumption": "minute_start_label_plus_one",
+    "cross_day_labels": false
+  },
+  "mark_policy": "same-day last available price; verified 02402 suspension uses pre-halt last mark; 00489 complex entitlement dates excluded",
+  "same_index_exclusive_groups": [
+    [
+      "HSI_FUT",
+      "02800"
+    ],
+    [
+      "HHI_FUT",
+      "02828"
+    ],
+    [
+      "HTI_FUT",
+      "03032",
+      "03033"
+    ]
+  ],
+  "result": {
+    "usable_days": 97,
+    "oos_days": 37,
+    "oos_start": "2026-06-10",
+    "oos_end": "2026-08-03",
+    "preferred_research_baselines": [
+      "HHI_FUT+HTI_FUT",
+      "HTI_FUT"
+    ],
+    "status": "PASS_RISK_ONLY_WITH_CAVEATS"
+  }
+}

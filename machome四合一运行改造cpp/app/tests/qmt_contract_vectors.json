@@ -1,0 +1,94 @@
+{
+  "vectors": [
+    {
+      "name": "production_orders_unicode_split_and_zero_floats",
+      "kind": "orders",
+      "data": [
+        {
+          "code": "159513.SZ",
+          "name": "纳指科技ETF",
+          "direction": "卖出",
+          "price": 0.0,
+          "qty": 1,
+          "traded_qty": 0,
+          "traded_price": 0.0,
+          "trade_amount": 0.0,
+          "status": "已报",
+          "time": "09:31:02.100",
+          "order_id": "10002",
+          "status_code": 50,
+          "remark": "M4HUB:子单-甲",
+          "client_order_id": "ETF-QMT1-R-159513-测试",
+          "sort_seq": 2,
+          "is_split_child": true,
+          "split_parent_id": "父单一",
+          "split_group_no": "1",
+          "split_display_no": "1",
+          "split_child_index": "1",
+          "split_child_count": "2",
+          "split_child_client_order_id": "ETF-QMT1-R-159513-测试",
+          "split_source": "四合一"
+        },
+        {
+          "code": "510300.SH",
+          "name": "沪深300ETF",
+          "direction": "买入",
+          "price": 1.234,
+          "qty": 1000,
+          "traded_qty": 1000,
+          "traded_price": 1.234,
+          "trade_amount": 1234.0,
+          "status": "已成",
+          "time": "09:31:01",
+          "order_id": "10001",
+          "status_code": 56,
+          "remark": "",
+          "client_order_id": "",
+          "sort_seq": 1
+        }
+      ],
+      "extra": {},
+      "canonical": "{\"data\":[{\"client_order_id\":\"ETF-QMT1-R-159513-测试\",\"code\":\"159513.SZ\",\"direction\":\"卖出\",\"is_split_child\":true,\"name\":\"纳指科技ETF\",\"order_id\":\"10002\",\"price\":0.0,\"qty\":1,\"remark\":\"M4HUB:子单-甲\",\"sort_seq\":2,\"split_child_client_order_id\":\"ETF-QMT1-R-159513-测试\",\"split_child_count\":\"2\",\"split_child_index\":\"1\",\"split_display_no\":\"1\",\"split_group_no\":\"1\",\"split_parent_id\":\"父单一\",\"split_source\":\"四合一\",\"status\":\"已报\",\"status_code\":50,\"time\":\"09:31:02.100\",\"trade_amount\":0.0,\"traded_price\":0.0,\"traded_qty\":0},{\"client_order_id\":\"\",\"code\":\"510300.SH\",\"direction\":\"买入\",\"name\":\"沪深300ETF\",\"order_id\":\"10001\",\"price\":1.234,\"qty\":1000,\"remark\":\"\",\"sort_seq\":1,\"status\":\"已成\",\"status_code\":56,\"time\":\"09:31:01\",\"trade_amount\":1234.0,\"traded_price\":1.234,\"traded_qty\":1000}],\"extra\":{}}",
+      "sha1": "57d8fd9c0f0043a14707d14e307941a7f1550b98"
+    },
+    {
+      "name": "production_positions_unicode_integral_floats",
+      "kind": "positions",
+      "data": [
+        {
+          "code": "159513.SZ",
+          "name": "纳指科技ETF",
+          "volume": 600000,
+          "available": 600000,
+          "cost_price": 1.2345,
+          "current_price": 0.0,
+          "profit": 0.0,
+          "profit_rate": 0.012345,
+          "market_value": 740700.0
+        },
+        {
+          "code": "510300.SH",
+          "name": "沪深300ETF",
+          "volume": 0,
+          "available": 0,
+          "cost_price": 0.0,
+          "current_price": 3.987,
+          "profit": -12.5,
+          "profit_rate": -0.001,
+          "market_value": 0.0
+        }
+      ],
+      "extra": {"available_cash": 1000000.0},
+      "canonical": "{\"data\":[{\"available\":600000,\"code\":\"159513.SZ\",\"cost_price\":1.2345,\"current_price\":0.0,\"market_value\":740700.0,\"name\":\"纳指科技ETF\",\"profit\":0.0,\"profit_rate\":0.012345,\"volume\":600000},{\"available\":0,\"code\":\"510300.SH\",\"cost_price\":0.0,\"current_price\":3.987,\"market_value\":0.0,\"name\":\"沪深300ETF\",\"profit\":-12.5,\"profit_rate\":-0.001,\"volume\":0}],\"extra\":{\"available_cash\":1000000.0}}",
+      "sha1": "058ab6a6d8a353db91404fcae9b84b06a86b12a7"
+    },
+    {
+      "name": "production_empty_positions_zero_cash",
+      "kind": "positions",
+      "data": [],
+      "extra": {"available_cash": 0.0},
+      "canonical": "{\"data\":[],\"extra\":{\"available_cash\":0.0}}",
+      "sha1": "0590047a642177acba51cbf333deb065d5add0e3"
+    }
+  ]
+}
