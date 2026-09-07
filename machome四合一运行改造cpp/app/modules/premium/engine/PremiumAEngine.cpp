@@ -244,12 +244,7 @@ void PremiumAEngine::start()
                 Q_EMIT eventReady(kind, summary);
             });
     connect(core_.get(), &CoreServer::nativeDetailPublished, this,
-            [this](const QJsonObject &detail) {
-                if (detailSubscriptions_.contains(
-                        detail.value(QStringLiteral("symbol")).toString())) {
-                    Q_EMIT eventReady(QStringLiteral("premium.detail"), detail);
-                }
-            });
+            &PremiumAEngine::forwardNativeDetail);
     connect(core_.get(), &CoreServer::nativeSignalPublished, this,
             [this](const QJsonObject &signal) {
                 Q_EMIT eventReady(QStringLiteral("premium.signal"), signal);
@@ -453,6 +448,14 @@ void PremiumAEngine::complete(const QString &commandId, bool ok,
                               const QString &message, const QJsonObject &details)
 {
     Q_EMIT commandFinished(commandId, ok, message, details);
+}
+
+void PremiumAEngine::forwardNativeDetail(const QJsonObject &detail)
+{
+    const QString symbol = normalizeSymbol(detail.value(QStringLiteral("s")).toString(
+        detail.value(QStringLiteral("symbol")).toString()));
+    if (!symbol.isEmpty() && detailSubscriptions_.contains(symbol))
+        Q_EMIT eventReady(QStringLiteral("premium.detail"), detail);
 }
 
 void PremiumAEngine::publishSync()

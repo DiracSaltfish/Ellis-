@@ -1,5 +1,6 @@
 #include "modules/premium/engine/PremiumAEngine.h"
 #include "modules/premium/PremiumClient.h"
+#include "modules/premium/engine/common/MarketTypes.h"
 
 #include <QDir>
 #include <QFile>
@@ -24,6 +25,34 @@ quint16 reserveLocalPort()
 class PremiumAEngineTests final : public QObject {
     Q_OBJECT
 private Q_SLOTS:
+    void nativeDetailForwardsCompactSymbolOnlyWhileSubscribed() {
+        QTemporaryDir root;
+        PremiumAEngine engine;
+        engine.initialize({"premium", root.path(), {{"summary_port", 0}, {"l1_port", 0}, {"replay", true}}, true});
+        engine.start();
+        QSignalSpy events(&engine, &PremiumAEngine::eventReady);
+        engine.submitCommand("premium_detail_subscribe", {{"symbol", "159217.SZ"}}, "detail-readonly");
+        events.clear();
+        machome::premium::engine::QuoteSnapshot quote;
+        quote.symbol = "159217.SZ";
+        quote.lastPriceE6 = 1234000;
+        QJsonObject wire = quote.toDetailJson();
+        QVERIFY(wire.contains("s"));
+        QVERIFY(!wire.contains("symbol"));
+        QVERIFY(QMetaObject::invokeMethod(&engine, "forwardNativeDetail", Qt::DirectConnection, Q_ARG(QJsonObject, wire)));
+        QCOMPARE(events.size(), 1);
+        QCOMPARE(events[0][0].toString(), QStringLiteral("premium.detail"));
+        QCOMPARE(events[0][1].toJsonObject().value("last_price_e6").toInteger(), qint64(1234000));
+        wire.insert("s", "510300.SH");
+        QVERIFY(QMetaObject::invokeMethod(&engine, "forwardNativeDetail", Qt::DirectConnection, Q_ARG(QJsonObject, wire)));
+        QCOMPARE(events.size(), 1);
+        engine.submitCommand("premium_detail_unsubscribe", {{"symbol", "159217.SZ"}}, "detail-stop");
+        events.clear(); wire.insert("s", "159217.SZ");
+        QVERIFY(QMetaObject::invokeMethod(&engine, "forwardNativeDetail", Qt::DirectConnection, Q_ARG(QJsonObject, wire)));
+        QVERIFY(events.isEmpty());
+        engine.stop();
+    }
+
     void editedListsAndNamesSurviveFreshEngine() {
         QTemporaryDir root;
         const hub::ModuleContext ctx{"premium",root.path(),{{"summary_port",0},{"l1_port",0},

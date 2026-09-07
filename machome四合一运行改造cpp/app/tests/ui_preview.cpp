@@ -14,10 +14,11 @@
 #include <QStackedWidget>
 #include <QTemporaryDir>
 #include <QTextStream>
+#include <QTabWidget>
 
 int main(int argc, char **argv) {
     QApplication app(argc, argv);
-    if (argc != 3) return 2;
+    if (argc != 3 && !(argc == 4 && QString::fromLocal8Bit(argv[3]) == "--all-tabs")) return 2;
     QTemporaryDir settings;
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settings.path());
@@ -62,6 +63,20 @@ int main(int argc, char **argv) {
             app.processEvents();
             if (!window.grab().save(output.filePath(pages[i] + "-" + QString::number(width) + ".png"))) return 4;
             QTextStream(stdout) << pages[i] << " " << window.size().width() << "x" << window.size().height() << '\n';
+            if (argc == 4 && i > 0) {
+                for (auto *page : window.findChildren<hub::ModulePage *>()) {
+                    if (page->moduleId() != pages[i]) continue;
+                    auto *tabs = page->findChild<QTabWidget *>();
+                    if (!tabs) continue;
+                    for (int tab = 0; tab < tabs->count(); ++tab) {
+                        tabs->setCurrentIndex(tab);
+                        app.processEvents();
+                        if (!window.grab().save(output.filePath(pages[i] + "-tab-" + QString::number(tab)
+                            + "-" + QString::number(width) + ".png"))) return 4;
+                    }
+                    tabs->setCurrentIndex(0);
+                }
+            }
         }
     }
     return 0;

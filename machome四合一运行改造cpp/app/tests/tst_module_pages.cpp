@@ -20,6 +20,124 @@ class ModulePagesTests final : public QObject {
     Q_OBJECT
 
 private slots:
+    void premiumNativeSignalsShowFieldsAndDeduplicateReplay() {
+        hub::ModuleConfig config; config.id = "premium"; config.adapter = "premium";
+        hub::PremiumPage page(config);
+        QSignalSpy commands(&page, &hub::ModulePage::commandRequested);
+        QSignalSpy alerts(&page, &hub::ModulePage::alertRequested);
+        page.applyEvent({{"event_kind", "premium.summary"}, {"payload", QJsonObject{{"s", "510300.SH"}, {"name", "测试ETF"}}}});
+        QJsonObject signal{{"type", "signal"}, {"symbol", "510300.SH"}, {"signal_seq", 7},
+            {"occurred_at", "2026-09-07T13:45:00+08:00"}, {"model", "premium+radar"},
+            {"premium_ppm", 12345}, {"rise_30s_ppm", 2345}, {"repeat", false}, {"backfill", false}};
+        page.applyEvent({{"event_kind", "premium.signal"}, {"payload", signal}});
+        auto *table = page.findChild<QTableWidget *>("premiumSignalsTable");
+        QCOMPARE(table->rowCount(), 1);
+        QCOMPARE(table->item(0, 0)->text(), hub::ui::localTimeText(signal.value("occurred_at").toString()));
+        QCOMPARE(table->item(0, 2)->text(), QStringLiteral("测试ETF"));
+        QCOMPARE(table->item(0, 3)->text(), QStringLiteral("溢价率 + 快速拉涨雷达"));
+        QCOMPARE(table->item(0, 4)->text(), QStringLiteral("1.234%"));
+        QCOMPARE(table->item(0, 5)->text(), QStringLiteral("0.234%"));
+        QCOMPARE(table->item(0, 6)->text(), QStringLiteral("首次触发"));
+        QCOMPARE(alerts.count(), 1);
+        signal.insert("backfill", true);
+        page.applyEvent({{"event_kind", "premium.signal"}, {"payload", signal}});
+        signal.insert("backfill", false);
+        page.applyEvent({{"event_kind", "premium.signal"}, {"payload", signal}});
+        QCOMPARE(table->rowCount(), 1);
+        QCOMPARE(alerts.count(), 1);
+        signal.insert("signal_seq", 8); signal.insert("repeat", true);
+        page.applyEvent({{"event_kind", "premium.signal"}, {"payload", signal}});
+        QCOMPARE(table->rowCount(), 2);
+        QCOMPARE(table->item(0, 6)->text(), QStringLiteral("重复提醒"));
+        page.applyEvent({{"event_kind", "premium.sync_complete"}, {"payload", QJsonObject{{"type", "sync_complete"}}}});
+        QCOMPARE(page.findChild<QLabel *>("premiumSyncState")->text(), QStringLiteral("同步完成"));
+        QVERIFY(commands.isEmpty());
+    }
+
+    void webullStatusOverridesOldBookFreshnessAndShowsWireFormats() {
+        hub::ModuleConfig config; config.id = "webull"; config.adapter = "webull";
+        hub::WebullPage page(config);
+        QSignalSpy commands(&page, &hub::ModulePage::commandRequested);
+        const QJsonObject book{{"symbol", "TEST"},
+            {"bids", QJsonArray{QJsonObject{{"level", 3}, {"price", "100.125"}, {"size", "123456"}}}},
+            {"asks", QJsonArray{QJsonObject{{"price", "100.250"}, {"size", "456"}}}}};
+        const QJsonObject telemetry{
+            {"book", book}, {"freshness", "fresh"}, {"status", QJsonObject{{"data_state", "stale"}}},
+            {"clients", QJsonArray{QJsonObject{{"client_id", "test-client"}, {"remote", "127.0.0.1"}, {"message_count", 9}}}}};
+        page.applySnapshot({{"payload", QJsonObject{{"telemetry", telemetry}}}});
+        auto *table = page.findChild<QTableWidget *>("webullBookTable");
+        QCOMPARE(table->rowCount(), 2);
+        QCOMPARE(table->item(1, 0)->text(), QStringLiteral("买盘"));
+        QCOMPARE(table->item(1, 1)->text(), QStringLiteral("3"));
+        QCOMPARE(table->item(1, 2)->text(), QStringLiteral("100.125"));
+        QCOMPARE(table->item(1, 3)->text(), QStringLiteral("123456"));
+        QCOMPARE(page.findChild<QLineEdit *>("webullSymbol")->text(), QStringLiteral("TEST"));
+        bool stale = false;
+        for (auto *label : page.findChildren<QLabel *>())
+            if (label->property("role") == "webullFreshness") stale = label->text() == hub::ui::stateText("stale");
+        QVERIFY(stale);
+        QCOMPARE(page.findChild<QTableWidget *>("webullClientsTable")->item(0, 4)->text(), QStringLiteral("9"));
+        page.applyEvent({{"event_kind", "webull.book"}, {"payload", QJsonObject{
+            {"symbol", "TEST"}, {"book", QJsonObject{{"bids", QJsonArray{QJsonObject{{"price", "101.5"}, {"volume", "20"}}}}, {"asks", QJsonArray{}}}}}}});
+        QCOMPARE(table->rowCount(), 1);
+        QCOMPARE(table->item(0, 3)->text(), QStringLiteral("20"));
+        page.applySnapshot({{"payload", QJsonObject{{"telemetry", QJsonObject{{"status", QJsonObject{{"data_state", "no_data"}}}}}}}});
+        QCOMPARE(table->rowCount(), 0);
+        QVERIFY(commands.isEmpty());
+    }
+
+    void bundledUploadDistinguishesMissingDetailsAndShowsReceipts() {
+        hub::ModuleConfig config; config.id = "upload"; config.adapter = "upload";
+        config.settings.insert("sink_mode", "bundled_business");
+        hub::UploadPage page(config);
+        QSignalSpy commands(&page, &hub::ModulePage::commandRequested);
+        const QJsonObject telemetry{{"workers", QJsonArray{QJsonObject{{"id", "sina"}, {"state", "running"}}}},
+            {"engine", QJsonObject{{"business_engine", "bundled_business"}, {"upload_health", QJsonArray{
+                QJsonObject{{"source", "test-source"}, {"pid", 123}, {"stage", "uploaded"}, {"state", "running"},
+                    {"accepted", 15}, {"last_success_at", "2026-09-07T13:00:00+08:00"}}}}}}};
+        page.applySnapshot({{"payload", QJsonObject{{"telemetry", telemetry}}}});
+        QVERIFY(page.findChild<QLabel *>("uploadFundsTableStatus")->text().contains(QStringLiteral("尚未接入")));
+        QVERIFY(page.findChild<QLabel *>("uploadHistoryTableStatus")->text().contains(QStringLiteral("尚未接入")));
+        auto *receipts = page.findChild<QTableWidget *>("uploadRecordsTable");
+        QCOMPARE(receipts->rowCount(), 1);
+        QCOMPARE(receipts->item(0, 0)->text(), QStringLiteral("test-source"));
+        QCOMPARE(receipts->item(0, 4)->text(), QStringLiteral("15"));
+        QVERIFY(receipts->item(0, 6)->text() != QStringLiteral("—"));
+        QCOMPARE(page.findChild<QTableWidget *>("uploadJobsTable")->item(0, 5)->text(), QStringLiteral("未报告"));
+        QVERIFY(commands.isEmpty());
+    }
+
+    void uploadRedemptionSummaryUsesOnlyLatestTwoDates() {
+        hub::ModuleConfig config; config.id = "upload"; config.adapter = "upload";
+        hub::UploadPage page(config);
+        QJsonArray shares;
+        for (int day : {3, 1, 4, 2}) shares.append(QJsonObject{{"symbol", "SZ159518"},
+            {"date", QStringLiteral("2026-09-%1").arg(day, 2, 10, QChar('0'))}, {"shares_10k", 100 - day}});
+        page.applySnapshot({{"payload", QJsonObject{{"telemetry", QJsonObject{
+            {"history", QJsonObject{{"share_history", shares}}}, {"funds", QJsonArray{}}, {"upload_records", QJsonArray{}}}}}}});
+        auto *history = page.findChild<QTableWidget *>("uploadHistoryTable");
+        QCOMPARE(history->rowCount(), 5);
+        QCOMPARE(history->item(0, 0)->text(), QStringLiteral("昨日赎回"));
+        QCOMPARE(history->item(0, 2)->text(), QStringLiteral("2026-09-04"));
+        QCOMPARE(history->item(0, 3)->text(), QStringLiteral("1"));
+        QVERIFY(page.findChild<QLabel *>("uploadFundsTableStatus")->text().contains(QStringLiteral("暂无基金记录")));
+    }
+
+    void pcfMissingComponentsDoesNotLookLikeSuccessfulData() {
+        hub::PcfDetailWindow page(QStringLiteral("159518"));
+        QSignalSpy commands(&page, &hub::PcfDetailWindow::qmtCommandRequested);
+        page.applyData({{"symbol", "159518"}, {"status", "error"}, {"error", "PCF pending"}});
+        QVERIFY(page.findChild<QPlainTextEdit *>("pcfComponents")->toPlainText().contains(QStringLiteral("尚未收到")));
+        bool hasError = false;
+        for (auto *label : page.findChildren<QLabel *>())
+            if (label->property("role") == "pcfDataStatus") hasError = label->text().contains("PCF pending");
+        QVERIFY(hasError);
+        page.applyData({{"symbol", "159518"}, {"status", "ready"},
+            {"components", QJsonArray{QJsonObject{{"SecurityID", "000001"}, {"Quantity", 100}}}}});
+        QVERIFY(page.findChild<QPlainTextEdit *>("pcfComponents")->toPlainText().contains("000001"));
+        QVERIFY(commands.isEmpty());
+    }
+
     void overviewDoesNotReportMissingTelemetryAsHealthy() {
         hub::ModuleConfig config;
         config.id = "upload"; config.adapter = "upload"; config.engine = "native";

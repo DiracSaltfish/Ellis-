@@ -93,6 +93,9 @@ private:
     QLineEdit *positionValueEdit_ = nullptr;
     QPlainTextEdit *messageEdit_ = nullptr;
     QLabel *workersExpectedLabel_ = nullptr;
+    QLabel *fundsStatus_ = nullptr;
+    QLabel *historyStatus_ = nullptr;
+    QLabel *recordsStatus_ = nullptr;
     QPushButton *ibkrReconnectButton_ = nullptr;
     QPushButton *ibkrDisconnectButton_ = nullptr;
     QList<QPointer<QPushButton>> jobControlButtons_;

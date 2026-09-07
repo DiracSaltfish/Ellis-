@@ -30,6 +30,9 @@ public Q_SLOTS:
     void submitCommand(const QString &action, const QJsonObject &arguments,
                        const QString &commandId) override;
 
+private Q_SLOTS:
+    void forwardNativeDetail(const QJsonObject &detail);
+
 private:
     bool writeRuntimeConfiguration(QString *error);
     void publishSnapshot();

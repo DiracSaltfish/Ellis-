@@ -626,20 +626,28 @@ UploadPage::UploadPage(ModuleConfig config, QWidget *parent)
                              QStringLiteral("篮子卖一净值"), QStringLiteral("仓位"),
                              QStringLiteral("更新时间")});
     fundsTable_->setObjectName(QStringLiteral("uploadFundsTable"));
-    tabs->addTab(fundsTable_, QStringLiteral("基金与详情"));
+    const auto dataPage = [](QTableWidget *table, QLabel **status) {
+        auto *page = new QWidget;
+        auto *layout = new QVBoxLayout(page);
+        *status = textLabel(QStringLiteral("等待服务返回数据"), table->objectName() + QStringLiteral("Status"));
+        layout->addWidget(*status);
+        layout->addWidget(table);
+        return page;
+    };
+    tabs->addTab(dataPage(fundsTable_, &fundsStatus_), QStringLiteral("基金与详情"));
 
     historyTable_ = makeTable({QStringLiteral("类型"), QStringLiteral("标的"),
                                QStringLiteral("日期"), QStringLiteral("值"),
                                QStringLiteral("来源"), QStringLiteral("详情")});
     historyTable_->setObjectName(QStringLiteral("uploadHistoryTable"));
-    tabs->addTab(historyTable_, QStringLiteral("历史 / 昨日赎回"));
+    tabs->addTab(dataPage(historyTable_, &historyStatus_), QStringLiteral("历史 / 昨日赎回"));
 
     recordsTable_ = makeTable({QStringLiteral("记录号"), QStringLiteral("任务"),
                                QStringLiteral("幂等键"), QStringLiteral("SHA-256"),
                                QStringLiteral("输出模式"), QStringLiteral("记录时间"),
                                QStringLiteral("接收确认")});
     recordsTable_->setObjectName(QStringLiteral("uploadRecordsTable"));
-    tabs->addTab(recordsTable_, QStringLiteral("诊断与统计"));
+    tabs->addTab(dataPage(recordsTable_, &recordsStatus_), QStringLiteral("诊断与统计"));
 
     auto *settings = new QWidget;
     auto *settingsLayout = new QFormLayout(settings);
@@ -734,9 +742,11 @@ void UploadPage::applySnapshot(const QJsonObject &message) {
         workersTable_->item(row, 0)->setToolTip(id);
         setCell(workersTable_, row, 1, ui::stateText(worker.value(QStringLiteral("kind")).toString()));
         setCell(workersTable_, row, 2, operatorStateText(worker.value(QStringLiteral("state")).toString()));
-        setCell(workersTable_, row, 3, operatorStateText(worker.value(QStringLiteral("stage")).toString()));
+        setCell(workersTable_, row, 3, worker.value(QStringLiteral("stage")).toString().isEmpty()
+            ? QStringLiteral("未报告") : operatorStateText(worker.value(QStringLiteral("stage")).toString()));
         setCell(workersTable_, row, 4, window);
-        setCell(workersTable_, row, 5, ui::localTimeText(worker.value(QStringLiteral("next_run_at")).toString()));
+        setCell(workersTable_, row, 5, worker.contains(QStringLiteral("next_run_at"))
+            ? ui::localTimeText(worker.value(QStringLiteral("next_run_at")).toString()) : QStringLiteral("未报告"));
         setCell(workersTable_, row, 6, ui::localTimeText(worker.value(QStringLiteral("last_success_at")).toString()));
         setCell(workersTable_, row, 7, ui::stateText(worker.value(QStringLiteral("model_version")).toString()));
         auto *button = new QPushButton(QStringLiteral("重跑"), workersTable_);
@@ -751,6 +761,14 @@ void UploadPage::applySnapshot(const QJsonObject &message) {
     }
 
     const QJsonArray funds = telemetry.value(QStringLiteral("funds")).toArray();
+    const bool bundled = telemetry.value("engine").toObject().value("sink_mode").toString() == "bundled_business"
+        || telemetry.value("engine").toObject().value("business_engine").toString() == "bundled_business"
+        || config_.settings.value("sink_mode").toString() == "bundled_business";
+    const QString unavailable = bundled
+        ? QStringLiteral("本页尚未接入网站明细，不代表没有业务数据。请在“指南与留言”打开业务网站查看。")
+        : QStringLiteral("服务尚未返回本页数据。");
+    fundsStatus_->setText(!telemetry.value("funds").isArray() ? unavailable
+        : funds.isEmpty() ? QStringLiteral("服务已返回：暂无基金记录") : QStringLiteral("共 %1 个基金").arg(funds.size()));
     fundsTable_->setRowCount(funds.size());
     row = 0;
     for (const auto &value : funds) {
@@ -806,14 +824,22 @@ void UploadPage::applySnapshot(const QJsonObject &message) {
         historyRows.append(item);
     }
     QHash<QString, QJsonObject> newerShare;
-    for (const auto &value : history.value(QStringLiteral("share_history")).toArray()) {
-        const QJsonObject item = value.toObject();
+    auto shareValues = history.value(QStringLiteral("share_history")).toArray().toVariantList();
+    std::stable_sort(shareValues.begin(), shareValues.end(), [](const QVariant &a, const QVariant &b) {
+        return a.toMap().value("date").toString() > b.toMap().value("date").toString();
+    });
+    QSet<QString> comparedShares;
+    for (const auto &value : shareValues) {
+        const QJsonObject item = QJsonObject::fromVariantMap(value.toMap());
         const QString symbol = item.value(QStringLiteral("symbol")).toString();
+        if (comparedShares.contains(symbol)) continue;
         if (!newerShare.contains(symbol)) {
             newerShare.insert(symbol, item);
             continue;
         }
-        const QJsonObject newest = newerShare.take(symbol);
+        const QJsonObject newest = newerShare.value(symbol);
+        if (item.value("date") == newest.value("date")) continue;
+        comparedShares.insert(symbol);
         const double redeemed = item.value(QStringLiteral("shares_10k")).toDouble()
             - newest.value(QStringLiteral("shares_10k")).toDouble();
         if (redeemed > 0) {
@@ -825,6 +851,8 @@ void UploadPage::applySnapshot(const QJsonObject &message) {
         }
     }
     historyTable_->setRowCount(historyRows.size());
+    historyStatus_->setText(!telemetry.value("history").isObject() ? unavailable
+        : historyRows.isEmpty() ? QStringLiteral("服务已返回：暂无历史记录") : QStringLiteral("共 %1 条记录；份额减少按每个基金最近两个日期计算").arg(historyRows.size()));
     row = 0;
     for (const QJsonObject &item : historyRows) {
         setCell(historyTable_, row, 0, item.value(QStringLiteral("kind_label")).toString(), item);
@@ -837,6 +865,11 @@ void UploadPage::applySnapshot(const QJsonObject &message) {
         ++row;
     }
     const QJsonArray records = telemetry.value(QStringLiteral("upload_records")).toArray();
+    recordsTable_->setHorizontalHeaderLabels({QStringLiteral("记录号"), QStringLiteral("任务"),
+        QStringLiteral("幂等键"), QStringLiteral("SHA-256"), QStringLiteral("输出模式"),
+        QStringLiteral("记录时间"), QStringLiteral("接收确认")});
+    recordsStatus_->setText(!telemetry.value("upload_records").isArray() ? unavailable
+        : records.isEmpty() ? QStringLiteral("服务已返回：暂无上传记录") : QStringLiteral("共 %1 条上传记录").arg(records.size()));
     recordsTable_->setRowCount(records.size());
     row = 0;
     for (const auto &value : records) {
@@ -849,6 +882,24 @@ void UploadPage::applySnapshot(const QJsonObject &message) {
         setCell(recordsTable_, row, 5, item.value(QStringLiteral("created_at")).toString());
         setCell(recordsTable_, row, 6, item.value(QStringLiteral("acked_at")).toString());
         ++row;
+    }
+    if (bundled && !telemetry.contains("upload_records")) {
+        const auto health = telemetry.value("engine").toObject().value("upload_health").toArray();
+        recordsTable_->setHorizontalHeaderLabels({QStringLiteral("数据来源"), QStringLiteral("进程"),
+            QStringLiteral("状态"), QStringLiteral("阶段"), QStringLiteral("接收次数"),
+            QStringLiteral("最近更新"), QStringLiteral("上次成功确认")});
+        recordsTable_->setRowCount(health.size());
+        recordsStatus_->setText(QStringLiteral("当前显示 %1 个来源的上传确认状态；网站逐笔记录请在业务网站查看。").arg(health.size()));
+        for (int i = 0; i < health.size(); ++i) {
+            const auto item = health[i].toObject();
+            setCell(recordsTable_, i, 0, firstValue(item, {"source"}), item);
+            setCell(recordsTable_, i, 1, firstValue(item, {"pid"}));
+            setCell(recordsTable_, i, 2, ui::stateText(item.value("state").toString()));
+            setCell(recordsTable_, i, 3, ui::stateText(item.value("stage").toString()));
+            setCell(recordsTable_, i, 4, firstValue(item, {"accepted"}));
+            setCell(recordsTable_, i, 5, ui::localTimeText(item.value("updated_at").toString()));
+            setCell(recordsTable_, i, 6, ui::localTimeText(item.value("last_success_at").toString()));
+        }
     }
     updateBusyControls();
 }
@@ -1045,7 +1096,7 @@ PremiumPage::PremiumPage(ModuleConfig config, QWidget *parent)
     auto *buttons = new QHBoxLayout;
     auto *sync = new QPushButton(QStringLiteral("重新同步"));
     auto *raw = new QPushButton(QStringLiteral("请求原始快照"));
-    syncLabel_ = textLabel(QStringLiteral("等待 sync"), QStringLiteral("secondaryText"));
+    syncLabel_ = textLabel(QStringLiteral("等待同步"), QStringLiteral("premiumSyncState"));
     soundEnabled_ = new QCheckBox(QStringLiteral("声音"));
     popupEnabled_ = new QCheckBox(QStringLiteral("系统通知"));
     QSettings alertSettings;
@@ -1067,8 +1118,8 @@ PremiumPage::PremiumPage(ModuleConfig config, QWidget *parent)
     buttons->addStretch();
     liveLayout->addLayout(buttons);
     signalsTable_ = makeTable({QStringLiteral("时间"), QStringLiteral("标的"), QStringLiteral("名称"),
-                               QStringLiteral("模型/事件"), QStringLiteral("溢价率"), QStringLiteral("窗口"),
-                               QStringLiteral("级别")});
+                               QStringLiteral("模型/事件"), QStringLiteral("溢价率"), QStringLiteral("30秒拉升"),
+                               QStringLiteral("提醒类型")});
     signalsTable_->setObjectName(QStringLiteral("premiumSignalsTable"));
     liveLayout->addWidget(signalsTable_);
     connect(signalsTable_, &QTableWidget::cellDoubleClicked, this, [this](int row, int) {
@@ -1248,12 +1299,12 @@ void PremiumPage::applySnapshot(const QJsonObject &message) {
     }
     const auto watch = telemetry.value(QStringLiteral("watchlist"));
     const auto hot = telemetry.value(QStringLiteral("l1_hotlist"));
-    if (watch.isArray() && watchlistEdit_->toPlainText().trimmed().isEmpty()) {
+    if (watch.isArray() && !watchlistEdit_->hasFocus() && !watchlistEdit_->document()->isModified()) {
         QStringList values;
         for (const auto &value : watch.toArray()) values.push_back(value.toString());
         watchlistEdit_->setPlainText(values.join(u'\n'));
     }
-    if (hot.isArray() && hotlistEdit_->toPlainText().trimmed().isEmpty()) {
+    if (hot.isArray() && !hotlistEdit_->hasFocus() && !hotlistEdit_->document()->isModified()) {
         QStringList values;
         for (const auto &value : hot.toArray()) values.push_back(value.toString());
         hotlistEdit_->setPlainText(values.join(u'\n'));
@@ -1283,6 +1334,10 @@ void PremiumPage::applyEvent(const QJsonObject &message) {
     ModulePage::applyEvent(message);
     const QString kind = message.value(QStringLiteral("event_kind")).toString();
     const auto payload = eventPayload(message);
+    if (kind == QStringLiteral("premium.raw_snapshot")) {
+        showJsonDetail(this, QStringLiteral("原始行情快照"), payload);
+        return;
+    }
     if (kind == QStringLiteral("premium.detail_state")) {
         for (auto it = detailWindows_.begin(); it != detailWindows_.end(); ++it) {
             if (it.value()) {
@@ -1352,7 +1407,10 @@ void PremiumPage::applyEvent(const QJsonObject &message) {
         }
     }
     else if (kind.contains(QStringLiteral("sync"), Qt::CaseInsensitive)) {
-        syncLabel_->setText(firstValue(payload, {QStringLiteral("state"), QStringLiteral("type")}, kind));
+        const QString type = payload.value("type").toString();
+        syncLabel_->setText(type == "sync_complete" || kind.endsWith("sync_complete")
+            ? QStringLiteral("同步完成") : type == "sync_begin" || kind.endsWith("sync_begin")
+                ? QStringLiteral("同步中") : ui::stateText(firstValue(payload, {"state", "phase"}, kind)));
     }
 }
 
@@ -1438,17 +1496,25 @@ bool PremiumPage::addSignal(const QJsonObject &payload) {
     };
     const auto key = identity(payload);
     for (int row = 0; row < signalsTable_->rowCount(); ++row) {
-        if (identity(signalsTable_->item(row, 0)->data(Qt::UserRole).toJsonObject()) == key)
+        const auto stored = QJsonDocument::fromJson(signalsTable_->item(row, 0)->data(Qt::UserRole).toString().toUtf8()).object();
+        if (identity(stored) == key)
             return false;
     }
     signalsTable_->insertRow(0);
-    setCell(signalsTable_, 0, 0, firstValue(payload, {QStringLiteral("timestamp"), QStringLiteral("ts"), QStringLiteral("time")}), payload);
-    setCell(signalsTable_, 0, 1, firstValue(payload, {QStringLiteral("symbol"), QStringLiteral("code")}));
-    setCell(signalsTable_, 0, 2, firstValue(payload, {QStringLiteral("name"), QStringLiteral("display_name")}));
-    setCell(signalsTable_, 0, 3, firstValue(payload, {QStringLiteral("model"), QStringLiteral("event"), QStringLiteral("kind")}));
-    setCell(signalsTable_, 0, 4, firstValue(payload, {QStringLiteral("premium_pct"), QStringLiteral("premium_rate"), QStringLiteral("premium")}));
-    setCell(signalsTable_, 0, 5, firstValue(payload, {QStringLiteral("window_sec"), QStringLiteral("window")}));
-    setCell(signalsTable_, 0, 6, firstValue(payload, {QStringLiteral("severity"), QStringLiteral("level")}));
+    setCell(signalsTable_, 0, 0, ui::localTimeText(firstValue(payload, {"occurred_at", "timestamp", "ts", "time"})), payload);
+    const QString symbol = firstValue(payload, {"symbol", "s", "code"});
+    setCell(signalsTable_, 0, 1, symbol);
+    QString name = firstValue(payload, {"name", "display_name"}, {});
+    if (name.isEmpty()) name = pendingSummaries_.value(symbol).value("name").toString();
+    if (name.isEmpty() && summaryRows_.contains(symbol)) name = summariesTable_->item(summaryRows_.value(symbol), 1)->text();
+    setCell(signalsTable_, 0, 2, name.isEmpty() ? QStringLiteral("—") : name);
+    setCell(signalsTable_, 0, 3, premiumModelText(firstValue(payload, {"model", "event", "kind"}, {})));
+    setCell(signalsTable_, 0, 4, payload.contains("premium_ppm") ? premiumPpmText(payload, "premium_ppm")
+        : firstValue(payload, {"premium_pct", "premium_rate", "premium"}));
+    setCell(signalsTable_, 0, 5, premiumPpmText(payload, "rise_30s_ppm"));
+    setCell(signalsTable_, 0, 6, payload.contains("repeat")
+        ? payload.value("repeat").toBool() ? QStringLiteral("重复提醒") : QStringLiteral("首次触发")
+        : ui::stateText(firstValue(payload, {"severity", "level"})));
     if (signalsTable_->rowCount() > 2000) signalsTable_->removeRow(signalsTable_->rowCount() - 1);
     return true;
 }
@@ -1558,6 +1624,8 @@ WebullPage::WebullPage(ModuleConfig config, QWidget *parent)
     symbolEdit_->setToolTip(QStringLiteral("标的由原生 WebullEngine 配置决定；切换需修改配置并重启模块"));
     auto *load = new QPushButton(QStringLiteral("加载盘口"));
     staleLabel_ = textLabel(QStringLiteral("尚无行情"), QStringLiteral("stateWarn"));
+    staleLabel_->setProperty("role", QStringLiteral("webullFreshness"));
+    symbolEdit_->setObjectName(QStringLiteral("webullSymbol"));
     connect(load, &QPushButton::clicked, this, [this] {
         send(QStringLiteral("webull_get_book"), QJsonObject{{QStringLiteral("symbol"), symbolEdit_->text().trimmed()}});
     });
@@ -1569,10 +1637,12 @@ WebullPage::WebullPage(ModuleConfig config, QWidget *parent)
     bookLayout->addLayout(bookActions);
     bookTable_ = makeTable({QStringLiteral("方向"), QStringLiteral("档位"), QStringLiteral("价格"),
                             QStringLiteral("数量"), QStringLiteral("订单数")});
+    bookTable_->setObjectName(QStringLiteral("webullBookTable"));
     bookLayout->addWidget(bookTable_);
     tabs->addTab(book, QStringLiteral("实时盘口"));
     clientsTable_ = makeTable({QStringLiteral("客户端标识"), QStringLiteral("远端地址"), QStringLiteral("连接时间"),
                                QStringLiteral("最后发送"), QStringLiteral("消息数")});
+    clientsTable_->setObjectName(QStringLiteral("webullClientsTable"));
     tabs->addTab(clientsTable_, QStringLiteral("客户端"));
 
     auto *runtime = new QWidget;
@@ -1644,8 +1714,9 @@ void WebullPage::applySnapshot(const QJsonObject &message) {
     }
     updateBook(telemetry.value(QStringLiteral("book")).toObject());
     updateClients(telemetry.value(QStringLiteral("clients")));
-    const QString freshness = firstValue(telemetry, {QStringLiteral("freshness"), QStringLiteral("status.data_state"),
-                                                      QStringLiteral("status.data.state")}, QStringLiteral("unknown"));
+    // Status continues to update when the last book has stopped changing.
+    const QString freshness = firstValue(telemetry, {QStringLiteral("status.data_state"),
+        QStringLiteral("status.data.state"), QStringLiteral("freshness")}, QStringLiteral("unknown"));
     const bool fresh = freshness == QStringLiteral("fresh") || freshness == QStringLiteral("flowing");
     staleLabel_->setText(ui::stateText(freshness));
     staleLabel_->setObjectName(fresh ? QStringLiteral("stateGood") : QStringLiteral("stateWarn"));
@@ -1671,15 +1742,19 @@ void WebullPage::applyEvent(const QJsonObject &message) {
 }
 
 void WebullPage::updateBook(const QJsonObject &book) {
-    if (book.isEmpty()) return;
+    if (book.isEmpty()) { bookTable_->setRowCount(0); return; }
+    const QString symbol = book.value("symbol").toString();
+    if (!symbol.isEmpty()) symbolEdit_->setText(symbol);
+    const auto levelsBook = book.value("book").isObject() ? book.value("book").toObject() : book;
     QJsonArray rows;
-    auto appendSide = [&rows, &book](const QString &side) {
-        const auto levels = book.value(side).toArray();
+    auto appendSide = [&rows, &levelsBook](const QString &side) {
+        const auto levels = levelsBook.value(side).toArray();
         int level = 1;
         for (const auto &value : levels) {
             auto object = value.toObject();
             object.insert(QStringLiteral("_side"), side);
-            object.insert(QStringLiteral("_level"), level++);
+            object.insert(QStringLiteral("_level"), object.value("level").toInt(level));
+            ++level;
             rows.append(object);
         }
     };
@@ -1689,7 +1764,8 @@ void WebullPage::updateBook(const QJsonObject &book) {
     int row = 0;
     for (const auto &value : rows) {
         const auto object = value.toObject();
-        setCell(bookTable_, row, 0, object.value(QStringLiteral("_side")).toString(), object);
+        setCell(bookTable_, row, 0, object.value(QStringLiteral("_side")).toString() == "asks"
+            ? QStringLiteral("卖盘") : QStringLiteral("买盘"), object);
         setCell(bookTable_, row, 1, QString::number(object.value(QStringLiteral("_level")).toInt()));
         setCell(bookTable_, row, 2, firstValue(object, {QStringLiteral("price"), QStringLiteral("px")}));
         setCell(bookTable_, row, 3, firstValue(object, {QStringLiteral("size"), QStringLiteral("quantity"), QStringLiteral("volume")}));
@@ -1860,7 +1936,7 @@ void RealtimePage::applySnapshot(const QJsonObject &message) {
     qmtBackends_ = telemetry.value(QStringLiteral("qmt_backends")).toObject();
     updateMutationControlState(payload);
     const auto watchlist = telemetry.value(QStringLiteral("watchlist")).toArray();
-    if (!watchlist.isEmpty() && watchlistEdit_ && !watchlistEdit_->hasFocus()
+    if (telemetry.value("watchlist").isArray() && watchlistEdit_ && !watchlistEdit_->hasFocus()
         && !watchlistEdit_->document()->isModified()) {
         QStringList symbols;
         for (const auto &entry : watchlist) {
@@ -2056,6 +2132,7 @@ PcfDetailWindow::PcfDetailWindow(QString symbol, QWidget *parent)
     resize(980, 720);
     auto *layout = new QVBoxLayout(this);
     status_ = textLabel(QStringLiteral("正在请求 PCF…"), QStringLiteral("stateIdle"));
+    status_->setProperty("role", QStringLiteral("pcfDataStatus"));
     layout->addWidget(status_);
     auto *tabs = new QTabWidget;
     auto add = [tabs](const QString &title) {
@@ -2066,6 +2143,7 @@ PcfDetailWindow::PcfDetailWindow(QString symbol, QWidget *parent)
     };
     summary_ = add(QStringLiteral("清单摘要"));
     components_ = add(QStringLiteral("成分证券"));
+    components_->setObjectName(QStringLiteral("pcfComponents"));
     tabs->addTab(buildQmtTab(QStringLiteral("QMT1")), QStringLiteral("QMT1"));
     tabs->addTab(buildQmtTab(QStringLiteral("QMT2")), QStringLiteral("QMT2"));
     layout->addWidget(tabs, 1);
@@ -2263,10 +2341,17 @@ void PcfDetailWindow::updateQmtTab(const QString &backend, const QJsonObject &sn
 }
 
 void PcfDetailWindow::applyData(const QJsonObject &object) {
-    status_->setText(QStringLiteral("已更新 %1").arg(utcNow()));
+    const QString state = object.value("status").toString();
+    status_->setText(QStringLiteral("清单状态：%1 · %2").arg(
+        state.isEmpty() ? QStringLiteral("未报告") : ui::stateText(state),
+        object.value("error").toString().isEmpty()
+            ? ui::localTimeText(object.value("cached_at").toString()) : object.value("error").toString()));
     summary_->setPlainText(pretty(object.value(QStringLiteral("summary")).isUndefined()
                                       ? QJsonValue(object) : object.value(QStringLiteral("summary"))));
-    components_->setPlainText(pretty(object.value(QStringLiteral("components"))));
+    components_->setPlainText(object.value("components").isArray()
+        ? object.value("components").toArray().isEmpty() ? QStringLiteral("服务返回的成分列表为空")
+                                                        : pretty(object.value("components"))
+        : QStringLiteral("尚未收到成分清单。请查看清单状态和错误信息；当前内容不能视为完整 PCF。"));
     QJsonObject embedded;
     if (object.value(QStringLiteral("qmt1")).isObject()) {
         embedded.insert(QStringLiteral("QMT1"), object.value(QStringLiteral("qmt1")));
