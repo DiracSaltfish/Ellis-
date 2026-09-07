@@ -436,6 +436,69 @@ private slots:
         engine.stop();
     }
 
+    void firstWindNullFaultRequiresSubsequentSubscriptionAck_data() {
+        QTest::addColumn<QString>("fault");
+        QTest::addColumn<bool>("subscribeAck");
+        QTest::addColumn<bool>("expectedActive");
+        QTest::newRow("known-first-call") << "EXC_BAD_ACCESS (code=1, address=0x0)." << true << true;
+        QTest::newRow("zero-padded") << "EXC_BAD_ACCESS (address = 0x0000000000000000)" << true << true;
+        QTest::newRow("no-formal-ack") << "EXC_BAD_ACCESS (address=0x0)" << false << false;
+        QTest::newRow("non-null-fault") << "EXC_BAD_ACCESS (address=0x0000010)" << true << false;
+        QTest::newRow("permission-error") << "attach failed: Operation not permitted" << true << false;
+    }
+
+    void firstWindNullFaultRequiresSubsequentSubscriptionAck() {
+        QFETCH(QString, fault);
+        QFETCH(bool, subscribeAck);
+        QFETCH(bool, expectedActive);
+        QTemporaryDir root;
+        const QString path = root.filePath("helper.py");
+        QFile helper(path);
+        QVERIFY(helper.open(QIODevice::WriteOnly));
+        const QByteArray encodedFault = QJsonDocument(QJsonArray{fault}).toJson(QJsonDocument::Compact);
+        helper.write("#!/usr/bin/env python3\nimport json,sys\n"
+                     "def emit(value): print(json.dumps(value),flush=True)\n"
+                     "emit({'type':'hello','protocol':1})\n"
+                     "emit({'type':'status','state':'ready','wind_running':True,'tbapi_loaded':True})\n");
+        helper.write("fault=" + encodedFault + "[0]\n");
+        helper.write(subscribeAck ? "ack=True\n" : "ack=False\n");
+        helper.write("for line in sys.stdin:\n"
+                     " c=json.loads(line);a=c.get('action')\n"
+                     " with open(__file__+'.commands','a') as log: log.write(str(a)+'\\n')\n"
+                     " if a=='quit': break\n"
+                     " if a=='warmup': emit({'type':'error','action':'warmup','code':'warmup_subscribe_failed','message':fault})\n"
+                     " if a=='subscribe' and ack: emit({'type':'status','state':'subscribed'})\n"
+                     " if a=='unsubscribe': emit({'type':'status','state':'ready','unsubscribed':True})\n");
+        helper.close();
+        QVERIFY(QFile::setPermissions(path, QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner));
+        auto settings = context(root.path()).settings;
+        settings.insert("wind_helper_mode", "fixture");
+        settings.insert("wind_helper_path", path);
+        RedemptionEngine engine;
+        engine.setNowForTest(shanghai(9, 15, 5));
+        engine.initialize({"redemption", root.path(), settings, true});
+        engine.start();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.snapshot().value("wind").toObject().value("state").toString(),
+                                  QStringLiteral("ready"), 3000);
+        engine.setNowForTest(shanghai(9, 15, 30));
+        engine.evaluateScheduleForTest();
+        if (expectedActive) {
+            QTRY_VERIFY_WITH_TIMEOUT(engine.snapshot().value("monitoring").toBool(), 7000);
+            QVERIFY(engine.snapshot().value("last_error").toString().isEmpty());
+        } else {
+            QTest::qWait(4000);
+            QVERIFY(!engine.snapshot().value("monitoring").toBool());
+        }
+        QFile commands(path + ".commands");
+        QVERIFY(commands.open(QIODevice::ReadOnly));
+        const auto actions = commands.readAll().split('\n');
+        QCOMPARE(actions.count("warmup"), 1);
+        QCOMPARE(actions.contains("subscribe"), expectedActive || !subscribeAck);
+        // No order commands or real Wind process are used by this fixture.
+        QVERIFY(!engine.snapshot().value("health").toObject().value("live_orders_allowed").toBool());
+        engine.stop();
+    }
+
     void dualQmtBackendsStartUnsyncedAndIndependent() {
         QTemporaryDir root;
         QJsonObject settings = context(root.path()).settings;

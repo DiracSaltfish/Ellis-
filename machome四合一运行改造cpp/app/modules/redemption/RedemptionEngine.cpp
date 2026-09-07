@@ -1244,6 +1244,26 @@ void RedemptionEngine::handleHelperMessage(const QJsonObject &message) {
             helperLastError_ = error;
         }
     } else if (type == QStringLiteral("error")) {
+        const QString detail = message.value(QStringLiteral("message")).toString();
+        const QDate day = nowUtc().toTimeZone(QTimeZone("Asia/Shanghai")).date();
+        // The original host consumes Wind's first-call lazy-initialization
+        // null fault once. The helper has already resumed Wind after lldb
+        // exits. Formal subscription must still receive its normal ACK.
+        static const QRegularExpression nullAddress(QStringLiteral("address\\s*=\\s*0x0+\\b"));
+        if (message.value(QStringLiteral("action")).toString() == QStringLiteral("warmup")
+            && message.value(QStringLiteral("code")).toString() == QStringLiteral("warmup_subscribe_failed")
+            && detail.contains(QStringLiteral("EXC_BAD_ACCESS"))
+            && nullAddress.match(detail).hasMatch()
+            && warmupAttemptDay_ == day && warmupDay_ != day && windCollectionReady()) {
+            warmupDay_ = day;
+            helperLastError_.clear();
+            lastError_.clear();
+            helperState_ = QStringLiteral("ready");
+            emitStatus(QStringLiteral("已处理 Wind 首次初始化空地址异常，等待 2 秒后确认正式订阅"));
+            QTimer::singleShot(2000, this, &RedemptionEngine::finishWarmupSettle);
+            publishSnapshot();
+            return;
+        }
         helperLastError_ = message.value(QStringLiteral("message")).toString();
         helperState_ = QStringLiteral("degraded");
         if (monitoringRequested_) {

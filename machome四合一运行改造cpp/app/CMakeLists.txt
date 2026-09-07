@@ -767,7 +767,8 @@ if(BUILD_TESTING)
                 --test-binary $<TARGET_FILE:tst-redemption-engine>
                 --deny-root /Users/ellis/Desktop/ETF交割/实时申购赎回数据
         )
-        set_tests_properties(redemption-baseline-invisible PROPERTIES TIMEOUT 20)
+        # Includes multiple real 2-second warmup/ACK timing scenarios.
+        set_tests_properties(redemption-baseline-invisible PROPERTIES TIMEOUT 60)
     endif()
 
     add_test(NAME redemption-wind-helper
