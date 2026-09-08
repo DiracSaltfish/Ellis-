@@ -87,6 +87,9 @@ def main():
         assert decoded["type"] == "capture"
         assert decoded["payload"]["values"]["etfsellamount"] == 2_000_000
         assert decoded["payload"]["callback_seq"] == 9
+        process.stdin.write('{"action":"status"}\n')
+        process.stdin.flush()
+        assert receive(process)["state"] == "subscribed", "status polling must retain subscription state"
         process.stdin.write('{"action":"unsubscribe","request_id":"stop-1"}\n')
         process.stdin.flush()
         stopped = receive(process)

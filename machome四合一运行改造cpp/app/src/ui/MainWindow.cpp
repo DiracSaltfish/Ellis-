@@ -4,6 +4,7 @@
 #include "ui/HubClient.h"
 #include "ui/AlertController.h"
 #include "ui/ModulePages.h"
+#include "MonitorSyncPage.h"
 #include "ui/UiText.h"
 
 #include <QCloseEvent>
@@ -60,7 +61,7 @@ QString prettyAction(const QString &raw) { return ui::actionText(raw); }
 
 MainWindow::MainWindow(AppConfig config, QString configPath, QString agentProgram, QWidget *parent, StartMode startMode)
     : QMainWindow(parent), config_(std::move(config)) {
-    setWindowTitle(QStringLiteral("Machome 四合一运行中心"));
+    setWindowTitle(QStringLiteral("Machome 五合一运行中心"));
     resize(1480, 920);
     setMinimumSize(1120, 720);
 
@@ -337,6 +338,7 @@ QWidget *MainWindow::buildCard(const ModuleConfig &module, int pageIndex) {
 }
 
 ModulePage *MainWindow::createModulePage(const ModuleConfig &module) {
+    if(module.adapter=="monitor_sync")return new MonitorSyncPage(module);
     if (module.adapter == QStringLiteral("upload")) return new UploadPage(module);
     if (module.adapter == QStringLiteral("premium")) return new PremiumPage(module);
     if (module.adapter == QStringLiteral("webull")) return new WebullPage(module);

@@ -1,0 +1,13 @@
+Test project /tmp/machome-close-qmt-build
+    Start 17: redemption-engine
+    Start 18: redemption-baseline-invisible
+    Start 31: module-pages
+1/4 Test #31: module-pages .....................   Passed    4.36 sec
+    Start 19: redemption-wind-helper
+2/4 Test #19: redemption-wind-helper ...........   Passed    0.44 sec
+3/4 Test #18: redemption-baseline-invisible ....   Passed   42.91 sec
+4/4 Test #17: redemption-engine ................   Passed   43.08 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =  43.09 sec

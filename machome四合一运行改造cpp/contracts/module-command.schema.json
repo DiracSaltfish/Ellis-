@@ -21,24 +21,75 @@
     "arguments"
   ],
   "properties": {
-    "schema_version": {"const": 1},
-    "protocol": {"const": "module.control.v1"},
-    "type": {"const": "command"},
-    "agent_instance_id": {"type": "string", "minLength": 8, "maxLength": 80},
-    "config_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "approval_token": {"type": "string", "minLength": 8, "maxLength": 80},
+    "schema_version": {
+      "const": 1
+    },
+    "protocol": {
+      "const": "module.control.v1"
+    },
+    "type": {
+      "const": "command"
+    },
+    "agent_instance_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 80
+    },
+    "config_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "approval_token": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 80
+    },
     "command_id": {
       "type": "string",
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{7,79}$"
     },
-    "module_id": {"enum": ["upload", "premium", "webull", "redemption"]},
-    "subservice_id": {"type": ["string", "null"], "maxLength": 128},
-    "action": {"$ref": "#/$defs/action"},
-    "expected_revision": {"type": "integer", "minimum": -1},
-    "requested_at": {"type": "string", "format": "date-time"},
-    "requested_by": {"type": "string", "minLength": 1, "maxLength": 128},
-    "reason": {"type": "string", "minLength": 1, "maxLength": 512},
-    "deadline_ms": {"type": "integer", "minimum": 1000, "maximum": 1800000},
+    "module_id": {
+      "enum": [
+        "upload",
+        "premium",
+        "webull",
+        "redemption",
+        "monitor_sync"
+      ]
+    },
+    "subservice_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 128
+    },
+    "action": {
+      "$ref": "#/$defs/action"
+    },
+    "expected_revision": {
+      "type": "integer",
+      "minimum": -1
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requested_by": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "deadline_ms": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 1800000
+    },
     "arguments": {
       "type": "object",
       "maxProperties": 32,
@@ -88,7 +139,13 @@
         "redemption_qmt_connect",
         "redemption_qmt_disconnect",
         "redemption_qmt_sync",
-        "redemption_qmt_order"
+        "redemption_qmt_order",
+        "monitor_sync_status",
+        "monitor_sync_set_root",
+        "monitor_sync_backup",
+        "monitor_sync_add_device",
+        "monitor_sync_revoke_device",
+        "monitor_sync_set_port"
       ]
     }
   }

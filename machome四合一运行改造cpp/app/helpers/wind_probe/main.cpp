@@ -532,7 +532,7 @@ private:
         QString manifestError;
         const bool abi = mode_ == QStringLiteral("fixture") || abiManifestValid(&manifestError);
         output({{QStringLiteral("type"), QStringLiteral("status")},
-                {QStringLiteral("state"), abi ? QStringLiteral("ready") : QStringLiteral("blocked")},
+                {QStringLiteral("state"), abi ? (subscribed_ ? QStringLiteral("subscribed") : QStringLiteral("ready")) : QStringLiteral("blocked")},
                 {QStringLiteral("wind_running"), !pids.isEmpty()},
                 {QStringLiteral("wind_pids"), values},
                 {QStringLiteral("tbapi_loaded"), tbapi},

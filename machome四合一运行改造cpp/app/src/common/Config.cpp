@@ -224,8 +224,10 @@ bool AppConfig::isValid(QString *error) const {
         {QStringLiteral("upload"), QStringLiteral("upload")},
         {QStringLiteral("premium"), QStringLiteral("premium")},
         {QStringLiteral("webull"), QStringLiteral("webull")},
-        {QStringLiteral("redemption"), QStringLiteral("realtime")}};
+        {QStringLiteral("redemption"), QStringLiteral("realtime")},
+        {QStringLiteral("monitor_sync"), QStringLiteral("monitor_sync")}};
     const QSet<QString> supportedActions{
+        "monitor_sync_set_port", "monitor_sync_status", "monitor_sync_set_root", "monitor_sync_backup", "monitor_sync_add_device", "monitor_sync_revoke_device",
         QStringLiteral("refresh"), QStringLiteral("open_legacy_ui"),
         QStringLiteral("set_operating_mode"),
         QStringLiteral("start_service"), QStringLiteral("stop_service"),
@@ -291,6 +293,13 @@ bool AppConfig::isValid(QString *error) const {
         }
 
         const QJsonObject settings = module.settings;
+        if(module.id == "monitor_sync") {
+            if(module.engine!="native" || !module.managedProcesses.isEmpty() || !module.launchdUnits.isEmpty()
+               || !QDir::isAbsolutePath(expandPath(settings.value("data_root").toString("~/MachomeHubData/monitor-sync")))
+               || settings.value("listen_port").toInt(18976)<1 || settings.value("listen_port").toInt(18976)>65535) {
+                if(error)*error=QStringLiteral("监控同步必须使用原生引擎、合法路径和端口"); return false;
+            }
+        }
         const QString testRoot = QDir::cleanPath(expandPath(jsonString(settings, QStringLiteral("data_root"))));
         const bool isolatedTestRoot = settings.value(QStringLiteral("test_mode")).toBool(false)
             && testRoot.startsWith(QStringLiteral("/private/tmp/"))
@@ -611,7 +620,8 @@ bool AppConfig::isValid(QString *error) const {
                 || (module.id == QStringLiteral("upload") && action.startsWith(QStringLiteral("upload_")))
                 || (module.id == QStringLiteral("premium") && action.startsWith(QStringLiteral("premium_")))
                 || (module.id == QStringLiteral("webull") && action.startsWith(QStringLiteral("webull_")))
-                || (module.id == QStringLiteral("redemption") && action.startsWith(QStringLiteral("redemption_")));
+                || (module.id == QStringLiteral("redemption") && action.startsWith(QStringLiteral("redemption_")))
+                || (module.id == QStringLiteral("monitor_sync") && action.startsWith(QStringLiteral("monitor_sync_")));
             if (!prefixMatches) {
                 if (error) *error = QStringLiteral("动作 %1 不属于模块 %2").arg(action, module.id);
                 return false;
@@ -722,7 +732,9 @@ bool AppConfig::isValid(QString *error) const {
         }
         ids.insert(module.id);
     }
-    if (ids != QSet<QString>(requiredModules.keyBegin(), requiredModules.keyEnd())) {
+    ids.remove("monitor_sync");
+    auto mandatory=QSet<QString>(requiredModules.keyBegin(), requiredModules.keyEnd()); mandatory.remove("monitor_sync");
+    if (ids != mandatory) {
         if (error) *error = QStringLiteral("配置必须恰好包含 upload、premium、webull、redemption 四个模块");
         return false;
     }

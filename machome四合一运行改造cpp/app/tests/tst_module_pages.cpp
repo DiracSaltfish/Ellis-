@@ -1,6 +1,7 @@
 #include "ui/ModulePages.h"
 #include "ui/PremiumHistory.h"
 #include "ui/UiText.h"
+#include "ui/ServiceOverview.h"
 #include <QTreeWidget>
 #include <QToolButton>
 
@@ -20,6 +21,53 @@ class ModulePagesTests final : public QObject {
     Q_OBJECT
 
 private slots:
+    void windShutdownIsAvailableOnOverviewAndRespectsControlGate() {
+        hub::ModuleConfig config;config.id="redemption";config.adapter="realtime";
+        config.controlEnabled=true;config.ownership="logic";
+        hub::RealtimePage page(config);QSignalSpy commands(&page,&hub::ModulePage::commandRequested);
+        auto *button=page.findChild<QPushButton *>("overviewWindShutdown");QVERIFY(button);
+        page.applySnapshot({{"payload",QJsonObject{{"control_enabled",true},{"ownership","logic"}}}});
+        QVERIFY(button->isEnabled());button->click();QCOMPARE(commands.size(),1);
+        QCOMPARE(commands.first().at(1).toString(),QString("redemption_wind_shutdown_cleanup"));
+        page.applySnapshot({{"payload",QJsonObject{{"control_enabled",false},{"ownership","shadow"}}}});
+        QVERIFY(!button->isEnabled());button->click();QCOMPARE(commands.size(),1);
+    }
+
+    void closedOverviewKeepsServicesOnlineWithoutFalseCollectionAlarm() {
+        hub::ServiceOverview page("redemption");
+        QJsonObject snapshot{{"operating_mode", "work"}, {"monitoring", false},
+            {"schedule", QJsonObject{{"phase", "closed_pcf_cache"}, {"monitoring_desired", false}}},
+            {"items", QJsonArray{}}, {"wind", QJsonObject{{"state", "cleaned"}, {"tbapi_loaded", false}}}};
+        QJsonObject telemetry{{"snapshot", snapshot},
+            {"health", QJsonObject{{"wind_helper_ok", false}}},
+            {"qmt_backends", QJsonObject{{"QMT1", QJsonObject{{"connection_state", "disconnected"}, {"connection_policy", "on_demand"}}}}}};
+        page.applySnapshot({{"lifecycle", "running"}, {"work_state", "scheduled_idle"}, {"telemetry", telemetry}});
+        QVERIFY(!page.findChild<QLabel *>("noticeText")->text().contains(QString("健康检查")));
+        QVERIFY(page.findChild<QLabel *>("noticeText")->text().contains(QString("清单仍可查询")));
+        const auto metrics = page.findChildren<QLabel *>("metricValue");
+        QCOMPARE(metrics.first()->text(), QString("按计划休眠"));
+        bool policy = false, phase = false;
+        for (auto *label : page.findChildren<QLabel *>()) {
+            policy |= label->text() == QString("按需连接（默认不连接）");
+            phase |= label->text() == QString("收盘休眠 · 申赎清单缓存服务中");
+        }
+        QVERIFY(policy); QVERIFY(phase);
+        // A subscription that actually remains active must not be hidden.
+        snapshot.insert("monitoring", true); telemetry.insert("snapshot", snapshot);
+        page.applySnapshot({{"lifecycle", "running"}, {"work_state", "active"}, {"telemetry", telemetry}});
+        QCOMPARE(metrics.first()->text(), QString("监控中"));
+        QVERIFY(page.findChild<QLabel *>("noticeText")->text().contains(QString("Wind 采集尚未就绪")));
+    }
+    void premiumPlannedDisconnectionIsNotUpstreamFailure() {
+        hub::ServiceOverview page("premium");
+        QJsonObject status{{"cn_quotes_desired", false}, {"hk_quotes_desired", false}, {"upstream_healthy", false}};
+        page.applySnapshot({{"lifecycle", "running"}, {"work_state", "scheduled_idle"}, {"telemetry", QJsonObject{{"status", status}}}});
+        QVERIFY(!page.findChild<QLabel *>("noticeText")->text().contains(QString("健康检查")));
+        status.insert("hk_quotes_desired", true);
+        page.applySnapshot({{"lifecycle", "running"}, {"work_state", "degraded"}, {"telemetry", QJsonObject{{"status", status}}}});
+        QVERIFY(page.findChild<QLabel *>("noticeText")->text().contains(QString("健康检查")));
+    }
+
     void premiumNativeSignalsShowFieldsAndDeduplicateReplay() {
         hub::ModuleConfig config; config.id = "premium"; config.adapter = "premium";
         hub::PremiumPage page(config);

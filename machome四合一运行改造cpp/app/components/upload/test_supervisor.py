@@ -70,6 +70,22 @@ class SupervisorTests(unittest.TestCase):
         self.assertFalse(service.business_readiness(now,[valid])[0])
         valid.update(pid=456,last_success_at='2026-09-07T09:20:59+08:00')
         self.assertFalse(service.business_readiness(now,[valid])[0])
+    def test_collection_schedule_preserves_website_and_close_boundaries(self):
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        service=sup.Supervisor(self.root,self.cfg,self.source)
+        service.workers.update({name:{'enabled':True} for name in ('xop-family','nikkei225','website')})
+        at=lambda h,m,day=7:datetime(2026,9,day,h,m,tzinfo=ZoneInfo('Asia/Shanghai'))
+        self.assertTrue(service.collection_expected('sina',at(14,56)))
+        self.assertFalse(service.collection_expected('sina',at(14,57)))
+        self.assertFalse(service.collection_expected('nikkei225',at(14,40)))
+        self.assertTrue(service.collection_expected('xop-family',at(14,59)))
+        self.assertFalse(service.collection_expected('xop-family',at(15,0)))
+        self.assertFalse(service.collection_expected('website',at(10,0)))
+        self.assertFalse(service.collection_expected('xop-family',at(10,0,5)))
+        service.env['NNN_UPLOAD_MONITOR_SKIP_DATES']='2026-09-07'
+        self.assertFalse(service.collection_expected('xop-family',at(10,0)))
+
     def test_schedule_marks_only_completed_runs(self):
         from datetime import datetime
         from zoneinfo import ZoneInfo

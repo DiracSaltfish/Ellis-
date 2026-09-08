@@ -1662,7 +1662,7 @@ WebullPage::WebullPage(ModuleConfig config, QWidget *parent)
         modes->addWidget(button, 0, modeColumn++);
     }
     auto *restartBrowser = new QPushButton(QStringLiteral("重启浏览器"));
-    auto *login = new QPushButton(QStringLiteral("打开登录窗口（可能启动采集）"));
+    auto *login = new QPushButton(QStringLiteral("打开登录窗口（开启强制采集）"));
     auto *startCollector = new QPushButton(QStringLiteral("立即启动采集"));
     auto *stopCollector = new QPushButton(QStringLiteral("立即停止采集"));
     mutationButtons_.append(startCollector);
@@ -1683,7 +1683,7 @@ WebullPage::WebullPage(ModuleConfig config, QWidget *parent)
     overview_->setDiagnostics(runtimeTree_);
     tabs->insertTab(0, overview_, QStringLiteral("服务概况"));
     tabs->setCurrentIndex(0);
-    runtimeLayout->addWidget(textLabel(QStringLiteral("采集模式决定是否按计划运行。登录后请到服务概况确认账号会话和行情状态；浏览器登录窗口可能需要在主机桌面完成操作。"), QStringLiteral("secondaryText")));
+    runtimeLayout->addWidget(textLabel(QStringLiteral("打开登录窗口会切换为强制采集，盘外也会继续运行。完成登录后点击“自动”恢复按计划休眠；登录操作请在主机桌面的浏览器中完成。"), QStringLiteral("secondaryText")));
     runtimeLayout->addStretch();
     tabs->addTab(runtime, QStringLiteral("采集与登录"));
     eventLog_ = new QPlainTextEdit;
@@ -1809,7 +1809,7 @@ RealtimePage::RealtimePage(ModuleConfig config, QWidget *parent)
     for (const auto &pair : {qMakePair(QStringLiteral("开始监控"), QStringLiteral("redemption_monitor_start")),
                              qMakePair(QStringLiteral("停止监控"), QStringLiteral("redemption_monitor_stop")),
                              qMakePair(QStringLiteral("启动 Wind"), QStringLiteral("redemption_wind_start")),
-                             qMakePair(QStringLiteral("安全退出 Wind"), QStringLiteral("redemption_wind_shutdown_cleanup")),
+                             qMakePair(QStringLiteral("关闭 Wind 并清理临时探针"), QStringLiteral("redemption_wind_shutdown_cleanup")),
                              qMakePair(QStringLiteral("刷新 PCF"), QStringLiteral("redemption_pcf_refresh"))}) {
         auto *button = new QPushButton(pair.first);
         connect(button, &QPushButton::clicked, this, [this, pair] { send(pair.second, {}, 120000); });
@@ -1918,7 +1918,23 @@ RealtimePage::RealtimePage(ModuleConfig config, QWidget *parent)
     runtimeTree_ = makeTree();
     overview_ = new ServiceOverview(config_.adapter);
     overview_->setDiagnostics(runtimeTree_);
-    tabs->insertTab(0, overview_, QStringLiteral("服务概况"));
+    auto *overviewTab = new QWidget;
+    auto *overviewLayout = new QVBoxLayout(overviewTab);
+    auto *windControls = new QHBoxLayout;
+    for (const auto &pair : {qMakePair(QStringLiteral("启动 Wind"), QStringLiteral("redemption_wind_start")),
+                             qMakePair(QStringLiteral("关闭 Wind 并清理临时探针"), QStringLiteral("redemption_wind_shutdown_cleanup"))}) {
+        auto *button = new QPushButton(pair.first);
+        button->setObjectName(pair.second == QStringLiteral("redemption_wind_start")
+            ? QStringLiteral("overviewWindStart") : QStringLiteral("overviewWindShutdown"));
+        connect(button, &QPushButton::clicked, this, [this, pair] { send(pair.second, {}, 120000); });
+        mutationButtons_.append(button);
+        windControls->addWidget(button);
+    }
+    windControls->addStretch();
+    overviewLayout->addLayout(windControls);
+    overviewLayout->addWidget(textLabel(QStringLiteral("工作日 09:10 启动 Wind，15:00 停订并退出。退出成功后仅清理临时探针 dylib，保留日志、历史申赎数据和清单。"), QStringLiteral("secondaryText")));
+    overviewLayout->addWidget(overview_, 1);
+    tabs->insertTab(0, overviewTab, QStringLiteral("服务概况"));
     tabs->setCurrentIndex(0);
     eventLog_ = new QPlainTextEdit;
     eventLog_->setObjectName(QStringLiteral("moduleEventLog"));

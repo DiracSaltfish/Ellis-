@@ -295,6 +295,7 @@
         "compatibility_expose_lan": true,
         "notifications_enabled": false,
         "live_qmt_orders_enabled": false,
+        "qmt_auto_connect_enabled": false,
         "qmt_backends": [
           {
             "id": "QMT1",

@@ -108,6 +108,7 @@
         "compatibility_api_enabled": false,
         "notifications_enabled": false,
         "live_qmt_orders_enabled": false,
+        "qmt_auto_connect_enabled": false,
         "qmt_backends": [
           {"id": "QMT1", "host": "127.0.0.1", "port": 19527, "enabled": true, "auto_connect": false,
            "reconnect_interval_ms": 500, "heartbeat_interval_ms": 1000, "silence_timeout_ms": 5000,

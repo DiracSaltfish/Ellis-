@@ -18,6 +18,17 @@ QString stateText(const QString &raw) {
     static const auto names = dictionary(R"(unknown=未知
 no_data=暂无数据
 scheduled_idle=按计划休息
+closed_pcf_cache=收盘休眠 · 申赎清单缓存服务中
+closed=已收盘
+weekend=周末休市
+overnight=隔夜休眠
+pcf_prefetch=盘前清单准备
+daily_reset=当日数据初始化
+wind_start=Wind 启动准备
+tbapi_warmup=Wind 接口预热
+on_demand=按需连接（默认不连接）
+configured=按显式配置连接
+cleaned=已退出并清理
 idle=空闲
 running=运行中
 active=工作中
@@ -343,7 +354,7 @@ redemption_history=查询变化历史
 redemption_pcf_detail=查看申赎清单
 redemption_pcf_refresh=刷新申赎清单
 redemption_set_watchlist=更新申赎观察列表
-redemption_wind_shutdown_cleanup=退出 Wind 并清理采集进程
+redemption_wind_shutdown_cleanup=关闭 Wind 并清理临时探针
 redemption_qmt_connect=连接 QMT
 redemption_qmt_disconnect=断开 QMT
 redemption_qmt_sync=同步 QMT 数据
@@ -409,6 +420,7 @@ QString valueText(const QJsonValue &value) {
     return displayValue(value);
 }
 QString serviceTitle(const QString &adapter, const QString &fallback) {
+    if(adapter=="monitor_sync")return QStringLiteral("监控数据同步");
     if (adapter == QStringLiteral("upload")) return QStringLiteral("网站与数据上传");
     if (adapter == QStringLiteral("premium")) return QStringLiteral("行情与拉涨监控");
     if (adapter == QStringLiteral("webull")) return QStringLiteral("Webull 行情转发");
@@ -416,6 +428,7 @@ QString serviceTitle(const QString &adapter, const QString &fallback) {
     return fallback;
 }
 QString serviceDescription(const QString &adapter) {
+    if(adapter=="monitor_sync")return QStringLiteral("按日期保存人工修正原文件，同步锁定汇率、成交时间及 TEMP");
     if (adapter == QStringLiteral("upload")) return QStringLiteral("采集行情与基金估值，向业务网站同步数据");
     if (adapter == QStringLiteral("premium")) return QStringLiteral("跟踪实时行情、溢价与拉涨信号，为客户端提供盘口");
     if (adapter == QStringLiteral("webull")) return QStringLiteral("采集美股盘口，向已连接的客户端转发行情");

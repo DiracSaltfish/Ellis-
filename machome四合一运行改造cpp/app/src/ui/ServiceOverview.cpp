@@ -195,13 +195,19 @@ void ServiceOverview::applySnapshot(const QJsonObject &p) {
         facts.append({QStringLiteral("盈透行情连接"), boolean(valueAt(engine, "ibkr.handshake_complete"), QStringLiteral("握手完成"), QStringLiteral("尚未握手"))});
         facts.append({QStringLiteral("业务就绪"), boolean(engine.value("ready"), QStringLiteral("检查通过"), QStringLiteral("检查尚未通过"))});
         note = QStringLiteral("进程运行不等于数据已送达。接收确认的时间和有效性，请结合“上传任务”查看。");
+        if (engine.value("collection_expected").isBool() && !engine.value("collection_expected").toBool())
+            note = QStringLiteral("行情上传已按时段休眠；网站、缓存和日终任务继续服务。运行任务数表示常驻进程数，不代表仍在采集。");
     } else if (adapter_ == "premium") {
+        const bool resting = status.value("cn_quotes_desired").isBool()
+            && status.value("hk_quotes_desired").isBool()
+            && !status.value("cn_quotes_desired").toBool()
+            && !status.value("hk_quotes_desired").toBool();
         metric(0, QStringLiteral("观察标的行情"), ratio(status.value("ready_symbols"), status.value("watchlist_symbols")), QStringLiteral("已收到行情 / 观察标的"));
         metric(1, QStringLiteral("额外基础行情"), ratio(status.value("l1_hot_ready"), status.value("l1_hot_symbols")), QStringLiteral("已就绪 / 额外标的"));
         metric(2, QStringLiteral("行情源连接"), boolean(status.value("adapter_connected"), QStringLiteral("已连接"), QStringLiteral("未连接")), QStringLiteral("连接与数据健康独立检查"));
         metric(3, QStringLiteral("概览客户端"), count(status.value("summary_clients")), QStringLiteral("当前订阅拉涨与溢价的客户端"));
         listTitle_->setText(QStringLiteral("行情链路"));
-        rows.append({QStringLiteral("行情源"), boolean(status.value("upstream_healthy"), QStringLiteral("数据正常"), QStringLiteral("数据异常")), ui::valueText(status.value("upstream_status"))});
+        rows.append({QStringLiteral("行情源"), resting ? QStringLiteral("按计划休眠") : boolean(status.value("upstream_healthy"), QStringLiteral("数据正常"), QStringLiteral("数据异常")), ui::valueText(status.value("upstream_status"))});
         rows.append({QStringLiteral("拉涨信号"), boolean(status.value("signals_enabled"), QStringLiteral("允许生成"), QStringLiteral("当前不生成")), ui::valueText(status.value("phase"))});
         rows.append({QStringLiteral("详情通道"), ui::valueText(valueAt(t, "detail_channel.state")), count(status.value("detail_clients")) + QStringLiteral(" 个客户端")});
         rows.append({QStringLiteral("基础行情通道"), count(status.value("l1_clients")) + QStringLiteral(" 个客户端"), QStringLiteral("向客户端提供基础盘口")});
@@ -211,7 +217,7 @@ void ServiceOverview::applySnapshot(const QJsonObject &p) {
         facts.append({QStringLiteral("处理耗时"), ui::valueText(status.value("core_latency_ms")) + QStringLiteral(" 毫秒")});
         facts.append({QStringLiteral("行情序号缺口"), count(status.value("adapter_gaps"))});
         facts.append({QStringLiteral("已隔离异常报文"), count(status.value("quarantined"))});
-        if (status.value("upstream_healthy").isBool() && !status.value("upstream_healthy").toBool()) problems << QStringLiteral("行情源未通过健康检查，请查看行情采集状态。");
+        if (!resting && status.value("upstream_healthy").isBool() && !status.value("upstream_healthy").toBool()) problems << QStringLiteral("行情源未通过健康检查，请查看行情采集状态。");
         if (status.value("historical_writes_stopped").toBool()) problems << QStringLiteral("历史写入已暂停，请检查磁盘与写入队列。");
         note = QStringLiteral("信号是否生成由当前时段决定；午间或盘外仍可能继续接收行情。");
     } else if (adapter_ == "webull") {
@@ -238,6 +244,10 @@ void ServiceOverview::applySnapshot(const QJsonObject &p) {
     } else {
         auto snapshot = t.value("snapshot").toObject();
         if (snapshot.isEmpty()) snapshot = engine;
+        const bool resting = snapshot.value("operating_mode").toString() == "work"
+            && valueAt(snapshot, "schedule.monitoring_desired").isBool()
+            && !valueAt(snapshot, "schedule.monitoring_desired").toBool()
+            && !snapshot.value("monitoring").toBool();
         const auto itemsValue = snapshot.value("items");
         const auto items = itemsValue.toArray();
         int pcfReady = 0;
@@ -248,21 +258,31 @@ void ServiceOverview::applySnapshot(const QJsonObject &p) {
             rows.append({item.value("symbol").toString() + "  " + item.value("name").toString(),
                          ui::valueText(item.value("status")), QStringLiteral("清单：") + ui::valueText(pcf.value("status"))});
         }
-        metric(0, QStringLiteral("份额监控"), boolean(snapshot.value("monitoring"), QStringLiteral("监控中"), QStringLiteral("未监控")), QStringLiteral("实时申购与赎回份额变化"));
+        metric(0, QStringLiteral("份额监控"), resting ? QStringLiteral("按计划休眠") : boolean(snapshot.value("monitoring"), QStringLiteral("监控中"), QStringLiteral("未监控")), QStringLiteral("实时申购与赎回份额变化"));
         metric(1, QStringLiteral("监控标的"), itemsValue.isArray() ? QString::number(items.size()) : count(t.value("symbol_count")), QStringLiteral("观察列表中的 ETF"));
         metric(2, QStringLiteral("申赎清单就绪"), itemsValue.isArray() ? QStringLiteral("%1 / %2").arg(pcfReady).arg(items.size()) : QStringLiteral("—"), QStringLiteral("服务端判定为就绪的清单"));
         metric(3, QStringLiteral("Wind 数据源"), ui::valueText(first(t, {"health.wind_helper_state", "snapshot.wind.state", "engine.wind.state"})), QStringLiteral("采集进程与数据订阅状态"));
+        const auto windRunning = valueAt(snapshot, "wind.running");
+        if (resting && windRunning.isBool()) {
+            metric(3, QStringLiteral("Wind 金融终端"), windRunning.toBool()
+                ? QStringLiteral("仍在运行") : QStringLiteral("已关闭"), QStringLiteral("休眠期间应退出，查询服务继续在线"));
+            if (windRunning.toBool()) problems << QStringLiteral("当前已停采，但 Wind 仍在运行；请检查自动关闭结果，或使用上方“关闭 Wind 并清理临时探针”。");
+        }
         listTitle_->setText(QStringLiteral("监控与清单概况"));
         facts.append({QStringLiteral("当前时段"), ui::valueText(first(snapshot, {"schedule.phase", "state"}))});
         const auto backends = t.value("qmt_backends").toObject();
         for (const auto &key : {QStringLiteral("QMT1"), QStringLiteral("QMT2")}) {
             const auto backend = backends.value(key).toObject();
-            facts.append({key + QStringLiteral(" 数据连接"), ui::valueText(backend.value("connection_state"))});
+            const bool onDemand = backend.value("connection_policy").toString() == "on_demand"
+                && backend.value("connection_state").toString() == "disconnected";
+            facts.append({key + QStringLiteral(" 数据连接"), onDemand
+                ? QStringLiteral("按需连接（默认不连接）") : ui::valueText(backend.value("connection_state"))});
         }
         facts.append({QStringLiteral("Wind 接口"), boolean(valueAt(snapshot, "wind.tbapi_loaded"), QStringLiteral("已加载"), QStringLiteral("未加载"))});
-        facts.append({QStringLiteral("最新份额快照"), ui::localTimeText(snapshot.value("server_time").toString())});
-        if (valueAt(t, "health.wind_helper_ok").isBool() && !valueAt(t, "health.wind_helper_ok").toBool()) problems << QStringLiteral("Wind 采集尚未就绪，请检查数据源与订阅状态。");
+        facts.append({QStringLiteral("服务状态更新"), ui::localTimeText(snapshot.value("server_time").toString())});
+        if (!resting && valueAt(t, "health.wind_helper_ok").isBool() && !valueAt(t, "health.wind_helper_ok").toBool()) problems << QStringLiteral("Wind 采集尚未就绪，请检查数据源与订阅状态。");
         note = QStringLiteral("首份累计数据用作基准；后续份额变化显示在“实时监控”，清单详情可从标的进入。");
+        if (resting) note = QStringLiteral("当前按计划停止份额采集，历史数据和申赎清单仍可查询。服务端默认不连接 QMT，客户端交易不受此设置影响。");
     }
     for (int i = 0; i < 6; ++i) {
         factNames_[i]->setText(i < facts.size() ? facts[i].first : QString());

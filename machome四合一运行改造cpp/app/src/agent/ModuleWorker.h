@@ -15,6 +15,7 @@ namespace machome::bridge {
 class RealtimeClient;
 struct RealtimeDataFreshness;
 }
+namespace machome::sync { class MonitorSyncEngine; }
 namespace machome::upload { class UploadEngine; }
 namespace machome::premium::engine { class PremiumAEngine; }
 namespace machome::premium { class PremiumClient; }
@@ -49,6 +50,7 @@ public slots:
     void setControlRevision(quint64 revision);
 
 private:
+    void startMonitorSync();
     void startUpload();
     void startPremium();
     void startPremiumProbe();
@@ -79,6 +81,7 @@ private:
     QJsonObject webullBookJson(const Machome::Webull::BookSnapshot &book) const;
     void verifyWebullControlPostconditions(const Machome::Webull::GatewayStatus &status);
 
+    machome::sync::MonitorSyncEngine *sync_ = nullptr;
     LifecycleController *lifecycle_ = nullptr;
     machome::upload::UploadEngine *upload_ = nullptr;
     machome::premium::engine::PremiumAEngine *premium_ = nullptr;

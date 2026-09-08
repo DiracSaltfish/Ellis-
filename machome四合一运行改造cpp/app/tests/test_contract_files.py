@@ -55,7 +55,7 @@ def main() -> int:
     }
     source_actions = {
         value for value in candidates
-        if value in generic or value.startswith(("upload_", "premium_", "webull_", "redemption_"))
+        if value in generic or value.startswith(("upload_", "premium_", "webull_", "redemption_", "monitor_sync_"))
     }
     assert contract_actions == source_actions, {
         "missing_from_contract": sorted(source_actions - contract_actions),

@@ -1,0 +1,16 @@
+{
+  "app/modules/redemption/RedemptionEngine.cpp": "c7b3a124b47c9bd29a60c74a4ba3daa1521c741b2e1136da4348a294f17eb9b4",
+  "app/modules/redemption/RedemptionEngine.h": "0f109e2be386aef180d016e63900d40ead4db31739ee2496501cb250ffdd442b",
+  "app/components/upload/supervisor.py": "63fdef443adf79f9b4961061d9a96dbd785f70761d5ddd0ae9248da205b3b90d",
+  "app/components/upload/test_supervisor.py": "d42fd02f6c0ff89e1e11eb8398d7bf47877d4878d1d1fa50a0abdca62203049b",
+  "app/src/agent/ModuleWorker.cpp": "50bfe60a84084e72250545b46cb9f0bb2e1982fe3d49b5b1dfd90fd938d5ef22",
+  "app/src/ui/ServiceOverview.cpp": "a4b30f45e8a2f3f3f5742c4f3b7a71da3963c7320c6c46e501f543f907e867ee",
+  "app/src/ui/UiText.cpp": "05089d9be723df993fd61f49677ce1a5949c3161cbee79471fb448aa58f6c42e",
+  "app/src/ui/ModulePages.cpp": "4333e18e3fbac4076faccff5d049c4631d770f6fa1fb7e9c77b4c6892ebb56d8",
+  "app/tests/tst_redemption_engine.cpp": "66a86c3449c582551217d9f856d6b37044e08380d1bce56d00b23099490cb742",
+  "app/tests/tst_module_pages.cpp": "8ee3c965e915ab5e389ac493ac39d0c147daa2a44d18ab168bf4638cd02f2ab1",
+  "config/modules.example.json": "7b2b7a65fdfd1d4824d4ee044ab19678ae2b9f3c647838aa6193e9df3172693f",
+  "config/modules.local-test.json": "f6af0b6eba00ca6c7421eca7f9f87827ae89bf49dbb6350655989be7954e5f9e",
+  "config/modules.owner.template.json": "8ee7b2b4ee53b0a39549a88a245f2b4083003d7eec33ee901fb69eeadcb06d32",
+  "config/modules.takeover-candidate.json": "9cb7d32a62dd4d051be3218df5ef5b1f0efc3452f8807e05550f820aa495bb05"
+}

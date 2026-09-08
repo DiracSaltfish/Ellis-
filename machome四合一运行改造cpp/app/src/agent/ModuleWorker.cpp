@@ -4,6 +4,7 @@
 #include "common/JsonUtil.h"
 #include "modules/bridge/RealtimeClient.h"
 #include "modules/upload/UploadEngine.h"
+#include "modules/monitor_sync/MonitorSyncEngine.h"
 #include "modules/premium/PremiumClient.h"
 #include "modules/premium/engine/PremiumAEngine.h"
 #include "modules/qmt/QmtClient.h"
@@ -156,7 +157,8 @@ void ModuleWorker::start() {
     });
     lifecycle_->start();
 
-    if (config_.adapter == QStringLiteral("upload")) startUpload();
+    if (config_.adapter == QStringLiteral("monitor_sync")) startMonitorSync();
+    else if (config_.adapter == QStringLiteral("upload")) startUpload();
     else if (config_.adapter == QStringLiteral("premium")) startPremium();
     else if (config_.adapter == QStringLiteral("webull")) startWebull();
     else if (config_.engine == QStringLiteral("native")) startRedemption();
@@ -171,6 +173,7 @@ void ModuleWorker::stop() {
     ++lifecycleReadinessGeneration_;
     lifecycleReadinessProbeIssued_ = false;
     readinessAdaptersSuspended_ = false;
+    if (sync_) sync_->stop();
     if (upload_) upload_->stop();
     if (premium_) premium_->stop();
     if (premiumProbe_) premiumProbe_->stop();
@@ -208,7 +211,10 @@ void ModuleWorker::startUpload() {
                           snapshot.value(QStringLiteral("upload_records")));
         telemetry_.insert(QStringLiteral("job_runs"), snapshot.value(QStringLiteral("job_runs")));
         telemetry_.insert(QStringLiteral("history"), snapshot.value(QStringLiteral("history")));
-        telemetry_.insert(QStringLiteral("workers_expected"), true);
+        telemetry_.insert(QStringLiteral("workers_expected"),
+                          snapshot.contains(QStringLiteral("collection_expected"))
+                              ? snapshot.value(QStringLiteral("collection_expected"))
+                              : QJsonValue(true));
         workState_ = snapshot.value(QStringLiteral("state")).toString();
         if (workState_ == QStringLiteral("running")) workState_ = QStringLiteral("active");
         lastError_ = snapshot.value(QStringLiteral("last_error")).toString();
@@ -839,7 +845,8 @@ void ModuleWorker::startRealtime() {
         auto backends = telemetry_.value(QStringLiteral("qmt_backends")).toObject();
         backends.insert(qmtConfig.id, client->snapshot());
         telemetry_.insert(QStringLiteral("qmt_backends"), backends);
-        if (definition.value(QStringLiteral("auto_connect")).toBool(false)
+        if (config_.settings.value(QStringLiteral("qmt_auto_connect_enabled")).toBool(false)
+            && definition.value(QStringLiteral("auto_connect")).toBool(false)
             && config_.controlEnabled && config_.ownership != QStringLiteral("shadow")) {
             client->connectBackend();
         }
@@ -925,6 +932,19 @@ void ModuleWorker::requestSnapshot() {
         telemetry_.insert(QStringLiteral("qmt_backends"), snapshot.value(QStringLiteral("qmt_backends")));
     }
     publishSnapshot();
+}
+
+void ModuleWorker::startMonitorSync() {
+    sync_ = new machome::sync::MonitorSyncEngine(this);
+    connect(sync_, &machome::sync::MonitorSyncEngine::snapshotReady, this, [this](const QJsonObject &s) {
+        telemetry_["engine"]=s; process_["lifecycle"]=s["running"].toBool()?"running":"stopped";
+        workState_=s["error"].toString().isEmpty()?(s["running"].toBool()?"active":"paused"):"blocked";
+        lastError_=s["error"].toString(); headline_=lastError_.isEmpty()?QStringLiteral("文件同步 · 在线设备 %1 · 队列 %2").arg(s["clients"].toArray().size()).arg(s["pending"].toInt()):lastError_; scheduleSnapshot();
+    });
+    connect(sync_, &machome::sync::MonitorSyncEngine::eventReady, this, &ModuleWorker::publishEvent);
+    connect(sync_, &machome::sync::MonitorSyncEngine::commandFinished, this, [this](const QString &id,bool ok,const QString &message,const QJsonObject &details){ finishPending("monitor_sync:"+id,ok,message,details); });
+    sync_->initialize({config_.id,AppConfig::expandPath(config_.settings.value("data_root").toString("~/MachomeHubData/monitor-sync")),config_.settings,false});
+    sync_->start();
 }
 
 void ModuleWorker::setControlRevision(quint64 revision) {
@@ -1070,18 +1090,20 @@ void ModuleWorker::submitCommand(const QJsonObject &command) {
             || action == QStringLiteral("restart_service"))) {
         if (!allowMutation(command)) return;
         const auto stopNative = [this] {
+            if (sync_) sync_->stop();
             if (upload_) upload_->stop(hub::StopMode::Graceful);
             else if (premium_) premium_->stop(hub::StopMode::Graceful);
             else if (webull_) webull_->stop(hub::StopMode::Graceful);
             else if (redemption_) redemption_->stop(hub::StopMode::Graceful);
         };
         const auto startNative = [this] {
+            if (sync_) sync_->start();
             if (upload_) upload_->start();
             else if (premium_) premium_->start();
             else if (webull_) webull_->start();
             else if (redemption_) redemption_->start();
         };
-        const bool hasNativeEngine = upload_ || premium_ || webull_ || redemption_;
+        const bool hasNativeEngine = sync_ || upload_ || premium_ || webull_ || redemption_;
         if (!hasNativeEngine) {
             publishCommand(command, QStringLiteral("failed"),
                            QStringLiteral("原生模块引擎尚未就绪"));
@@ -1115,6 +1137,7 @@ void ModuleWorker::submitCommand(const QJsonObject &command) {
             engineStatus = redemption_->snapshot();
             running = engineStatus.value(QStringLiteral("running")).toBool(false);
         }
+        if (sync_) { engineStatus=sync_->snapshot(); running=engineStatus["running"].toBool(); }
         const bool expectedRunning = action != QStringLiteral("stop_service");
         const bool lifecycleConfirmed = running == expectedRunning;
         const QString operation = action == QStringLiteral("start_service")
@@ -1131,6 +1154,11 @@ void ModuleWorker::submitCommand(const QJsonObject &command) {
                         {QStringLiteral("expected_running"), expectedRunning},
                         {QStringLiteral("actual_running"), running},
                         {QStringLiteral("engine_status"), engineStatus}});
+        return;
+    }
+    if (sync_ && action.startsWith("monitor_sync_")) {
+        if (!allowMutation(command)) return;
+        if (rememberPending("monitor_sync:"+commandId,command,120000)) sync_->submitCommand(action,command.value("arguments").toObject(),commandId);
         return;
     }
     if (lifecycle_ && lifecycle_->handles(action)) {
@@ -2016,6 +2044,7 @@ void ModuleWorker::publishSnapshot() {
         commands.append(QStringLiteral("stop_service"));
         commands.append(QStringLiteral("restart_service"));
     }
+    if (sync_) for(const auto &a:{QStringLiteral("monitor_sync_set_port"),QStringLiteral("monitor_sync_status"),QStringLiteral("monitor_sync_set_root"),QStringLiteral("monitor_sync_backup"),QStringLiteral("monitor_sync_add_device"),QStringLiteral("monitor_sync_revoke_device")}) commands.append(a);
     QJsonArray allowedCommands;
     for (const auto &value : commands) {
         if (config_.allowedActions.contains(value.toString())) allowedCommands.append(value);

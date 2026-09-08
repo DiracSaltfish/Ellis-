@@ -270,6 +270,17 @@ class Supervisor:
                 return key
         return False
 
+    def collection_expected(self, name, now):
+        data_ids={'sina','xop-family','xop-smart','xop-overnight','lof-162411','basket-159605',
+                  'silver','china-internet','india','nasdaq','sp500','nikkei225','germany'}
+        if name not in data_ids or not self.workers.get(name,{}).get('enabled',True):return False
+        is_day=now.weekday()<5 and now.date().isoformat() not in self.env.get('NNN_UPLOAD_MONITOR_SKIP_DATES','').split(',')
+        clock=now.strftime('%H:%M:%S')
+        begin=self.env.get('NNN_UPLOAD_MONITOR_PUBLIC_START','09:20:00') if name=='sina' else self.env.get('NNN_UPLOAD_MONITOR_PRIVATE_START','09:37:00')
+        end='14:57:00' if name=='sina' else '14:40:00' if name=='nikkei225' else '15:00:00'
+        return is_day and begin<=clock<end and (name!='silver' or
+            '09:15:00'<=clock<'10:15:00' or '10:30:00'<=clock<'11:30:00' or '13:30:00'<=clock<'15:00:00')
+
     def business_readiness(self, now, health):
         data_ids={'sina','xop-family','xop-smart','xop-overnight','lof-162411','basket-159605',
                   'silver','china-internet','india','nasdaq','sp500','nikkei225','germany'}
@@ -281,16 +292,10 @@ class Supervisor:
             if self.states.get(name,{}).get('state') not in ('running','scheduled_idle','completed'):
                 problems.append(name+':process_not_ready')
         if 'website' in active and not self.website_ok:problems.append('website:not_ready')
-        is_day=now.weekday()<5 and now.date().isoformat() not in self.env.get('NNN_UPLOAD_MONITOR_SKIP_DATES','').split(',')
-        clock=now.strftime('%H:%M:%S')
         duration=self.env.get('NNN_UPLOAD_MONITOR_FRESHNESS','35s').strip()
         freshness=max(15,float(duration[:-1])*(60 if duration.endswith('m') else 1)) if duration.endswith(('s','m')) else max(15,float(duration))
         for name in required:
-            begin=self.env.get('NNN_UPLOAD_MONITOR_PUBLIC_START','09:20:00') if name=='sina' else self.env.get('NNN_UPLOAD_MONITOR_PRIVATE_START','09:37:00')
-            end='14:57:00' if name=='sina' else '14:40:00' if name=='nikkei225' else '15:00:00'
-            if not is_day or not begin<=clock<end:continue
-            if name=='silver' and not ('09:15:00'<=clock<'10:15:00' or '10:30:00'<=clock<'11:30:00' or '13:30:00'<=clock<'15:00:00'):
-                continue
+            if not self.collection_expected(name,now):continue
             state=self.states.get(name,{})
             matches=[x for x in health if x.get('pid')==state.get('pid')]
             valid=False
@@ -382,6 +387,7 @@ class Supervisor:
                 jobs=[]
                 for name,value in self.states.items():
                     row=dict(value);spec=self.workers[name]
+                    row['collection_expected']=self.collection_expected(name,now)
                     row.update(kind='website' if name=='website' else 'bundled_worker',timezone='Asia/Shanghai',
                                run_at=', '.join(spec.get('daily_at',[])),model_version='preserved-baseline')
                     matching=[item for item in health if item.get('pid')==value.get('pid')]
@@ -391,7 +397,10 @@ class Supervisor:
                         row['business_state']=latest.get('state')
                     jobs.append(row)
                 ready,readiness_problems=self.business_readiness(now,health)
-                emit({'type':'status','engine':'bundled_business' ,'state':'running' if ready else 'degraded',
+                collecting=any(self.collection_expected(name,now) for name in self.workers)
+                emit({'type':'status','engine':'bundled_business',
+                      'state':('running' if collecting else 'scheduled_idle') if ready else 'degraded',
+                      'collection_expected':collecting,
                       'record_only':False,'jobs':jobs,'ready':ready,'readiness_problems':readiness_problems,'upload_health':health,
                       'readiness_note':'Readiness checks owned processes, website health and current-process ACK freshness inside the baseline monitoring windows.'})
         finally:self.shutdown()

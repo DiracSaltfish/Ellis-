@@ -49,6 +49,145 @@ hub::ModuleContext context(const QString &root) {
 class RedemptionEngineTest final : public QObject {
     Q_OBJECT
 private slots:
+    void windLifecycleChecksRealStatusAcrossIdleAndLaunchWindows() {
+        QTemporaryDir root;
+        QFile helper(root.filePath("lifecycle.py")); QVERIFY(helper.open(QIODevice::WriteOnly));
+        helper.write(R"PY(#!/usr/bin/env python3
+import json,sys,pathlib
+running=True
+marker=pathlib.Path(__file__).with_suffix('.opened')
+def emit(x): print(json.dumps(x),flush=True)
+def status(): emit({'type':'status','state':'ready','wind_running':running,'tbapi_loaded':running})
+emit({'type':'hello','protocol':1});status()
+for line in sys.stdin:
+ c=json.loads(line);a=c['action']
+ if a=='quit':break
+ if a=='status':
+  if marker.exists(): running=True;marker.unlink()
+  status()
+ if a in ('shutdown_wind','start_wind'):
+  running=a=='start_wind';status()
+  emit({'type':'command_result','action':a,'ok':True,'details':{'cleanup_deleted_count':2}})
+)PY");
+        helper.close(); QVERIFY(helper.setPermissions(QFile::ReadOwner|QFile::WriteOwner|QFile::ExeOwner));
+        auto ctx=context(root.path()); ctx.settings.insert("wind_helper_mode","fixture");
+        ctx.settings.insert("wind_helper_path",helper.fileName());ctx.settings.insert("wind_control_enabled",true);
+        RedemptionEngine engine;engine.setNowForTest(shanghai(8,40));engine.initialize(ctx);
+        QSignalSpy snapshots(&engine,&hub::IModuleEngine::snapshotReady);engine.start();
+        QTRY_VERIFY_WITH_TIMEOUT(!engine.snapshot()["wind"].toObject()["last_cleanup_at"].toString().isEmpty(),3000);
+        QVERIFY(!engine.snapshot()["wind"].toObject()["running"].toBool());
+        QCOMPARE(engine.snapshot()["wind"].toObject()["cleanup_deleted_count"].toInt(),2);
+        engine.setNowForTest(shanghai(9,10));engine.evaluateScheduleForTest();
+        QTRY_VERIFY_WITH_TIMEOUT(engine.snapshot()["wind"].toObject()["running"].toBool(),3000);
+        engine.setNowForTest(shanghai(15,0));engine.evaluateScheduleForTest();
+        QTRY_VERIFY_WITH_TIMEOUT(!engine.snapshot()["wind"].toObject()["running"].toBool(),3000);
+        QFile marker(root.filePath("lifecycle.opened"));QVERIFY(marker.open(QIODevice::WriteOnly));marker.close();
+        // Same day cleanup was already done: real process state still wins.
+        engine.setNowForTest(shanghai(15,3));engine.evaluateScheduleForTest();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.snapshot()["wind"].toObject()["last_cleanup_at"].toString(),
+            shanghai(15,3).toString(Qt::ISODateWithMs),3000);
+        QVERIFY(!engine.snapshot()["wind"].toObject()["running"].toBool());
+        snapshots.clear();engine.setNowForTest(shanghai(7,51,0,2026,9,5));engine.evaluateScheduleForTest();
+        QVERIFY(!snapshots.isEmpty());
+        QCOMPARE(snapshots.last().first().toJsonObject()["schedule"].toObject()["phase"].toString(),QString("weekend"));
+        engine.stop();
+    }
+
+    void serverQmtIsOptInAndCloseStopsReconnect() {
+        QTemporaryDir root;
+        QTcpServer backend; QVERIFY(backend.listen(QHostAddress::LocalHost, 0));
+        auto ctx = context(root.path());
+        ctx.settings.insert("qmt_backends", QJsonArray{QJsonObject{
+            {"id", "QMT1"}, {"host", "127.0.0.1"}, {"port", backend.serverPort()},
+            {"auto_connect", true}, {"reconnect_interval_ms", 500}}});
+        RedemptionEngine engine; engine.setNowForTest(shanghai(10, 0));
+        engine.initialize(ctx); engine.start();
+        QTest::qWait(600);
+        QVERIFY(!backend.hasPendingConnections()); // stale auto_connect cannot dial by default
+        QCOMPARE(engine.snapshot()["qmt_backends"].toObject()["QMT1"].toObject()["connection_policy"].toString(), QString("on_demand"));
+        engine.submitCommand("redemption_qmt_connect", {{"backend", "QMT1"}}, "connect");
+        QTRY_VERIFY_WITH_TIMEOUT(backend.hasPendingConnections(), 1000);
+        auto *peer = backend.nextPendingConnection();
+        peer->abort();
+        engine.setNowForTest(shanghai(15, 0)); engine.evaluateScheduleForTest();
+        QTest::qWait(1100);
+        QCOMPARE(engine.snapshot()["state"].toString(), QString("scheduled_idle"));
+        for (const auto &item : engine.snapshot()["items"].toArray())
+            QCOMPARE(item.toObject()["status"].toString(), QString("stopped"));
+        const auto state = engine.snapshot()["qmt_backends"].toObject()["QMT1"].toObject();
+        QVERIFY(!state["want_connection"].toBool());
+        QCOMPARE(state["connection_state"].toString(), QString("disconnected"));
+        QVERIFY(!backend.hasPendingConnections());
+        QSignalSpy finished(&engine, &hub::IModuleEngine::commandFinished);
+        engine.submitCommand("redemption_qmt_connect", {{"backend", "QMT1"}}, "closed-connect");
+        engine.submitCommand("redemption_monitor_start", {}, "closed-monitor");
+        QCOMPARE(finished.count(), 2);
+        QVERIFY(!finished.at(0).at(1).toBool()); QVERIFY(!finished.at(1).at(1).toBool());
+        engine.setNowForTest(shanghai(10, 0, 0, 2026, 9, 7)); engine.evaluateScheduleForTest();
+        QTest::qWait(600); QVERIFY(!backend.hasPendingConnections());
+        engine.stop();
+    }
+
+    void manualWindCleanupCannotSuppressClose_data() {
+        QTest::addColumn<bool>("pendingWarmup");
+        QTest::addColumn<bool>("lateAck");
+        QTest::newRow("subscribed-again-after-cleanup") << false << false;
+        QTest::newRow("warmup-crosses-close") << true << false;
+        QTest::newRow("subscribe-ack-crosses-close") << false << true;
+    }
+    void manualWindCleanupCannotSuppressClose() {
+        QFETCH(bool, pendingWarmup);
+        QFETCH(bool, lateAck);
+        QTemporaryDir root;
+        const auto helperPath = QDir(root.path()).filePath("helper.py");
+        QFile helper(helperPath); QVERIFY(helper.open(QIODevice::WriteOnly));
+        helper.write(R"PY(#!/usr/bin/env python3
+import json,sys
+def emit(x): print(json.dumps(x),flush=True)
+emit({'type':'hello','protocol':1})
+emit({'type':'status','state':'ready','wind_running':True,'tbapi_loaded':True})
+for line in sys.stdin:
+ c=json.loads(line); a=c['action']
+ if a=='quit': break
+ if a=='warmup': emit({'type':'command_result','action':a,'ok':True,'details':{'warmup_completed':True,'unsubscribe_confirmed':True}})
+ elif a=='subscribe':
+  import time
+  time.sleep(.3)
+  emit({'type':'status','state':'subscribed','wind_running':True,'tbapi_loaded':True})
+ elif a=='unsubscribe': emit({'type':'status','state':'ready','unsubscribed':True})
+ elif a in ('start_wind','shutdown_wind'):
+  emit({'type':'status','state':'ready','wind_running':a=='start_wind','tbapi_loaded':True})
+  emit({'type':'command_result','action':a,'request_id':c.get('request_id',''),'ok':True})
+)PY");
+        helper.close(); QVERIFY(helper.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner));
+        auto ctx = context(root.path()); ctx.settings.insert("wind_helper_mode", "fixture");
+        ctx.settings.insert("wind_helper_path", helperPath); ctx.settings.insert("wind_control_enabled", true);
+        RedemptionEngine engine; engine.setNowForTest(shanghai(9, 15, 5)); engine.initialize(ctx); engine.start();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.snapshot()["wind"].toObject()["state"].toString(), QString("ready"), 3000);
+        engine.setNowForTest(shanghai(10, 0));
+        engine.evaluateScheduleForTest();
+        if (lateAck) {
+            QTRY_COMPARE_WITH_TIMEOUT(engine.snapshot()["state"].toString(), QString("subscribing"), 4000);
+        } else if (!pendingWarmup) {
+            QTRY_VERIFY_WITH_TIMEOUT(engine.snapshot()["monitoring"].toBool(), 5000);
+            QSignalSpy finished(&engine, &hub::IModuleEngine::commandFinished);
+            engine.submitCommand("redemption_wind_shutdown_cleanup", {}, "cleanup");
+            QTRY_VERIFY_WITH_TIMEOUT(!finished.isEmpty(), 2000);
+            QVERIFY(finished.takeFirst().at(1).toBool());
+            engine.submitCommand("redemption_wind_start", {}, "restart-wind");
+            QTRY_VERIFY_WITH_TIMEOUT(!finished.isEmpty(), 2000);
+            engine.submitCommand("redemption_monitor_start", {}, "resume");
+            QTRY_VERIFY_WITH_TIMEOUT(engine.snapshot()["monitoring"].toBool(), 3000);
+        }
+        engine.setNowForTest(shanghai(15, 0)); engine.evaluateScheduleForTest();
+        QTest::qWait(2300); // late warmup completion must not resubscribe
+        QVERIFY(!engine.snapshot()["monitoring"].toBool());
+        QCOMPARE(engine.snapshot()["state"].toString(), QString("scheduled_idle"));
+        QCOMPARE(engine.snapshot()["schedule"].toObject()["phase"].toString(), QString("closed_pcf_cache"));
+        QVERIFY(engine.snapshot()["health"].toObject()["ok"].toBool());
+        engine.stop();
+    }
+
     void pcfManualRefreshIsSerializedAndCooldownSurvivesRestart() {
         QTemporaryDir root;QTcpServer server;QVERIFY(server.listen(QHostAddress::LocalHost,0));
         QList<QTcpSocket*> requests;
@@ -475,7 +614,8 @@ private slots:
         settings.insert("wind_helper_mode", "fixture");
         settings.insert("wind_helper_path", path);
         RedemptionEngine engine;
-        engine.setNowForTest(shanghai(9, 15, 5));
+        // Observe startup before allowing the asynchronous warmup fault.
+        engine.setNowForTest(shanghai(9, 15, 4));
         engine.initialize({"redemption", root.path(), settings, true});
         engine.start();
         QTRY_COMPARE_WITH_TIMEOUT(engine.snapshot().value("wind").toObject().value("state").toString(),

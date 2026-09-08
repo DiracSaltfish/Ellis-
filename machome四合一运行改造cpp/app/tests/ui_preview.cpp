@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
             snapshots.insert(message.value("module_id").toString(), message);
     }
     hub::AppConfig appConfig;
-    const QStringList ids{"upload", "premium", "webull", "redemption"};
+    const QStringList ids{"upload", "premium", "webull", "redemption", "monitor_sync"};
     for (const auto &id : ids) {
         hub::ModuleConfig config;
         config.id = id;
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
         appConfig.modules.append(config);
     }
     hub::MainWindow window(appConfig, {}, {}, nullptr, hub::MainWindow::StartMode::OfflinePreview);
-    window.setWindowTitle(QStringLiteral("四合一界面预览 · 离线快照"));
+    window.setWindowTitle(QStringLiteral("五合一界面预览 · 离线快照"));
     for (const auto &id : ids) QMetaObject::invokeMethod(&window, "onSnapshot", Qt::DirectConnection,
                                                        Q_ARG(QJsonObject, snapshots.value(id)));
     auto *nav = window.findChild<QListWidget *>("navigation");

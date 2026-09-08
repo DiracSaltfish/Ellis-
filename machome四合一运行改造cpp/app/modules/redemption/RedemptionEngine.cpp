@@ -440,7 +440,7 @@ QJsonObject RedemptionEngine::healthSnapshot() const {
         && operatingMode_ == QStringLiteral("work")
         && RedemptionCore::evaluateSchedule(nowUtc()).monitoringDesired;
     return {{QStringLiteral("ok"), initialized_ && running_ && lastError_.isEmpty()
-                                      && helperOk && (!collectionExpected || monitoring_)},
+                                      && (!collectionExpected || (helperOk && monitoring_))},
             {QStringLiteral("service"), QStringLiteral("machome-native-redemption")},
             {QStringLiteral("protocol"), 1},
             {QStringLiteral("monitoring"), monitoring_},
@@ -493,6 +493,9 @@ QJsonObject RedemptionEngine::snapshot() const {
                                                        : QStringLiteral("Wind 探针未启用")},
                  {QStringLiteral("running"), windRunning_},
                  {QStringLiteral("tbapi_loaded"), tbapiReady_},
+                 {QStringLiteral("last_cleanup_at"), iso(lastWindCleanupAtUtc_)},
+                 {QStringLiteral("cleanup_deleted_count"), windCleanupDeletedCount_ < 0
+                      ? QJsonValue() : QJsonValue(windCleanupDeletedCount_)},
                  {QStringLiteral("last_error"), helperLastError_}}},
             {QStringLiteral("health"), healthSnapshot()},
             {QStringLiteral("schedule"), scheduleSnapshot()},
@@ -699,6 +702,10 @@ void RedemptionEngine::finishWarmupSettle() {
 }
 
 void RedemptionEngine::startMonitoring(const QString &reason) {
+    // Recheck at the point of subscription: a warmup callback can arrive
+    // after the close timer has already run.
+    if (operatingMode_ == QStringLiteral("work")
+        && !RedemptionCore::evaluateSchedule(nowUtc()).monitoringDesired) return;
     if (monitoring_ || monitoringRequested_ || monitoringWarmupPending_) return;
     lastMonitorAttemptUtc_ = nowUtc();
     if (!windCollectionReady()) {
@@ -727,6 +734,17 @@ void RedemptionEngine::startMonitoring(const QString &reason) {
 
 void RedemptionEngine::stopMonitoring(const QString &reason, const QString &requestId) {
     if (!monitoring_ && !monitoringRequested_ && !monitoringWarmupPending_) {
+        // A failed pre-subscription attempt may only have changed state_ to
+        // warming. It still needs to leave that transient state at the close.
+        if (state_ == QStringLiteral("warming") || state_ == QStringLiteral("subscribing")
+            || state_ == QStringLiteral("active")) {
+            state_ = QStringLiteral("scheduled_idle");
+            for (auto it = states_.begin(); it != states_.end(); ++it) {
+                it->status = QStringLiteral("stopped");
+                it->subId = -1;
+            }
+            publishSnapshot();
+        }
         if (!requestId.isEmpty()) {
             emit commandFinished(requestId, true, QStringLiteral("原生监控已经停止"), snapshot());
         }
@@ -751,12 +769,26 @@ void RedemptionEngine::stopMonitoring(const QString &reason, const QString &requ
 void RedemptionEngine::evaluateScheduleForTest() { evaluateSchedule(); }
 
 void RedemptionEngine::evaluateSchedule() {
+    const auto now = nowUtc();
+    // Status reads are independent of subscriptions. Wind can be opened or
+    // closed from the desktop while this module has no capture traffic.
+    if (helperReady_ && (!lastWindStatusPollUtc_.isValid()
+        || now < lastWindStatusPollUtc_ || lastWindStatusPollUtc_.secsTo(now) >= 10)) {
+        lastWindStatusPollUtc_ = now;
+        sendHelperCommand(QStringLiteral("status"));
+    }
+    const ScheduleDecision decision = RedemptionCore::evaluateSchedule(now);
+    if (!lastScheduleSnapshotUtc_.isValid() || now < lastScheduleSnapshotUtc_
+        || lastScheduleSnapshotUtc_.secsTo(now) >= 5 || lastSchedulePhase_ != decision.phase) {
+        lastScheduleSnapshotUtc_ = now;
+        lastSchedulePhase_ = decision.phase;
+        publishSnapshot();
+    }
     // weekend_test is intentionally manual-only.  It removes the clock's
     // automatic stop/relaunch pressure so an operator can exercise Wind,
     // PCF and QMT on a weekend, but it never synthesizes production traffic.
     if (operatingMode_ == QStringLiteral("weekend_test")) return;
 
-    const ScheduleDecision decision = RedemptionCore::evaluateSchedule(nowUtc());
     const QDate day = decision.localNow.date();
     if (decision.resetDue && resetDay_ != day) dailyReset(day, QStringLiteral("09:00 schedule"));
     if (decision.windLaunchDue && windLaunchDay_ != day) {
@@ -778,11 +810,16 @@ void RedemptionEngine::evaluateSchedule() {
             || lastMonitorAttemptUtc_.secsTo(nowUtc()) >= 30)) {
         startMonitoring(QStringLiteral("09:15:30 schedule"));
     }
-    if (decision.shutdownDue && shutdownDay_ != day) {
-        stopMonitoring(QStringLiteral("15:00 schedule"));
-        if (!windRunning_ && helperReady_) {
-            shutdownDay_ = day;
-        } else if (helperReady_
+    if (!decision.windLaunchDue) {
+        // Manual Wind cleanup earlier today must not suppress the actual
+        // closing transition. Enforce desired state on every schedule tick.
+        stopMonitoring(QStringLiteral("Wind 运行时段之外"));
+        for (auto *client : std::as_const(qmtClients_)) {
+            if (client->snapshot().value(QStringLiteral("want_connection")).toBool())
+                client->disconnectBackend();
+        }
+        if (helperReady_
+                   && (windRunning_ || lastWindCleanupAtUtc_.toTimeZone(QTimeZone("Asia/Shanghai")).date() != day)
                    && context_.settings.value(QStringLiteral("wind_control_enabled")).toBool(false)
                    && (!lastWindShutdownAttemptUtc_.isValid()
                        || lastWindShutdownAttemptUtc_.secsTo(nowUtc()) >= 120)) {
@@ -850,6 +887,11 @@ void RedemptionEngine::initializeQmt() {
         auto *client = new machome::qmt::QmtClient(config, this);
         qmtClients_.insert(config.id, client);
         qmtSnapshots_.insert(config.id, client->snapshot());
+        auto initial = qmtSnapshots_.value(config.id).toObject();
+        initial.insert(QStringLiteral("connection_policy"),
+            context_.settings.value(QStringLiteral("qmt_auto_connect_enabled")).toBool(false)
+                ? QStringLiteral("configured") : QStringLiteral("on_demand"));
+        qmtSnapshots_.insert(config.id, initial);
         connect(client, &machome::qmt::QmtClient::snapshotChanged, this,
                 [this, id = config.id](const QJsonObject &snapshot) { updateQmtSnapshot(id, snapshot); });
         connect(client, &machome::qmt::QmtClient::eventOccurred, this,
@@ -863,13 +905,22 @@ void RedemptionEngine::initializeQmt() {
             details.insert(QStringLiteral("backend"), id);
             emit commandFinished(commandId, ok, message, details);
         });
-        if (definition.value(QStringLiteral("auto_connect")).toBool(false)) client->connectBackend();
+        // Server monitoring does not need account sessions. Old per-backend
+        // auto_connect flags only take effect with an explicit module opt-in.
+        if (context_.settings.value(QStringLiteral("qmt_auto_connect_enabled")).toBool(false)
+            && definition.value(QStringLiteral("auto_connect")).toBool(false)
+            && RedemptionCore::evaluateSchedule(nowUtc()).monitoringDesired)
+            client->connectBackend();
     }
 }
 
 void RedemptionEngine::updateQmtSnapshot(const QString &id,
                                          const QJsonObject &snapshot) {
-    qmtSnapshots_.insert(id, snapshot);
+    auto annotated = snapshot;
+    annotated.insert(QStringLiteral("connection_policy"),
+        context_.settings.value(QStringLiteral("qmt_auto_connect_enabled")).toBool(false)
+            ? QStringLiteral("configured") : QStringLiteral("on_demand"));
+    qmtSnapshots_.insert(id, annotated);
     if (snapshot.value(QStringLiteral("ready")).toBool()) {
         if (pendingQmtConnect_.contains(id)) {
             emit commandFinished(pendingQmtConnect_.take(id), true,
@@ -918,6 +969,12 @@ void RedemptionEngine::handleQmtCommand(const QString &action,
         return;
     }
     if (action == QStringLiteral("redemption_qmt_connect")) {
+        if (operatingMode_ == QStringLiteral("work")
+            && !RedemptionCore::evaluateSchedule(nowUtc()).monitoringDesired) {
+            emit commandFinished(commandId, false,
+                QStringLiteral("当前为盘外休眠时段；临时连接请使用周末测试模式"), {});
+            return;
+        }
         pendingQmtConnect_.insert(backend, commandId);
         client->connectBackend();
     } else if (action == QStringLiteral("redemption_qmt_disconnect")) {
@@ -1030,6 +1087,12 @@ void RedemptionEngine::submitCommand(const QString &action,
         if (ok) publishSnapshot();
         emit commandFinished(commandId, ok, ok ? QStringLiteral("标的名称已更新") : error, snapshot());
     } else if (action == QStringLiteral("redemption_monitor_start")) {
+        if (operatingMode_ == QStringLiteral("work")
+            && !RedemptionCore::evaluateSchedule(nowUtc()).monitoringDesired) {
+            emit commandFinished(commandId, false,
+                QStringLiteral("当前为盘外休眠时段；临时采集请使用周末测试模式"), snapshot());
+            return;
+        }
         startMonitoring(QStringLiteral("manual"));
         const bool accepted = monitoring_ || monitoringRequested_ || monitoringWarmupPending_;
         emit commandFinished(commandId, accepted,
@@ -1190,6 +1253,15 @@ void RedemptionEngine::handleHelperMessage(const QJsonObject &message) {
         if (message.contains(QStringLiteral("tbapi_loaded")))
             tbapiReady_ = message.value(QStringLiteral("tbapi_loaded")).toBool();
         helperState_ = message.value(QStringLiteral("state")).toString(helperState_);
+        if (helperState_ == QStringLiteral("subscribed")
+            && operatingMode_ == QStringLiteral("work")
+            && !RedemptionCore::evaluateSchedule(nowUtc()).monitoringDesired) {
+            // Late subscribe acknowledgement: send an actual unsubscribe,
+            // even if the close transition already cleared our local flags.
+            monitoringRequested_ = true;
+            stopMonitoring(QStringLiteral("盘外迟到订阅已停订"));
+            return;
+        }
         if (helperState_ == QStringLiteral("subscribed") && monitoringRequested_) {
             monitoringRequested_ = false;
             monitoring_ = true;
@@ -1228,10 +1300,22 @@ void RedemptionEngine::handleHelperMessage(const QJsonObject &message) {
             monitoring_ = false;
             monitoringRequested_ = false;
             monitoringWarmupPending_ = false;
+            pendingMonitoringReason_.clear();
+            warmupDay_ = {};
+            warmupAttemptDay_ = {};
+            warmupSettleElapsed_ = false;
+            state_ = QStringLiteral("scheduled_idle");
+            for (auto it = states_.begin(); it != states_.end(); ++it) {
+                it->status = QStringLiteral("stopped");
+                it->subId = -1;
+            }
             windRunning_ = false;
             tbapiReady_ = false;
             helperState_ = QStringLiteral("cleaned");
-            shutdownDay_ = nowUtc().toTimeZone(QTimeZone("Asia/Shanghai")).date();
+            lastError_.clear();
+            helperLastError_.clear();
+            lastWindCleanupAtUtc_ = nowUtc();
+            windCleanupDeletedCount_ = details.value(QStringLiteral("cleanup_deleted_count")).toInt(-1);
         }
         if (!requestId.isEmpty()) {
             emit commandFinished(requestId, ok,

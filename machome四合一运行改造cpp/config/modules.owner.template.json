@@ -234,6 +234,7 @@
         "required_protocol": 1,
         "legacy_app": "/Users/ellis/Applications/ETF监控主机.app",
         "process_probe_ms": 5000,
+        "qmt_auto_connect_enabled": false,
         "qmt_backends": [
           {"id": "QMT1", "host": "192.168.1.112", "port": 9527, "enabled": true, "auto_connect": false, "reconnect_interval_ms": 5000, "heartbeat_interval_ms": 5000, "silence_timeout_ms": 15000, "order_throttle_ms": 5000},
           {"id": "QMT2", "host": "192.168.1.111", "port": 9527, "enabled": true, "auto_connect": false, "reconnect_interval_ms": 5000, "heartbeat_interval_ms": 5000, "silence_timeout_ms": 15000, "order_throttle_ms": 5000}

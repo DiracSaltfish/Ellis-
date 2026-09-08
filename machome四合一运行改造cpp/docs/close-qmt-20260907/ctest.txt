@@ -1,0 +1,80 @@
+Test project /tmp/machome-close-qmt-build
+      Start 17: redemption-engine
+      Start 18: redemption-baseline-invisible
+      Start 35: upload-business-supervisor
+      Start  4: premium-engine-l1
+ 1/36 Test  #4: premium-engine-l1 ................   Passed    4.41 sec
+      Start  2: premium-client
+ 2/36 Test #35: upload-business-supervisor .......   Passed    6.07 sec
+      Start 34: alert-controller
+ 3/36 Test  #2: premium-client ...................   Passed    2.30 sec
+      Start 26: owner-handoff
+ 4/36 Test #34: alert-controller .................   Passed    1.36 sec
+      Start 31: module-pages
+ 5/36 Test #26: owner-handoff ....................   Passed    0.76 sec
+      Start  5: premium-a-engine
+ 6/36 Test  #5: premium-a-engine .................   Passed    1.01 sec
+      Start  8: premium-baseline-invisible
+ 7/36 Test  #8: premium-baseline-invisible .......   Passed    0.73 sec
+      Start 10: webull-engine
+ 8/36 Test #10: webull-engine ....................   Passed    0.83 sec
+      Start 22: audit-writer
+ 9/36 Test #31: module-pages .....................   Passed    3.11 sec
+      Start 12: webull-baseline-invisible
+10/36 Test #22: audit-writer .....................   Passed    0.50 sec
+      Start  3: premium-engine-domain
+11/36 Test  #3: premium-engine-domain ............   Passed    0.23 sec
+      Start 11: webull-browser-helper
+12/36 Test #11: webull-browser-helper ............   Passed    0.29 sec
+      Start 15: upload-engine
+13/36 Test #12: webull-baseline-invisible ........   Passed    0.53 sec
+      Start  1: hub-common
+14/36 Test  #1: hub-common .......................   Passed    0.02 sec
+      Start 16: upload-baseline-invisible
+15/36 Test #15: upload-engine ....................   Passed    0.50 sec
+      Start 19: redemption-wind-helper
+16/36 Test #16: upload-baseline-invisible ........   Passed    0.48 sec
+      Start  6: premium-pushplus
+17/36 Test #19: redemption-wind-helper ...........   Passed    0.10 sec
+      Start 36: monitor-sync-file-service
+18/36 Test  #6: premium-pushplus .................   Passed    0.43 sec
+      Start 20: qmt-contract
+19/36 Test #36: monitor-sync-file-service ........   Passed    0.36 sec
+      Start  9: webull-status
+20/36 Test  #9: webull-status ....................   Passed    0.32 sec
+      Start 14: ibkr-bridge-core
+21/36 Test #20: qmt-contract .....................   Passed    0.35 sec
+      Start 21: command-journal
+22/36 Test #21: command-journal ..................   Passed    0.03 sec
+      Start 28: upload-runtime-isolation
+23/36 Test #28: upload-runtime-isolation .........   Passed    0.11 sec
+      Start 29: webull-runtime-isolation
+24/36 Test #14: ibkr-bridge-core .................   Passed    0.21 sec
+      Start 13: worker-schedule
+25/36 Test #13: worker-schedule ..................   Passed    0.02 sec
+      Start 23: lifecycle-controller
+26/36 Test #29: webull-runtime-isolation .........   Passed    0.09 sec
+      Start 25: ibkr-shared-client-unit
+27/36 Test #23: lifecycle-controller .............   Passed    0.02 sec
+      Start 30: release-script-dry-run
+28/36 Test #25: ibkr-shared-client-unit ..........   Passed    0.05 sec
+      Start  7: premium-runtime-isolation
+29/36 Test #30: release-script-dry-run ...........   Passed    0.04 sec
+      Start 24: contract-files
+30/36 Test  #7: premium-runtime-isolation ........   Passed    0.03 sec
+      Start 27: build-manifest
+31/36 Test #24: contract-files ...................   Passed    0.02 sec
+32/36 Test #27: build-manifest ...................   Passed    0.02 sec
+33/36 Test #18: redemption-baseline-invisible ....   Passed   39.85 sec
+34/36 Test #17: redemption-engine ................   Passed   40.18 sec
+      Start 33: four-native-acceptance
+35/36 Test #33: four-native-acceptance ...........   Passed   12.65 sec
+      Start 32: full-smoke
+36/36 Test #32: full-smoke .......................   Passed    3.16 sec
+
+100% tests passed, 0 tests failed out of 36
+
+Label Time Summary:
+integration    =  15.80 sec*proc (2 tests)
+
+Total Test time (real) =  55.99 sec

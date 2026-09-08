@@ -161,6 +161,10 @@ target_include_directories(machome-hub-common PUBLIC
 target_link_libraries(machome-hub-common PUBLIC Qt6::Core Qt6::Network)
 
 add_library(machome-hub-modules STATIC
+    modules/monitor_sync/FileStore.cpp
+    modules/monitor_sync/FileStore.h
+    modules/monitor_sync/MonitorSyncEngine.cpp
+    modules/monitor_sync/MonitorSyncEngine.h
     modules/bridge/RealtimeClient.cpp
     modules/bridge/RealtimeClient.h
     modules/premium/PremiumClient.cpp
@@ -208,7 +212,7 @@ add_library(machome-hub-modules STATIC
 )
 target_include_directories(machome-hub-modules PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(machome-hub-modules PUBLIC
-    machome-hub-common Qt6::Core Qt6::Network Qt6::Sql Qt6::WebSockets
+    machome-hub-common Qt6::Core Qt6::Network Qt6::Sql Qt6::WebSockets Qt6::Concurrent
 )
 target_compile_definitions(machome-hub-modules PRIVATE
     MACHOME_ENABLE_LIVE_QMT_ORDERS=$<BOOL:${MACHOME_ENABLE_LIVE_QMT_ORDERS}>)
@@ -461,6 +465,8 @@ qt_add_executable(machome-hub-ui MACOSX_BUNDLE
     src/ui/MainWindow.h
     src/ui/AlertController.cpp
     src/ui/AlertController.h
+    src/ui/MonitorSyncPage.cpp
+    src/ui/MonitorSyncPage.h
     src/ui/ModulePages.cpp
     src/ui/UiText.cpp
     src/ui/UiText.h
@@ -476,7 +482,7 @@ target_link_libraries(machome-hub-ui PRIVATE
 set_target_properties(machome-hub-ui PROPERTIES
     OUTPUT_NAME "Machome 四合一运行中心"
     MACOSX_BUNDLE_GUI_IDENTIFIER "com.ellis.machome.operations-hub"
-    MACOSX_BUNDLE_BUNDLE_NAME "Machome 四合一运行中心"
+    MACOSX_BUNDLE_BUNDLE_NAME "Machome 五合一运行中心"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
     MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
 )
@@ -900,6 +906,7 @@ if(BUILD_TESTING)
         tests/tst_module_pages.cpp
         src/ui/AlertController.cpp
         src/ui/AlertController.h
+        src/ui/MonitorSyncPage.cpp src/ui/MonitorSyncPage.h
         src/ui/ModulePages.cpp
         src/ui/UiText.cpp
         src/ui/UiText.h
@@ -917,6 +924,7 @@ if(BUILD_TESTING)
         src/ui/MainWindow.cpp src/ui/MainWindow.h
         src/ui/HubClient.cpp src/ui/HubClient.h
         src/ui/AlertController.cpp src/ui/AlertController.h
+        src/ui/MonitorSyncPage.cpp src/ui/MonitorSyncPage.h
         src/ui/ModulePages.cpp src/ui/ModulePages.h
         src/ui/ServiceOverview.cpp src/ui/ServiceOverview.h
         src/ui/UiText.cpp src/ui/UiText.h
@@ -984,4 +992,18 @@ if(APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_BINARY_DIR}/source_manifest.json"
             "$<TARGET_BUNDLE_DIR:machome-hub-ui>/Contents/Resources/source_manifest.json"
         DEPENDS machome-hub-ui)
+endif()
+
+if(BUILD_TESTING)
+    add_executable(monitor-sync-test-server tests/monitor_sync_server.cpp)
+    target_link_libraries(monitor-sync-test-server PRIVATE machome-hub-modules Qt6::Concurrent)
+endif()
+
+if(APPLE)
+    target_link_libraries(machome-hub-modules PUBLIC iconv)
+endif()
+if(BUILD_TESTING)
+    add_executable(tst-monitor-sync tests/tst_monitor_sync.cpp)
+    target_link_libraries(tst-monitor-sync PRIVATE machome-hub-modules Qt6::Test Qt6::Concurrent)
+    add_test(NAME monitor-sync-file-service COMMAND tst-monitor-sync)
 endif()

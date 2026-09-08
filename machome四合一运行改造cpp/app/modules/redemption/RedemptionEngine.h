@@ -160,11 +160,15 @@ private:
     QDateTime lastMonitorAttemptUtc_;
     QDateTime lastWindLaunchAttemptUtc_;
     QDateTime lastWindShutdownAttemptUtc_;
+    QDateTime lastWindStatusPollUtc_;
+    QDateTime lastScheduleSnapshotUtc_;
+    QDateTime lastWindCleanupAtUtc_;
+    QString lastSchedulePhase_;
+    int windCleanupDeletedCount_ = -1;
     QDate resetDay_;
     QDate windLaunchDay_;
     QDate warmupDay_;
     QDate warmupAttemptDay_;
-    QDate shutdownDay_;
     QDate lastHistoryPruneDay_;
     QString state_ = QStringLiteral("created");
     QString lastError_;

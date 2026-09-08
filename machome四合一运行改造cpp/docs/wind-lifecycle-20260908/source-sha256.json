@@ -1,0 +1,11 @@
+{
+  "app/modules/redemption/RedemptionEngine.cpp": "aad45ca918803caee1ea26c057f1a0e0b82a3f04bb3e9da943fca169064ee198",
+  "app/modules/redemption/RedemptionEngine.h": "650b667b3ccd655c3c2b3363e467fac57d5982cd8e99ab6189d8c30d2d99e934",
+  "app/helpers/wind_probe/main.cpp": "942f90712c8208fadbd0f45b3709b56cd2d77e2c5624fe7668ab7b734c5c4bd0",
+  "app/src/ui/ModulePages.cpp": "c0159ee5b86e4005f26f1e56e939c0b1e24038d1473beb6cf74e4979cc9f41f1",
+  "app/src/ui/ServiceOverview.cpp": "416a4e4ce74320cbf630dafaa020da7707d8c6155508b71388206d3b2e4ae405",
+  "app/src/ui/UiText.cpp": "5575f0218291114cdb2aa7b5b91a0c65927671f47ceec895e0f3f38d3c5a5929",
+  "app/tests/tst_redemption_engine.cpp": "1fe20629ef06d8e13e97f23046df738cb3e04796d2a1b7097ab33b360556aea7",
+  "app/tests/tst_module_pages.cpp": "5cc47f4b55a1b0d7ee2f93609534c751469b36398bae0b4b54193f2136261307",
+  "app/tests/test_wind_probe_helper.py": "9e11ff7e6f5171699c95b41a7d6b56544a01056587ee09b023607508b03773bc"
+}

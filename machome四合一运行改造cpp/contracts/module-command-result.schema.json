@@ -17,27 +17,90 @@
     "timestamp"
   ],
   "properties": {
-    "schema_version": {"const": 1},
-    "protocol": {"const": "module.control.v1"},
-    "type": {"const": "command_result"},
-    "instance_id": {"type": "string", "minLength": 8, "maxLength": 80},
+    "schema_version": {
+      "const": 1
+    },
+    "protocol": {
+      "const": "module.control.v1"
+    },
+    "type": {
+      "const": "command_result"
+    },
+    "instance_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 80
+    },
     "command_id": {
       "type": "string",
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{7,79}$"
     },
-    "module_id": {"enum": ["upload", "premium", "webull", "redemption"]},
-    "action": {"$ref": "module-command.schema.json#/$defs/action"},
-    "state": {"enum": ["accepted", "running", "succeeded", "failed", "timed_out"]},
-    "message": {"type": "string", "maxLength": 2048},
-    "code": {"type": "string", "maxLength": 128},
-    "expected_revision": {"type": "integer", "minimum": -1},
-    "accepted_revision": {"type": "integer", "minimum": -1},
-    "current_revision": {"type": "integer", "minimum": -1},
-    "control_revision": {"type": "integer", "minimum": -1},
-    "requested_at": {"type": "string", "format": "date-time"},
-    "requested_by": {"type": "string", "minLength": 1, "maxLength": 128},
-    "reason": {"type": "string", "minLength": 1, "maxLength": 512},
-    "timestamp": {"type": "string", "format": "date-time"},
-    "details": {"type": "object", "additionalProperties": true}
+    "module_id": {
+      "enum": [
+        "upload",
+        "premium",
+        "webull",
+        "redemption",
+        "monitor_sync"
+      ]
+    },
+    "action": {
+      "$ref": "module-command.schema.json#/$defs/action"
+    },
+    "state": {
+      "enum": [
+        "accepted",
+        "running",
+        "succeeded",
+        "failed",
+        "timed_out"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 2048
+    },
+    "code": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "expected_revision": {
+      "type": "integer",
+      "minimum": -1
+    },
+    "accepted_revision": {
+      "type": "integer",
+      "minimum": -1
+    },
+    "current_revision": {
+      "type": "integer",
+      "minimum": -1
+    },
+    "control_revision": {
+      "type": "integer",
+      "minimum": -1
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requested_by": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": true
+    }
   }
 }

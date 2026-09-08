@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setOrganizationDomain(QStringLiteral("ellis.local"));
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(QStringLiteral("Machome 四合一运行中心后台 Agent"));
+    parser.setApplicationDescription(QStringLiteral("Machome 五合一运行中心后台 Agent"));
     parser.addHelpOption();
     parser.addVersionOption();
     QCommandLineOption configOption({QStringLiteral("c"), QStringLiteral("config")},
