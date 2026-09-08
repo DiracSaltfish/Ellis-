@@ -1,0 +1,26 @@
+[
+  {
+    "requested": [
+      {
+        "market": 102,
+        "symbol": "159518"
+      }
+    ],
+    "same_shape_as_previous_mac": true,
+    "same_zero_basic_fields_as_previous_mac": true,
+    "same_empty_basic_fields_as_previous_mac": true,
+    "exchange_same_trading_day": true
+  },
+  {
+    "requested": [
+      {
+        "market": 101,
+        "symbol": "513350"
+      }
+    ],
+    "same_shape_as_previous_mac": true,
+    "same_zero_basic_fields_as_previous_mac": true,
+    "same_empty_basic_fields_as_previous_mac": true,
+    "exchange_same_trading_day": false
+  }
+]

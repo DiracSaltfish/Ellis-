@@ -1,0 +1,22 @@
+[
+  {
+    "requested": [
+      {
+        "market": 102,
+        "symbol": "159518"
+      }
+    ],
+    "same_shape_and_types": true,
+    "same_request": true
+  },
+  {
+    "requested": [
+      {
+        "market": 101,
+        "symbol": "513350"
+      }
+    ],
+    "same_shape_and_types": true,
+    "same_request": true
+  }
+]

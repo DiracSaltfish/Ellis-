@@ -1,0 +1,580 @@
+{
+  "at": "2026-09-07T23:58:31.772367+00:00",
+  "backend": "mac",
+  "closed": true,
+  "login": true,
+  "queries": [
+    {
+      "elapsed_ms": 141,
+      "error_code": 0,
+      "error_type": "int",
+      "exchange_comparison": {
+        "api_unavailable_limit_fields": [],
+        "bytes": 25913,
+        "component_fields": [
+          "ComponentShare",
+          "CreationCashSubstitute",
+          "PremiumRatio",
+          "RedemptionCashSubstitute",
+          "SubstituteFlag",
+          "UnderlyingSecurityID",
+          "UnderlyingSecurityIDSource",
+          "UnderlyingSymbol"
+        ],
+        "component_identity_sets_equal": true,
+        "component_matches": {
+          "component_share": {
+            "compared": 52,
+            "equal": 52
+          },
+          "creation_cash_substitute": {
+            "compared": 52,
+            "equal": 52
+          },
+          "premium_ratio": {
+            "compared": 52,
+            "equal": 52
+          },
+          "redemption_cash_substitute": {
+            "compared": 52,
+            "equal": 52
+          }
+        },
+        "component_rows": 52,
+        "flags_match": {
+          "creation": true,
+          "publish": true,
+          "redemption": true
+        },
+        "http_status": 200,
+        "numeric_matches": {
+          "cash_component": true,
+          "creation_limit": true,
+          "creation_redemption_unit": true,
+          "estimate_cash_component": true,
+          "max_cash_ratio": true,
+          "nav": true,
+          "nav_per_cu": true,
+          "net_creation_limit": true,
+          "net_redemption_limit": true,
+          "record_num": true,
+          "redemption_limit": true,
+          "total_record_num": true
+        },
+        "root": "PCFFile",
+        "same_trading_day": true,
+        "summary_fields": [
+          "CashComponent",
+          "Creation",
+          "CreationLimit",
+          "CreationLimitPerUser",
+          "CreationRedemptionUnit",
+          "DividendPerCU",
+          "EstimateCashComponent",
+          "FundManagementCompany",
+          "MaxCashRatio",
+          "NAV",
+          "NAVperCU",
+          "NetCreationLimit",
+          "NetCreationLimitPerUser",
+          "NetRedemptionLimit",
+          "NetRedemptionLimitPerUser",
+          "PreTradingDay",
+          "Publish",
+          "RecordNum",
+          "Redemption",
+          "RedemptionLimit",
+          "RedemptionLimitPerUser",
+          "SecurityID",
+          "SecurityIDSource",
+          "Symbol",
+          "TotalRecordNum",
+          "TradingDay",
+          "UnderlyingSecurityID",
+          "UnderlyingSecurityIDSource",
+          "Version"
+        ]
+      },
+      "mode": "single",
+      "requested": [
+        {
+          "market": 102,
+          "symbol": "159518"
+        }
+      ],
+      "summary": {
+        "entries": [
+          {
+            "basic_empty_fields": [
+              "all_cash_amount",
+              "all_cash_discount_rate",
+              "all_cash_flag",
+              "all_cash_premium_rate",
+              "creation_redemption_switch",
+              "reserved",
+              "rtgs_flag"
+            ],
+            "basic_fields": [
+              "all_cash_amount",
+              "all_cash_discount_rate",
+              "all_cash_flag",
+              "all_cash_premium_rate",
+              "cash_component",
+              "creation",
+              "creation_limit",
+              "creation_limit_per_user",
+              "creation_redemption_switch",
+              "creation_redemption_unit",
+              "dividend_per_cu",
+              "estimate_cash_component",
+              "fund_management_company",
+              "market_type",
+              "max_cash_ratio",
+              "nav",
+              "nav_per_cu",
+              "net_creation_limit",
+              "net_creation_limit_per_user",
+              "net_redemption_limit",
+              "net_redemption_limit_per_user",
+              "pre_trading_day",
+              "publish",
+              "record_num",
+              "redemption",
+              "redemption_limit",
+              "redemption_limit_per_user",
+              "reserved",
+              "rtgs_flag",
+              "security_code",
+              "symbol",
+              "total_record_num",
+              "trading_day",
+              "underlying_security_id",
+              "underlying_security_id_source"
+            ],
+            "basic_types": {
+              "all_cash_amount": "str",
+              "all_cash_discount_rate": "str",
+              "all_cash_flag": "str",
+              "all_cash_premium_rate": "str",
+              "cash_component": "int",
+              "creation": "str",
+              "creation_limit": "int",
+              "creation_limit_per_user": "int",
+              "creation_redemption_switch": "str",
+              "creation_redemption_unit": "int",
+              "dividend_per_cu": "int",
+              "estimate_cash_component": "int",
+              "fund_management_company": "str",
+              "market_type": "int",
+              "max_cash_ratio": "int",
+              "nav": "int",
+              "nav_per_cu": "int",
+              "net_creation_limit": "int",
+              "net_creation_limit_per_user": "int",
+              "net_redemption_limit": "int",
+              "net_redemption_limit_per_user": "int",
+              "pre_trading_day": "int",
+              "publish": "str",
+              "record_num": "int",
+              "redemption": "str",
+              "redemption_limit": "int",
+              "redemption_limit_per_user": "int",
+              "reserved": "str",
+              "rtgs_flag": "str",
+              "security_code": "str",
+              "symbol": "str",
+              "total_record_num": "int",
+              "trading_day": "int",
+              "underlying_security_id": "str",
+              "underlying_security_id_source": "str"
+            },
+            "basic_zero_fields": [
+              "creation_limit",
+              "creation_limit_per_user",
+              "dividend_per_cu",
+              "net_creation_limit_per_user",
+              "net_redemption_limit",
+              "net_redemption_limit_per_user",
+              "redemption_limit_per_user"
+            ],
+            "component_empty_fields": [
+              "buy_or_sell_to_open",
+              "reserved"
+            ],
+            "component_fields": [
+              "buy_or_sell_to_open",
+              "component_share",
+              "creation_cash_substitute",
+              "discount_ratio",
+              "market_type",
+              "premium_ratio",
+              "redemption_cash_substitute",
+              "reserved",
+              "security_code",
+              "substitute_flag",
+              "substitution_cash_amount",
+              "underlying_security_id",
+              "underlying_symbol"
+            ],
+            "component_rows": 52,
+            "component_types": {
+              "buy_or_sell_to_open": [
+                "str"
+              ],
+              "component_share": [
+                "int"
+              ],
+              "creation_cash_substitute": [
+                "int"
+              ],
+              "discount_ratio": [
+                "int"
+              ],
+              "market_type": [
+                "int"
+              ],
+              "premium_ratio": [
+                "int"
+              ],
+              "redemption_cash_substitute": [
+                "int"
+              ],
+              "reserved": [
+                "str"
+              ],
+              "security_code": [
+                "str"
+              ],
+              "substitute_flag": [
+                "str"
+              ],
+              "substitution_cash_amount": [
+                "int"
+              ],
+              "underlying_security_id": [
+                "str"
+              ],
+              "underlying_symbol": [
+                "str"
+              ]
+            },
+            "component_zero_fields": [
+              "discount_ratio",
+              "redemption_cash_substitute",
+              "substitution_cash_amount"
+            ],
+            "current_day": false,
+            "declared_component_count_matches": true,
+            "requested_identity_matches": true
+          }
+        ],
+        "records": 1,
+        "returned_exact_requested_set": true
+      }
+    },
+    {
+      "elapsed_ms": 36,
+      "error_code": 0,
+      "error_type": "int",
+      "exchange_comparison": {
+        "api_unavailable_limit_fields": [
+          "creation_limit",
+          "redemption_limit"
+        ],
+        "bytes": 22238,
+        "component_fields": [
+          "CreationPremiumRate",
+          "InstrumentID",
+          "InstrumentName",
+          "Quantity",
+          "RedemptionDiscountRate",
+          "SubstitutionCashAmount",
+          "SubstitutionFlag",
+          "UnderlyingSecurityID"
+        ],
+        "component_identity_sets_equal": true,
+        "component_matches": {
+          "component_share": {
+            "compared": 51,
+            "equal": 51
+          },
+          "substitution_cash_amount": {
+            "compared": 51,
+            "equal": 51
+          }
+        },
+        "component_rows": 51,
+        "current_fullgoal_source": {
+          "bytes": 1063,
+          "fields": [
+            "allCashAmount",
+            "allCashDiscountrate",
+            "allCashFlag",
+            "allCashPremiumrate",
+            "annDate",
+            "cashBalance",
+            "cashDividend",
+            "creationLimitperacct",
+            "creationRedemptionMechanism",
+            "fileSource",
+            "fundid1",
+            "fundid2",
+            "ifIopv",
+            "ifSh",
+            "investorAccountid",
+            "lastTenminuteredemptionlimit",
+            "manageName",
+            "maxCashtd",
+            "maxSg",
+            "maxSh",
+            "minShdy",
+            "minShnav",
+            "minYgcash",
+            "netCreationLimitperacct",
+            "netCreationlimit",
+            "netRedemptionLimit",
+            "netRedemptionLimitperacct",
+            "pbuId",
+            "productAbbr",
+            "productCode",
+            "ptradeDate",
+            "recordNumber",
+            "redemptionLimitperacct",
+            "rtgsFlag",
+            "shId",
+            "shareValue",
+            "tradeDate",
+            "tradingDay",
+            "underlyingIndex",
+            "underlyingIndexisincode",
+            "version"
+          ],
+          "http_status": 200,
+          "numeric_matches": {
+            "creation_redemption_unit": true,
+            "estimate_cash_component": true,
+            "nav_per_cu": true
+          }
+        },
+        "flags_match": {
+          "creation_redemption_switch": true
+        },
+        "http_status": 200,
+        "numeric_matches": {
+          "cash_component": true,
+          "creation_limit": false,
+          "creation_redemption_unit": true,
+          "estimate_cash_component": true,
+          "max_cash_ratio": true,
+          "nav": true,
+          "nav_per_cu": true,
+          "redemption_limit": false,
+          "total_record_num": true
+        },
+        "root": "SSEPortfolioCompositionFile",
+        "same_trading_day": true,
+        "summary_fields": [
+          "CreationLimit",
+          "CreationRedemptionMechanism",
+          "CreationRedemptionSwitch",
+          "CreationRedemptionUnit",
+          "EstimatedCashComponent",
+          "FundInstrumentID",
+          "MaxCashRatio",
+          "NAV",
+          "NAVperCU",
+          "PreCashComponent",
+          "PreTradingDay",
+          "PublishIOPVFlag",
+          "RecordNumber",
+          "RedemptionLimit",
+          "TradingDay"
+        ]
+      },
+      "mode": "single",
+      "requested": [
+        {
+          "market": 101,
+          "symbol": "513350"
+        }
+      ],
+      "summary": {
+        "entries": [
+          {
+            "basic_empty_fields": [
+              "all_cash_amount",
+              "all_cash_discount_rate",
+              "all_cash_flag",
+              "all_cash_premium_rate",
+              "creation",
+              "fund_management_company",
+              "redemption",
+              "reserved",
+              "rtgs_flag",
+              "symbol",
+              "underlying_security_id",
+              "underlying_security_id_source"
+            ],
+            "basic_fields": [
+              "all_cash_amount",
+              "all_cash_discount_rate",
+              "all_cash_flag",
+              "all_cash_premium_rate",
+              "cash_component",
+              "creation",
+              "creation_limit",
+              "creation_limit_per_user",
+              "creation_redemption_switch",
+              "creation_redemption_unit",
+              "dividend_per_cu",
+              "estimate_cash_component",
+              "fund_management_company",
+              "market_type",
+              "max_cash_ratio",
+              "nav",
+              "nav_per_cu",
+              "net_creation_limit",
+              "net_creation_limit_per_user",
+              "net_redemption_limit",
+              "net_redemption_limit_per_user",
+              "pre_trading_day",
+              "publish",
+              "record_num",
+              "redemption",
+              "redemption_limit",
+              "redemption_limit_per_user",
+              "reserved",
+              "rtgs_flag",
+              "security_code",
+              "symbol",
+              "total_record_num",
+              "trading_day",
+              "underlying_security_id",
+              "underlying_security_id_source"
+            ],
+            "basic_types": {
+              "all_cash_amount": "str",
+              "all_cash_discount_rate": "str",
+              "all_cash_flag": "str",
+              "all_cash_premium_rate": "str",
+              "cash_component": "int",
+              "creation": "str",
+              "creation_limit": "int",
+              "creation_limit_per_user": "int",
+              "creation_redemption_switch": "str",
+              "creation_redemption_unit": "int",
+              "dividend_per_cu": "int",
+              "estimate_cash_component": "int",
+              "fund_management_company": "str",
+              "market_type": "int",
+              "max_cash_ratio": "int",
+              "nav": "int",
+              "nav_per_cu": "int",
+              "net_creation_limit": "int",
+              "net_creation_limit_per_user": "int",
+              "net_redemption_limit": "int",
+              "net_redemption_limit_per_user": "int",
+              "pre_trading_day": "int",
+              "publish": "str",
+              "record_num": "int",
+              "redemption": "str",
+              "redemption_limit": "int",
+              "redemption_limit_per_user": "int",
+              "reserved": "str",
+              "rtgs_flag": "str",
+              "security_code": "str",
+              "symbol": "str",
+              "total_record_num": "int",
+              "trading_day": "int",
+              "underlying_security_id": "str",
+              "underlying_security_id_source": "str"
+            },
+            "basic_zero_fields": [
+              "creation_limit",
+              "creation_limit_per_user",
+              "dividend_per_cu",
+              "net_creation_limit",
+              "net_creation_limit_per_user",
+              "net_redemption_limit",
+              "net_redemption_limit_per_user",
+              "record_num",
+              "redemption_limit",
+              "redemption_limit_per_user"
+            ],
+            "component_empty_fields": [
+              "buy_or_sell_to_open",
+              "reserved"
+            ],
+            "component_fields": [
+              "buy_or_sell_to_open",
+              "component_share",
+              "creation_cash_substitute",
+              "discount_ratio",
+              "market_type",
+              "premium_ratio",
+              "redemption_cash_substitute",
+              "reserved",
+              "security_code",
+              "substitute_flag",
+              "substitution_cash_amount",
+              "underlying_security_id",
+              "underlying_symbol"
+            ],
+            "component_rows": 51,
+            "component_types": {
+              "buy_or_sell_to_open": [
+                "str"
+              ],
+              "component_share": [
+                "int"
+              ],
+              "creation_cash_substitute": [
+                "int"
+              ],
+              "discount_ratio": [
+                "int"
+              ],
+              "market_type": [
+                "int"
+              ],
+              "premium_ratio": [
+                "int"
+              ],
+              "redemption_cash_substitute": [
+                "int"
+              ],
+              "reserved": [
+                "str"
+              ],
+              "security_code": [
+                "str"
+              ],
+              "substitute_flag": [
+                "str"
+              ],
+              "substitution_cash_amount": [
+                "int"
+              ],
+              "underlying_security_id": [
+                "str"
+              ],
+              "underlying_symbol": [
+                "str"
+              ]
+            },
+            "component_zero_fields": [
+              "creation_cash_substitute",
+              "discount_ratio",
+              "redemption_cash_substitute"
+            ],
+            "current_day": false,
+            "declared_component_count_matches": true,
+            "requested_identity_matches": true
+          }
+        ],
+        "records": 1,
+        "returned_exact_requested_set": true
+      }
+    }
+  ]
+}
