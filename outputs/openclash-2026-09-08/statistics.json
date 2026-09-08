@@ -1,0 +1,501 @@
+{
+  "range": [
+    {
+      "first_seen": "2026-07-18T07:53:40+00:00",
+      "last_seen": "2026-09-08T00:02:56+00:00",
+      "days": 53
+    }
+  ],
+  "periods": [
+    {
+      "period": "累计",
+      "category": "DIRECT",
+      "up": 640588379,
+      "down": 173028994577
+    },
+    {
+      "period": "累计",
+      "category": "PROXY",
+      "up": 134431517351,
+      "down": 131746461995
+    },
+    {
+      "period": "本月",
+      "category": "DIRECT",
+      "up": 101256116,
+      "down": 38529661737
+    },
+    {
+      "period": "本月",
+      "category": "PROXY",
+      "up": 11442977355,
+      "down": 15557684164
+    },
+    {
+      "period": "昨日",
+      "category": "DIRECT",
+      "up": 10689599,
+      "down": 245040244
+    },
+    {
+      "period": "昨日",
+      "category": "PROXY",
+      "up": 1167548959,
+      "down": 2896974754
+    },
+    {
+      "period": "今日",
+      "category": "DIRECT",
+      "up": 2690835,
+      "down": 1954675247
+    },
+    {
+      "period": "今日",
+      "category": "PROXY",
+      "up": 44014568,
+      "down": 215878009
+    }
+  ],
+  "devices": [
+    {
+      "source_ip": "192.168.1.22",
+      "up": 18795980,
+      "down": 16168450402,
+      "proxy": 44826425
+    },
+    {
+      "source_ip": "192.168.1.23",
+      "up": 2330617146,
+      "down": 12723994822,
+      "proxy": 8892143761
+    },
+    {
+      "source_ip": "192.168.1.10",
+      "up": 5345941422,
+      "down": 1887029091,
+      "proxy": 6472185593
+    },
+    {
+      "source_ip": "192.168.1.113",
+      "up": 3358742471,
+      "down": 3717993514,
+      "proxy": 6851960976
+    },
+    {
+      "source_ip": "192.168.1.24",
+      "up": 6954350,
+      "down": 7056516363,
+      "proxy": 59203879
+    },
+    {
+      "source_ip": "192.168.1.8",
+      "up": 380794967,
+      "down": 6227108558,
+      "proxy": 1669964757
+    },
+    {
+      "source_ip": "192.168.1.119",
+      "up": 32126168,
+      "down": 3403270568,
+      "proxy": 165331932
+    },
+    {
+      "source_ip": "192.168.1.111",
+      "up": 6792000,
+      "down": 1175220627,
+      "proxy": 1181953587
+    },
+    {
+      "source_ip": "192.168.1.27",
+      "up": 20828708,
+      "down": 887364499,
+      "proxy": 904950965
+    },
+    {
+      "source_ip": "192.168.1.112",
+      "up": 40461337,
+      "down": 716158615,
+      "proxy": 699574029
+    },
+    {
+      "source_ip": "192.168.1.20",
+      "up": 1350719,
+      "down": 108073239,
+      "proxy": 55618801
+    },
+    {
+      "source_ip": "192.168.1.35",
+      "up": 828203,
+      "down": 16165603,
+      "proxy": 2946814
+    }
+  ],
+  "daily": [
+    {
+      "day": "2026-09-01",
+      "up": 1084286281,
+      "down": 12069846852
+    },
+    {
+      "day": "2026-09-02",
+      "up": 5247951893,
+      "down": 10781819375
+    },
+    {
+      "day": "2026-09-03",
+      "up": 1561494175,
+      "down": 4343270220
+    },
+    {
+      "day": "2026-09-04",
+      "up": 1669127105,
+      "down": 5899584374
+    },
+    {
+      "day": "2026-09-05",
+      "up": 358188797,
+      "down": 5151031171
+    },
+    {
+      "day": "2026-09-06",
+      "up": 398241259,
+      "down": 10529225655
+    },
+    {
+      "day": "2026-09-07",
+      "up": 1178238558,
+      "down": 3142014998
+    },
+    {
+      "day": "2026-09-08",
+      "up": 46705403,
+      "down": 2170553256
+    }
+  ],
+  "domains": [
+    {
+      "dimension_value": "updates.cdn-apple.com",
+      "category": "DIRECT",
+      "up": 1238441,
+      "down": 22098447277
+    },
+    {
+      "dimension_value": "iosapps.itunes.apple.com",
+      "category": "DIRECT",
+      "up": 1178392,
+      "down": 14174325670
+    },
+    {
+      "dimension_value": "persistent.oaistatic.com",
+      "category": "PROXY",
+      "up": 201117,
+      "down": 4703857506
+    },
+    {
+      "dimension_value": "chatgpt.com",
+      "category": "PROXY",
+      "up": 1208702806,
+      "down": 2805424753
+    },
+    {
+      "dimension_value": "ab.chatgpt.com",
+      "category": "PROXY",
+      "up": 548976807,
+      "down": 875229607
+    },
+    {
+      "dimension_value": "gspe11-2-cn-ssl.ls.apple.com",
+      "category": "DIRECT",
+      "up": 11528431,
+      "down": 764532389
+    },
+    {
+      "dimension_value": "conda.anaconda.org",
+      "category": "PROXY",
+      "up": 129494,
+      "down": 764139849
+    },
+    {
+      "dimension_value": "1navs.com",
+      "category": "PROXY",
+      "up": 697304,
+      "down": 341819891
+    },
+    {
+      "dimension_value": "cl2-cn.apple.com",
+      "category": "DIRECT",
+      "up": 146044,
+      "down": 308120989
+    },
+    {
+      "dimension_value": "prodata.tradingview.com",
+      "category": "PROXY",
+      "up": 5850934,
+      "down": 297155510
+    },
+    {
+      "dimension_value": "video-s.twimg.com",
+      "category": "PROXY",
+      "up": 311917,
+      "down": 286588097
+    },
+    {
+      "dimension_value": "release-assets.githubusercontent.com",
+      "category": "PROXY",
+      "up": 181741,
+      "down": 218217536
+    },
+    {
+      "dimension_value": "pba.apple.com",
+      "category": "PROXY",
+      "up": 216491,
+      "down": 217514372
+    },
+    {
+      "dimension_value": "registry.npmjs.org",
+      "category": "PROXY",
+      "up": 716957,
+      "down": 178851093
+    },
+    {
+      "dimension_value": "opencode.ai",
+      "category": "PROXY",
+      "up": 138528262,
+      "down": 36594945
+    },
+    {
+      "dimension_value": "repo.anaconda.com",
+      "category": "PROXY",
+      "up": 126559,
+      "down": 168890462
+    },
+    {
+      "dimension_value": "cl2.apple.com",
+      "category": "DIRECT",
+      "up": 57143,
+      "down": 165969890
+    },
+    {
+      "dimension_value": "gspe19-cn-ssl.ls.apple.com",
+      "category": "DIRECT",
+      "up": 3379544,
+      "down": 135300178
+    },
+    {
+      "dimension_value": "files.pythonhosted.org",
+      "category": "PROXY",
+      "up": 36953,
+      "down": 130144388
+    },
+    {
+      "dimension_value": "uslax2.icloud-content.com",
+      "category": "PROXY",
+      "up": 120739060,
+      "down": 27672
+    }
+  ],
+  "outbound": [
+    {
+      "dimension_value": "DIRECT",
+      "category": "DIRECT",
+      "up": 101256116,
+      "down": 38529661737
+    },
+    {
+      "dimension_value": "🇺🇸 DMIT-0PVVByKgEy trojan",
+      "category": "PROXY",
+      "up": 11442977355,
+      "down": 15557684164
+    }
+  ],
+  "ports": [
+    {
+      "dimension_value": "tcp/443",
+      "category": "DIRECT",
+      "up": 95853972,
+      "down": 38471296491
+    },
+    {
+      "dimension_value": "tcp/443",
+      "category": "PROXY",
+      "up": 10900787704,
+      "down": 13461419993
+    },
+    {
+      "dimension_value": "tcp/80",
+      "category": "PROXY",
+      "up": 2924902,
+      "down": 945153410
+    },
+    {
+      "dimension_value": "tcp/8886",
+      "category": "PROXY",
+      "up": 29847089,
+      "down": 689047807
+    },
+    {
+      "dimension_value": "tcp/5223",
+      "category": "PROXY",
+      "up": 170555462,
+      "down": 186538683
+    },
+    {
+      "dimension_value": "tcp/22",
+      "category": "PROXY",
+      "up": 288498612,
+      "down": 30563489
+    },
+    {
+      "dimension_value": "tcp/4000",
+      "category": "PROXY",
+      "up": 20612833,
+      "down": 155835601
+    },
+    {
+      "dimension_value": "tcp/80",
+      "category": "DIRECT",
+      "up": 482335,
+      "down": 48325835
+    },
+    {
+      "dimension_value": "tcp/5228",
+      "category": "PROXY",
+      "up": 10865656,
+      "down": 35843591
+    },
+    {
+      "dimension_value": "tcp/8881",
+      "category": "PROXY",
+      "up": 2259185,
+      "down": 20939087
+    },
+    {
+      "dimension_value": "tcp/4001",
+      "category": "PROXY",
+      "up": 3076912,
+      "down": 11413776
+    },
+    {
+      "dimension_value": "tcp/8890",
+      "category": "PROXY",
+      "up": 3964704,
+      "down": 9576619
+    },
+    {
+      "dimension_value": "udp/80",
+      "category": "PROXY",
+      "up": 4896722,
+      "down": 4931930
+    },
+    {
+      "dimension_value": "udp/8000",
+      "category": "PROXY",
+      "up": 2515515,
+      "down": 1835159
+    },
+    {
+      "dimension_value": "tcp/8043",
+      "category": "DIRECT",
+      "up": 9341,
+      "down": 4316657
+    },
+    {
+      "dimension_value": "tcp/8080",
+      "category": "DIRECT",
+      "up": 1794391,
+      "down": 1866191
+    },
+    {
+      "dimension_value": "tcp/9528",
+      "category": "DIRECT",
+      "up": 1787952,
+      "down": 1038497
+    },
+    {
+      "dimension_value": "tcp/8884",
+      "category": "PROXY",
+      "up": 94895,
+      "down": 2433356
+    },
+    {
+      "dimension_value": "tcp/8883",
+      "category": "DIRECT",
+      "up": 195435,
+      "down": 1985449
+    },
+    {
+      "dimension_value": "tcp/8887",
+      "category": "DIRECT",
+      "up": 773218,
+      "down": 618221
+    }
+  ],
+  "dimension_totals": [
+    {
+      "dimension": "destination_port",
+      "up": 11544233471,
+      "down": 54087345901
+    },
+    {
+      "dimension": "dns_mode",
+      "up": 11544233471,
+      "down": 54087345901
+    },
+    {
+      "dimension": "domain",
+      "up": 2882931233,
+      "down": 51227827869
+    },
+    {
+      "dimension": "outbound",
+      "up": 11544233471,
+      "down": 54087345901
+    },
+    {
+      "dimension": "peer_ip",
+      "up": 11544190283,
+      "down": 54087271783
+    },
+    {
+      "dimension": "proxy_server_ip",
+      "up": 11442977355,
+      "down": 15557684164
+    },
+    {
+      "dimension": "rule",
+      "up": 11544233471,
+      "down": 54087345901
+    }
+  ],
+  "preview": [
+    {
+      "day": "2026-07-18",
+      "source_ip": "192.168.1.10",
+      "category": "DIRECT",
+      "upload_bytes": 102691,
+      "download_bytes": 28076107
+    },
+    {
+      "day": "2026-07-18",
+      "source_ip": "192.168.1.10",
+      "category": "PROXY",
+      "upload_bytes": 54764317,
+      "download_bytes": 91393215
+    },
+    {
+      "day": "2026-07-18",
+      "source_ip": "192.168.1.112",
+      "category": "DIRECT",
+      "upload_bytes": 52193,
+      "download_bytes": 1249577
+    }
+  ],
+  "quality": [
+    {
+      "rows": 909,
+      "negative_rows": 0,
+      "missing_sources": 0
+    }
+  ],
+  "captured_at": "2026-09-08T08:02:58.854203"
+}
