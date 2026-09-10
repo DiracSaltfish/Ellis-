@@ -1,0 +1,2074 @@
+package privatevaluation
+
+import (
+	"encoding/hex"
+	"fmt"
+	"math"
+	"strings"
+	"time"
+
+	"newnavnav/internal/domain"
+)
+
+const (
+	SchemaVersion      = "private-valuation/v1"
+	InputSchemaVersion = 1
+
+	// Target* aliases retain the original SZ159518 API used by the first
+	// private estimator and its historical snapshots.
+	TargetSymbol                   = "SZ159518"
+	TargetName                     = "标普油气ETF嘉实"
+	ReferenceSymbol                = "XOP"
+	ModelVersion                   = "private.total-basket.xop-cfets-pcf.v1"
+	RedemptionUnit                 = 1_000_000.0
+	XOPEquivalentShares            = 996.0
+	ExpectedSecurityComponentCount = 51
+
+	SH513350Symbol              = "SH513350"
+	SH513350Name                = "标普油气ETF富国"
+	SH513350ModelVersion        = "private.total-basket.xop-cfets-pcf.sh513350.v1"
+	SH513350XOPEquivalentShares = 1_046.0
+	// CFETSReferenceRateSource is the intraday hourly reference rate used by
+	// live inputs. CFETSUSDCNYSpotCloseSource is limited to after-close
+	// historical replay: SH513350 and historical NQ/ES proxy snapshots use the
+	// dated 16:30 USD/CNY spot close; it is never accepted for their live feed.
+	CFETSReferenceRateSource = "CFETS_REFERENCE_RATE"
+	CFETSSpotRateSource      = "CFETS_SPOT_RATE"
+	// CFETSPreopenFallbackSource preserves the last healthy CFETS spot quote
+	// during the narrow Chinese opening-auction gap before today's spot feed is
+	// published. It is accepted only for the index-futures proxy models and is
+	// always display-only; the engine expires it at 09:35 Shanghai time.
+	CFETSPreopenFallbackSource = "CFETS_PREOPEN_FALLBACK"
+	CFETSUSDCNYSpotCloseSource = "CFETS_USD_CNY_SPOT_CLOSE_1630"
+
+	SZ159605Symbol       = "SZ159605"
+	SZ159605Name         = "中概互联网ETF广发"
+	SZ159605ModelVersion = "private.full-cash-substitution.multi-market-pcf.v1"
+
+	SZ159607Symbol       = "SZ159607"
+	SZ159607Name         = "中概互联网ETF嘉实"
+	SZ159607ModelVersion = "private.full-cash-substitution.multi-market-pcf.159607.v1"
+
+	SH513050Symbol       = "SH513050"
+	SH513050Name         = "中概互联网ETF易方达"
+	SH513050ModelVersion = "private.full-cash-substitution.multi-market-pcf.513050.v1"
+
+	SH513220Symbol       = "SH513220"
+	SH513220Name         = "中概互联ETF招商"
+	SH513220ModelVersion = "private.full-cash-substitution.multi-market-pcf.513220.v1"
+
+	// Nasdaq-100 funds use a dated PCF basket and NQ as the China-session
+	// executable proxy.  They intentionally remain non-actionable until each
+	// fund has its own prospectus and realised-redemption calibration.
+	NQReferenceSymbol      = "NQ"
+	NQProxyModelVersion    = "private.total-basket.nq-cfets-pcf.pre-scan.v1"
+	ESReferenceSymbol      = "ES"
+	ESProxyModelVersion    = "private.total-basket.es-cfets-pcf.pre-scan.v1"
+	N225MReferenceSymbol   = "N225M"
+	N225MProxyModelVersion = "private.total-basket.n225m-cfets-pcf.pre-scan.v1"
+	DAXReferenceSymbol     = "DAX"
+	DAXProxyModelVersion   = "private.total-basket.fdxm-cfets-pcf.xetra-1735-anchor.pre-scan.v2"
+
+	SH513100Symbol = "SH513100"
+	SH513100Name   = "纳指ETF国泰"
+	SH513110Symbol = "SH513110"
+	SH513110Name   = "纳指100"
+	SH513300Symbol = "SH513300"
+	SH513300Name   = "纳斯达克"
+	SH513390Symbol = "SH513390"
+	SH513390Name   = "纳指基金"
+	SH513870Symbol = "SH513870"
+	SH513870Name   = "纳指指数"
+
+	SZ159501Symbol = "SZ159501"
+	SZ159501Name   = "纳指ETF嘉实"
+	SZ159513Symbol = "SZ159513"
+	SZ159513Name   = "纳斯达克100ETF大成"
+	SZ159632Symbol = "SZ159632"
+	SZ159632Name   = "纳斯达克ETF华安"
+	SZ159659Symbol = "SZ159659"
+	SZ159659Name   = "纳斯达克100ETF招商"
+	SZ159660Symbol = "SZ159660"
+	SZ159660Name   = "纳指ETF汇添富"
+	SZ159696Symbol = "SZ159696"
+	SZ159696Name   = "纳指ETF易方达"
+	SZ159941Symbol = "SZ159941"
+	SZ159941Name   = "纳指ETF广发"
+
+	SH513500Symbol = "SH513500"
+	SH513500Name   = "标普500"
+	SH513650Symbol = "SH513650"
+	SH513650Name   = "标普ETF"
+	SZ159612Symbol = "SZ159612"
+	SZ159612Name   = "标普500ETF国泰"
+	SZ159655Symbol = "SZ159655"
+	SZ159655Name   = "标普500ETF华夏"
+
+	SH513000Symbol = "SH513000"
+	SH513000Name   = "225ETF"
+	SH513520Symbol = "SH513520"
+	SH513520Name   = "日经ETF"
+	SH513880Symbol = "SH513880"
+	SH513880Name   = "日经225"
+	SZ159866Symbol = "SZ159866"
+	SZ159866Name   = "日经ETF工银"
+
+	SH513030Symbol = "SH513030"
+	SH513030Name   = "德国ETF华安"
+	SZ159561Symbol = "SZ159561"
+	SZ159561Name   = "德国ETF嘉实"
+
+	// SZ164824 is a QDII LOF rather than an exchange-traded ETF creation
+	// basket.  Its public NAV is released with a lag and is struck from four
+	// overseas closing windows.  It therefore has a dedicated T-2 NAV model;
+	// do not force it into the PCF/ETF proxy contract used by the other private
+	// estimators.
+	SZ164824Symbol       = "SZ164824"
+	SZ164824Name         = "印度基金"
+	SZ164824ModelVersion = "private.t2-multimarket.inda-safe.v1"
+	IndiaReferenceSymbol = "INDA"
+
+	// SZ162411 is a QDII LOF whose public estimator is anchored to the XOP
+	// regular-session close on the dated official NAV. It deliberately has no
+	// PCF, creation/redemption unit or CFETS intraday settlement semantics.
+	SZ162411Symbol                  = "SZ162411"
+	SZ162411Name                    = "华宝油气"
+	SZ162411ModelVersion            = "private.weighted-nav.xop-safe.us-close.v1"
+	SZ162411DefaultEffectiveRatio   = 0.955
+	LOFEffectiveRatioWeightedAnchor = "weighted_anchor"
+	LOFEffectiveRatioManualOverride = "manual_override"
+	LOFReferencePriceRegularClose   = "regular_session_close"
+
+	// SZ161226 is a commodity-futures LOF. Its struck NAV follows the SHFE AG
+	// daily settlement, while the second intraday reading follows the current
+	// futures trade price. The selected even-month contract rolls on day 10.
+	SZ161226Symbol                          = "SZ161226"
+	SZ161226Name                            = "白银基金"
+	SZ161226ModelVersion                    = "private.cn-future.ag-settlement.v1"
+	SilverContractSelectionVersion          = "shfe-ag-even-month-roll-day10.v1"
+	SilverIntradayAverageBasis              = "sina_minline_cumulative_average"
+	SilverOfficialSettlementBasis           = "sina_shfe_official_daily_settlement"
+	SilverPreviousSettlementSource          = "SINA_SHFE_DAILY_SETTLEMENT"
+	SilverEastmoneyIntradayAverageBasis     = "eastmoney_futures_sse_cumulative_turnover_vwap"
+	SilverEastmoneyPreviousSettlementSource = "EASTMONEY_FUTURES_SSE_PREVIOUS_SETTLEMENT"
+	// NiftyContractSelectionVersion makes the monthly contract convention
+	// explicit. From each calendar last Tuesday, NIFTY uses the next monthly
+	// contract; older cached bridge values are not interchangeable.
+	NiftyContractSelectionVersion = "sgx-monthly-effective-last-tuesday.v2"
+	// Roll-basis provenance stays explicit: live collection and an auditable
+	// historical BID/ASK replay are both accepted, while arbitrary labels (and
+	// LAST/midpoint reconstructions) remain invalid.
+	IndiaNiftyLiveRollSource       = "IBKR_TWS_LIVE_SGX_NIFTY_ROLL_1230_BJT"
+	IndiaNiftyHistoricalRollSource = "IBKR_TWS_HISTORICAL_BID_ASK_1M"
+
+	// The 2026 Q2 report's top-ten fund investments are classified by their
+	// listing market: US 52.60%, Europe 31.65%, Japan 4.25%, Hong Kong 0.87%.
+	// They total 89.37% of NAV; the remaining 10.63% is held static until the
+	// next disclosed portfolio report.  Anchor weights are normalised within
+	// that 89.37% market-risk sleeve so they sum to one.
+	IndiaInvestmentRatio = 0.8937
+	IndiaStaticRatio     = 0.1063
+)
+
+type CalculationMode string
+
+const (
+	CalculationModeXOPProxy                CalculationMode = "xop_proxy"
+	CalculationModeNQProxy                 CalculationMode = "nq_proxy"
+	CalculationModeESProxy                 CalculationMode = "es_proxy"
+	CalculationModeN225MProxy              CalculationMode = "n225m_proxy"
+	CalculationModeDAXProxy                CalculationMode = "dax_proxy"
+	CalculationModeFullCashSubstitutionPCF CalculationMode = "full_cash_substitution_pcf"
+	CalculationModeIndiaT2MultiMarket      CalculationMode = "india_t2_multimarket"
+	CalculationModeLOFWeightedAnchor       CalculationMode = "lof_weighted_anchor"
+	CalculationModeSilverSettlement        CalculationMode = "silver_settlement"
+)
+
+// FundDefinition keeps every private-only calibration isolated by fund. A
+// definition deliberately contains no public-estimation configuration.
+type FundDefinition struct {
+	Symbol                         string
+	Name                           string
+	SecurityID                     string
+	ModelVersion                   string
+	CalculationMode                CalculationMode
+	ReferenceSymbol                string
+	ExpectedRedemptionUnit         float64
+	XOPEquivalentShares            float64
+	ExpectedSecurityComponentCount int
+	ExpectedComponentMarket        string
+	ExpectedComponentCurrency      string
+	FXPair                         string
+}
+
+var fundDefinitions = []FundDefinition{
+	{
+		Symbol:                         TargetSymbol,
+		Name:                           TargetName,
+		SecurityID:                     "159518",
+		ModelVersion:                   ModelVersion,
+		CalculationMode:                CalculationModeXOPProxy,
+		ReferenceSymbol:                ReferenceSymbol,
+		ExpectedRedemptionUnit:         RedemptionUnit,
+		XOPEquivalentShares:            XOPEquivalentShares,
+		ExpectedSecurityComponentCount: ExpectedSecurityComponentCount,
+	},
+	{
+		Symbol:                 SH513350Symbol,
+		Name:                   SH513350Name,
+		SecurityID:             "513350",
+		ModelVersion:           SH513350ModelVersion,
+		CalculationMode:        CalculationModeXOPProxy,
+		ReferenceSymbol:        ReferenceSymbol,
+		ExpectedRedemptionUnit: RedemptionUnit,
+		// SH513350 uses the user-confirmed fixed 1,046-XOP proxy per
+		// 1,000,000-share creation/redemption unit. The PCF remains the source
+		// of its dated cash component and audit metadata.
+		XOPEquivalentShares: SH513350XOPEquivalentShares,
+	},
+	{
+		Symbol:                         SZ159605Symbol,
+		Name:                           SZ159605Name,
+		SecurityID:                     "159605",
+		ModelVersion:                   SZ159605ModelVersion,
+		CalculationMode:                CalculationModeFullCashSubstitutionPCF,
+		ExpectedRedemptionUnit:         RedemptionUnit,
+		ExpectedSecurityComponentCount: 30,
+	},
+	{
+		Symbol:                         SZ159607Symbol,
+		Name:                           SZ159607Name,
+		SecurityID:                     "159607",
+		ModelVersion:                   SZ159607ModelVersion,
+		CalculationMode:                CalculationModeFullCashSubstitutionPCF,
+		ExpectedRedemptionUnit:         RedemptionUnit,
+		ExpectedSecurityComponentCount: 30,
+	},
+	{
+		Symbol:                         SH513050Symbol,
+		Name:                           SH513050Name,
+		SecurityID:                     "513050",
+		ModelVersion:                   SH513050ModelVersion,
+		CalculationMode:                CalculationModeFullCashSubstitutionPCF,
+		ExpectedRedemptionUnit:         RedemptionUnit,
+		ExpectedSecurityComponentCount: 35,
+	},
+	{
+		Symbol:                         SH513220Symbol,
+		Name:                           SH513220Name,
+		SecurityID:                     "513220",
+		ModelVersion:                   SH513220ModelVersion,
+		CalculationMode:                CalculationModeFullCashSubstitutionPCF,
+		ExpectedRedemptionUnit:         RedemptionUnit,
+		ExpectedSecurityComponentCount: 30,
+	},
+	// NDX PCFs are dated fund baskets. Their positive-quantity constituent
+	// count can change when a security is removed or substituted, so these
+	// definitions deliberately do not enforce one historical count. The
+	// index-futures proxy validator still enforces a non-empty, unique and
+	// well-formed basket.
+	{
+		Symbol: SH513100Symbol, Name: SH513100Name, SecurityID: "513100", ModelVersion: NQProxyModelVersion,
+		CalculationMode: CalculationModeNQProxy, ReferenceSymbol: NQReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SH513110Symbol, Name: SH513110Name, SecurityID: "513110", ModelVersion: NQProxyModelVersion,
+		CalculationMode: CalculationModeNQProxy, ReferenceSymbol: NQReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SH513300Symbol, Name: SH513300Name, SecurityID: "513300", ModelVersion: NQProxyModelVersion,
+		CalculationMode: CalculationModeNQProxy, ReferenceSymbol: NQReferenceSymbol,
+		ExpectedRedemptionUnit: 750_000,
+	},
+	{
+		Symbol: SH513390Symbol, Name: SH513390Name, SecurityID: "513390", ModelVersion: NQProxyModelVersion,
+		CalculationMode: CalculationModeNQProxy, ReferenceSymbol: NQReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SH513870Symbol, Name: SH513870Name, SecurityID: "513870", ModelVersion: NQProxyModelVersion,
+		CalculationMode: CalculationModeNQProxy, ReferenceSymbol: NQReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SZ159501Symbol, Name: SZ159501Name, SecurityID: "159501", ModelVersion: NQProxyModelVersion,
+		CalculationMode: CalculationModeNQProxy, ReferenceSymbol: NQReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SZ159513Symbol, Name: SZ159513Name, SecurityID: "159513", ModelVersion: NQProxyModelVersion,
+		CalculationMode: CalculationModeNQProxy, ReferenceSymbol: NQReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SZ159632Symbol, Name: SZ159632Name, SecurityID: "159632", ModelVersion: NQProxyModelVersion,
+		CalculationMode: CalculationModeNQProxy, ReferenceSymbol: NQReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SZ159659Symbol, Name: SZ159659Name, SecurityID: "159659", ModelVersion: NQProxyModelVersion,
+		CalculationMode: CalculationModeNQProxy, ReferenceSymbol: NQReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SZ159660Symbol, Name: SZ159660Name, SecurityID: "159660", ModelVersion: NQProxyModelVersion,
+		CalculationMode: CalculationModeNQProxy, ReferenceSymbol: NQReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SZ159696Symbol, Name: SZ159696Name, SecurityID: "159696", ModelVersion: NQProxyModelVersion,
+		CalculationMode: CalculationModeNQProxy, ReferenceSymbol: NQReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SZ159941Symbol, Name: SZ159941Name, SecurityID: "159941", ModelVersion: NQProxyModelVersion,
+		CalculationMode: CalculationModeNQProxy, ReferenceSymbol: NQReferenceSymbol,
+		ExpectedRedemptionUnit: 1_300_000,
+	},
+	// S&P 500 PCFs publish 502/503 constituent records, but fund-specific
+	// substitution/rounding makes the positive-share set different by product
+	// and day. The uploader requires an auditable non-empty US/USD list and
+	// preserves it; count zero deliberately means no shared fixed count.
+	{
+		Symbol: SH513500Symbol, Name: SH513500Name, SecurityID: "513500", ModelVersion: ESProxyModelVersion,
+		CalculationMode: CalculationModeESProxy, ReferenceSymbol: ESReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SH513650Symbol, Name: SH513650Name, SecurityID: "513650", ModelVersion: ESProxyModelVersion,
+		CalculationMode: CalculationModeESProxy, ReferenceSymbol: ESReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SZ159612Symbol, Name: SZ159612Name, SecurityID: "159612", ModelVersion: ESProxyModelVersion,
+		CalculationMode: CalculationModeESProxy, ReferenceSymbol: ESReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	{
+		Symbol: SZ159655Symbol, Name: SZ159655Name, SecurityID: "159655", ModelVersion: ESProxyModelVersion,
+		CalculationMode: CalculationModeESProxy, ReferenceSymbol: ESReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000,
+	},
+	// Each Nikkei product's PCF holds one Japanese wrapper ETF rather than a
+	// direct 225-stock basket. The wrapper codes differ, so the N225M contract
+	// equivalent is recalibrated from each dated PCF/NAV independently.
+	{
+		Symbol: SH513000Symbol, Name: SH513000Name, SecurityID: "513000", ModelVersion: N225MProxyModelVersion,
+		CalculationMode: CalculationModeN225MProxy, ReferenceSymbol: N225MReferenceSymbol,
+		ExpectedRedemptionUnit: 500_000, ExpectedSecurityComponentCount: 1,
+		ExpectedComponentMarket: "JP", ExpectedComponentCurrency: "JPY", FXPair: "JPY/CNY",
+	},
+	{
+		Symbol: SH513520Symbol, Name: SH513520Name, SecurityID: "513520", ModelVersion: N225MProxyModelVersion,
+		CalculationMode: CalculationModeN225MProxy, ReferenceSymbol: N225MReferenceSymbol,
+		ExpectedRedemptionUnit: 500_000, ExpectedSecurityComponentCount: 1,
+		ExpectedComponentMarket: "JP", ExpectedComponentCurrency: "JPY", FXPair: "JPY/CNY",
+	},
+	{
+		Symbol: SH513880Symbol, Name: SH513880Name, SecurityID: "513880", ModelVersion: N225MProxyModelVersion,
+		CalculationMode: CalculationModeN225MProxy, ReferenceSymbol: N225MReferenceSymbol,
+		ExpectedRedemptionUnit: 500_000, ExpectedSecurityComponentCount: 1,
+		ExpectedComponentMarket: "JP", ExpectedComponentCurrency: "JPY", FXPair: "JPY/CNY",
+	},
+	{
+		Symbol: SZ159866Symbol, Name: SZ159866Name, SecurityID: "159866", ModelVersion: N225MProxyModelVersion,
+		CalculationMode: CalculationModeN225MProxy, ReferenceSymbol: N225MReferenceSymbol,
+		ExpectedRedemptionUnit: 500_000, ExpectedSecurityComponentCount: 1,
+		ExpectedComponentMarket: "JP", ExpectedComponentCurrency: "JPY", FXPair: "JPY/CNY",
+	},
+	// Both German products publish the direct 40-stock DAX basket. China
+	// trading overlaps the Xetra cash session only at the close, so Mini-DAX
+	// (FDXM, exposed by IBKR as DAX with a EUR5 multiplier) is the continuous
+	// China-session proxy. Each dated PCF/NAV keeps its own calibrated quantity,
+	// anchored to the FDXM one-minute trade bar ending at the scheduled Xetra
+	// 17:35 official closing-auction price (17:30 is retained as an audit check).
+	{
+		Symbol: SH513030Symbol, Name: SH513030Name, SecurityID: "513030", ModelVersion: DAXProxyModelVersion,
+		CalculationMode: CalculationModeDAXProxy, ReferenceSymbol: DAXReferenceSymbol,
+		ExpectedRedemptionUnit: 500_000, ExpectedSecurityComponentCount: 40,
+		ExpectedComponentMarket: "DE", ExpectedComponentCurrency: "EUR", FXPair: "EUR/CNY",
+	},
+	{
+		Symbol: SZ159561Symbol, Name: SZ159561Name, SecurityID: "159561", ModelVersion: DAXProxyModelVersion,
+		CalculationMode: CalculationModeDAXProxy, ReferenceSymbol: DAXReferenceSymbol,
+		ExpectedRedemptionUnit: 1_000_000, ExpectedSecurityComponentCount: 40,
+		ExpectedComponentMarket: "DE", ExpectedComponentCurrency: "EUR", FXPair: "EUR/CNY",
+	},
+	{
+		Symbol:          SZ164824Symbol,
+		Name:            SZ164824Name,
+		ModelVersion:    SZ164824ModelVersion,
+		CalculationMode: CalculationModeIndiaT2MultiMarket,
+		ReferenceSymbol: IndiaReferenceSymbol,
+		FXPair:          "USD/CNY",
+	},
+	{
+		Symbol:          SZ162411Symbol,
+		Name:            SZ162411Name,
+		SecurityID:      "162411",
+		ModelVersion:    SZ162411ModelVersion,
+		CalculationMode: CalculationModeLOFWeightedAnchor,
+		ReferenceSymbol: ReferenceSymbol,
+		FXPair:          "USD/CNY",
+	},
+	{
+		Symbol:          SZ161226Symbol,
+		Name:            SZ161226Name,
+		SecurityID:      "161226",
+		ModelVersion:    SZ161226ModelVersion,
+		CalculationMode: CalculationModeSilverSettlement,
+		ReferenceSymbol: "AG",
+	},
+}
+
+func Definitions() []FundDefinition {
+	return append([]FundDefinition(nil), fundDefinitions...)
+}
+
+func Definition(symbol string) (FundDefinition, bool) {
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	for _, definition := range fundDefinitions {
+		if definition.Symbol == symbol {
+			return definition, true
+		}
+	}
+	return FundDefinition{}, false
+}
+
+// Input is the private-only raw valuation state uploaded by Mac-home. It is
+// deliberately separate from domain.ValuationData so the public estimator can
+// never consume PCF, CFETS-hourly or IB bid/ask values by accident.
+type Input struct {
+	SchemaVersion int             `json:"schema_version"`
+	Symbol        string          `json:"symbol"`
+	ModelVersion  string          `json:"model_version"`
+	ValuationKind CalculationMode `json:"valuation_kind,omitempty"`
+	PCF           PCFInput        `json:"pcf,omitempty"`
+	FX            FXInput         `json:"fx,omitempty"`
+	IB            IBQuoteInput    `json:"ib,omitempty"`
+	// India is intentionally a native LOF model input. It carries the dated
+	// public NAV, four overseas INDA anchor observations and SAFE central
+	// parity; it must never be interpreted as a PCF.
+	India *IndiaT2Input `json:"india,omitempty"`
+	// LOF is the native single-close weighted-anchor input used by SZ162411.
+	// Current executable XOP Bid/Ask remains in the top-level IB field so quote
+	// freshness and source handling stay consistent with other private models.
+	LOF *LOFWeightedAnchorInput `json:"lof,omitempty"`
+	// Silver is the native SHFE AG settlement/trade dual-estimate input used by
+	// SZ161226. It deliberately contains no PCF, FX or IB fields.
+	Silver *SilverSettlementInput `json:"silver,omitempty"`
+	// FXRates and MarketQuotes are used by full-cash-substitution PCFs. They
+	// stay inside the private input and are never exposed to the public model.
+	FXRates      []FXInput          `json:"fx_rates,omitempty"`
+	MarketQuotes []MarketQuoteInput `json:"market_quotes,omitempty"`
+	Source       string             `json:"source"`
+	GeneratedAt  time.Time          `json:"generated_at"`
+	ReceivedAt   time.Time          `json:"received_at"`
+}
+
+// SilverSettlementInput keeps the complete dated denominator and the two
+// current AG numerators needed to reproduce both 161226 intraday estimates.
+type SilverSettlementInput struct {
+	BaseNAV                  float64   `json:"base_nav"`
+	BaseNAVDate              string    `json:"base_nav_date"`
+	BaseNAVSource            string    `json:"base_nav_source"`
+	BaseNAVFetchedAt         time.Time `json:"base_nav_fetched_at"`
+	TradingDay               string    `json:"trading_day"`
+	Contract                 string    `json:"contract"`
+	ContractSelectionVersion string    `json:"contract_selection_version"`
+	PreviousSettlement       float64   `json:"previous_settlement"`
+	PreviousSettlementDate   string    `json:"previous_settlement_date"`
+	PreviousSettlementSource string    `json:"previous_settlement_source"`
+	FuturesPrice             float64   `json:"futures_price"`
+	IntradayAverage          float64   `json:"intraday_average"`
+	IntradayAverageBasis     string    `json:"intraday_average_basis"`
+	ObservedAt               time.Time `json:"observed_at"`
+	Source                   string    `json:"source"`
+}
+
+// LOFWeightedAnchorInput reproduces the public weighted-anchor method without
+// importing any ETF PCF/settlement assumptions. The resolved effective ratio
+// is uploaded together with its provenance so a later manual override cannot
+// silently rewrite historical snapshots.
+type LOFWeightedAnchorInput struct {
+	BaseNAV          float64                `json:"base_nav"`
+	BaseNAVDate      string                 `json:"base_nav_date"`
+	BaseNAVSource    string                 `json:"base_nav_source"`
+	BaseNAVFetchedAt time.Time              `json:"base_nav_fetched_at"`
+	BaseReference    LOFBaseReferenceInput  `json:"base_reference"`
+	BaseFX           FXInput                `json:"base_fx"`
+	CurrentFX        FXInput                `json:"current_fx"`
+	EffectiveRatio   LOFEffectiveRatioInput `json:"effective_ratio"`
+}
+
+// LOFBaseReferenceInput is the one-sided historical denominator. It must be
+// the regular-session close, not a historical Bid/Ask side or midpoint.
+type LOFBaseReferenceInput struct {
+	Symbol        string    `json:"symbol"`
+	Price         float64   `json:"price"`
+	PriceBasis    string    `json:"price_basis"`
+	TargetAt      time.Time `json:"target_at"`
+	ObservedAt    time.Time `json:"observed_at"`
+	Source        string    `json:"source"`
+	CaptureStatus string    `json:"capture_status"`
+}
+
+// LOFEffectiveRatioInput records both the resolved value and its public-model
+// default. Override metadata is mandatory only when source=manual_override.
+type LOFEffectiveRatioInput struct {
+	Value             float64   `json:"value"`
+	Source            string    `json:"source"`
+	DefaultValue      float64   `json:"default_value"`
+	DefaultSource     string    `json:"default_source"`
+	OverrideSource    string    `json:"override_source,omitempty"`
+	OverrideUpdatedAt time.Time `json:"override_updated_at,omitempty"`
+	OverrideUpdatedBy string    `json:"override_updated_by,omitempty"`
+}
+
+// IndiaT2Input keeps every value required to reproduce the 164824 T-2 model.
+// base_nav is the latest released fund NAV (normally T-2); base_fx is the
+// SAFE USD/CNY central parity for that anchor day, while current_fx is the
+// current T-day central parity.
+type IndiaT2Input struct {
+	BaseNAV         float64            `json:"base_nav"`
+	BaseNAVDate     string             `json:"base_nav_date"`
+	BaseFX          FXInput            `json:"base_fx"`
+	CurrentFX       FXInput            `json:"current_fx"`
+	InvestmentRatio float64            `json:"investment_ratio"`
+	StaticRatio     float64            `json:"static_ratio"`
+	Anchors         []IndiaAnchorInput `json:"anchors"`
+	PortfolioAsOf   string             `json:"portfolio_as_of"`
+	PortfolioSource string             `json:"portfolio_source"`
+	// NiftyBridge is optional so existing, direct-INDA snapshots stay readable.
+	// When present, it records a real simultaneous INDA/NIFTY reference around
+	// the prior New York cash close and the current executable NIFTY quote.
+	// It is an intraday hedge/IOPV proxy, not a replacement for final INDA NAV.
+	NiftyBridge *IndiaNiftyBridgeInput `json:"nifty_bridge,omitempty"`
+}
+
+// IndiaAnchorInput records a single market close in local-exchange time. The
+// underlying remains INDA for the simplified, executable-proxy model; the
+// key and timestamp document which part of the fund portfolio it anchors.
+type IndiaAnchorInput struct {
+	Key           string    `json:"key"`
+	Label         string    `json:"label"`
+	Weight        float64   `json:"weight"`
+	Price         float64   `json:"price"`
+	TargetAt      time.Time `json:"target_at"`
+	ObservedAt    time.Time `json:"observed_at"`
+	Source        string    `json:"source"`
+	CaptureStatus string    `json:"capture_status"`
+}
+
+// IndiaNiftyBridgeInput converts the live NIFTY futures movement back into an
+// INDA-equivalent price using a synchronized prior U.S. cash-session anchor.
+// ReferenceAt is deliberately an America/New_York timestamp so the daylight
+// saving-time rule is auditable instead of hard-coding Beijing 03:50.
+type IndiaNiftyBridgeInput struct {
+	Nifty                    IBQuoteInput                   `json:"nifty"`
+	INDAReference            IBQuoteInput                   `json:"inda_reference"`
+	NiftyReference           IBQuoteInput                   `json:"nifty_reference"`
+	ReferenceAt              time.Time                      `json:"reference_at"`
+	Beta                     float64                        `json:"beta"`
+	ContractSelectionVersion string                         `json:"contract_selection_version,omitempty"`
+	RollAdjustment           *IndiaNiftyRollAdjustmentInput `json:"roll_adjustment,omitempty"`
+}
+
+// IndiaNiftyRollAdjustmentInput preserves the real Monday BJT basis used only
+// when the current and reference NIFTY legs straddle a monthly contract roll.
+type IndiaNiftyRollAdjustmentInput struct {
+	RollDate    string    `json:"roll_date"`
+	CapturedAt  time.Time `json:"captured_at"`
+	OldContract string    `json:"old_contract"`
+	NewContract string    `json:"new_contract"`
+	Direction   string    `json:"direction"`
+	BidFactor   float64   `json:"bid_factor"`
+	AskFactor   float64   `json:"ask_factor"`
+	Source      string    `json:"source"`
+}
+
+type PCFInput struct {
+	SecurityID               string              `json:"security_id"`
+	TradingDay               string              `json:"trading_day"`
+	PreTradingDay            string              `json:"pre_trading_day,omitempty"`
+	Creation                 string              `json:"creation,omitempty"`
+	Redemption               string              `json:"redemption"`
+	CreationRedemptionUnit   *float64            `json:"creation_redemption_unit"`
+	EstimateCashComponentCNY *float64            `json:"estimate_cash_component_cny"`
+	NAVPerCU                 *float64            `json:"nav_per_cu,omitempty"`
+	ComponentCount           int                 `json:"component_count,omitempty"`
+	Components               []PCFComponentInput `json:"components,omitempty"`
+	// XOPEquivalentShares is the backwards-compatible wire name for a dynamic
+	// reference quantity. It is XOP shares for legacy oil funds and NQ/ES
+	// futures contracts for index pre-scan models. The meaning is determined by the
+	// fund definition's ReferenceSymbol; do not use this field on public data.
+	XOPEquivalentShares *float64 `json:"xop_equivalent_shares,omitempty"`
+	// HistoricalFixedProxy records a deliberate latest-PCF fixed-coefficient
+	// replay for an NQ/ES/N225M/DAX proxy. It is accepted only with HistoricalBidAsk
+	// input and permits the PCF date to be newer than the chart minute.
+	HistoricalFixedProxy bool   `json:"historical_fixed_proxy,omitempty"`
+	SourceURL            string `json:"source_url,omitempty"`
+	SHA256               string `json:"sha256,omitempty"`
+}
+
+// PCFComponentInput is the security quantity in the official PCF. The
+// 159900 cash row must not be included: it is a settlement record, not a
+// tradeable component.
+type PCFComponentInput struct {
+	Symbol   string  `json:"symbol"`
+	Name     string  `json:"name"`
+	Market   string  `json:"market"`
+	Currency string  `json:"currency"`
+	Quantity float64 `json:"quantity"`
+}
+
+type FXInput struct {
+	SourceObservedAt time.Time `json:"source_observed_at,omitempty"`
+	FallbackReason   string    `json:"fallback_reason,omitempty"`
+	Pair             string    `json:"pair"`
+	Rate             *float64  `json:"rate"`
+	TradingDay       string    `json:"trading_day"`
+	QuoteTime        string    `json:"quote_time"`
+	Source           string    `json:"source"`
+	FetchedAt        time.Time `json:"fetched_at"`
+}
+
+type IBQuoteInput struct {
+	Symbol          string    `json:"symbol"`
+	Contract        string    `json:"contract,omitempty"`
+	Bid             *float64  `json:"bid"`
+	Ask             *float64  `json:"ask"`
+	Last            *float64  `json:"last,omitempty"`
+	MarketDataType  string    `json:"market_data_type,omitempty"`
+	QuoteSession    string    `json:"quote_session,omitempty"`
+	Source          string    `json:"source"`
+	ObservedAt      time.Time `json:"observed_at"`
+	StreamCheckedAt time.Time `json:"stream_checked_at,omitempty"`
+}
+
+// MarketQuoteInput represents a component's executable side. It intentionally
+// supports both HK and US venues instead of treating KWEB as a one-to-one
+// substitute for the PCF basket.
+type MarketQuoteInput struct {
+	Symbol          string    `json:"symbol"`
+	Market          string    `json:"market"`
+	Currency        string    `json:"currency"`
+	Bid             *float64  `json:"bid"`
+	Ask             *float64  `json:"ask"`
+	Last            *float64  `json:"last,omitempty"`
+	MarketDataType  string    `json:"market_data_type,omitempty"`
+	Source          string    `json:"source"`
+	ObservedAt      time.Time `json:"observed_at"`
+	StreamCheckedAt time.Time `json:"stream_checked_at,omitempty"`
+}
+
+func (input Input) Normalized(receivedAt time.Time) Input {
+	input.Symbol = strings.ToUpper(strings.TrimSpace(input.Symbol))
+	input.ModelVersion = strings.TrimSpace(input.ModelVersion)
+	if input.ModelVersion == "" {
+		if definition, ok := Definition(input.Symbol); ok {
+			input.ModelVersion = definition.ModelVersion
+		} else {
+			input.ModelVersion = ModelVersion
+		}
+	}
+	if input.SchemaVersion == 0 {
+		input.SchemaVersion = InputSchemaVersion
+	}
+	if input.ValuationKind == "" {
+		if definition, ok := Definition(input.Symbol); ok {
+			input.ValuationKind = definition.CalculationMode
+		}
+	}
+	input.PCF.TradingDay = normalizeDate(input.PCF.TradingDay)
+	input.PCF.PreTradingDay = normalizeDate(input.PCF.PreTradingDay)
+	input.PCF.SecurityID = strings.TrimSpace(input.PCF.SecurityID)
+	input.PCF.Creation = strings.ToUpper(strings.TrimSpace(input.PCF.Creation))
+	input.PCF.Redemption = strings.ToUpper(strings.TrimSpace(input.PCF.Redemption))
+	input.PCF.SourceURL = strings.TrimSpace(input.PCF.SourceURL)
+	input.PCF.SHA256 = strings.ToLower(strings.TrimSpace(input.PCF.SHA256))
+	for index := range input.PCF.Components {
+		component := &input.PCF.Components[index]
+		component.Symbol = strings.ToUpper(strings.TrimSpace(component.Symbol))
+		component.Name = strings.TrimSpace(component.Name)
+		component.Market = strings.ToUpper(strings.TrimSpace(component.Market))
+		component.Currency = strings.ToUpper(strings.TrimSpace(component.Currency))
+	}
+	input.FX.Pair = strings.ToUpper(strings.TrimSpace(input.FX.Pair))
+	input.FX.TradingDay = normalizeDate(input.FX.TradingDay)
+	input.FX.QuoteTime = normalizeHour(input.FX.QuoteTime)
+	input.FX.Source = strings.TrimSpace(input.FX.Source)
+	input.IB = normalizeIBQuoteInput(input.IB)
+	for index := range input.FXRates {
+		input.FXRates[index] = normalizeFXInput(input.FXRates[index])
+	}
+	for index := range input.MarketQuotes {
+		quote := &input.MarketQuotes[index]
+		quote.Symbol = strings.ToUpper(strings.TrimSpace(quote.Symbol))
+		quote.Market = strings.ToUpper(strings.TrimSpace(quote.Market))
+		quote.Currency = strings.ToUpper(strings.TrimSpace(quote.Currency))
+		quote.MarketDataType = strings.TrimSpace(quote.MarketDataType)
+		quote.Source = strings.TrimSpace(quote.Source)
+	}
+	if input.India != nil {
+		input.India.BaseNAVDate = normalizeDate(input.India.BaseNAVDate)
+		input.India.PortfolioAsOf = normalizeDate(input.India.PortfolioAsOf)
+		input.India.PortfolioSource = strings.TrimSpace(input.India.PortfolioSource)
+		input.India.BaseFX = normalizeFXInput(input.India.BaseFX)
+		input.India.CurrentFX = normalizeFXInput(input.India.CurrentFX)
+		if input.India.NiftyBridge != nil {
+			bridge := input.India.NiftyBridge
+			bridge.Nifty = normalizeIBQuoteInput(bridge.Nifty)
+			bridge.INDAReference = normalizeIBQuoteInput(bridge.INDAReference)
+			bridge.NiftyReference = normalizeIBQuoteInput(bridge.NiftyReference)
+		}
+		for index := range input.India.Anchors {
+			anchor := &input.India.Anchors[index]
+			anchor.Key = strings.TrimSpace(anchor.Key)
+			anchor.Label = strings.TrimSpace(anchor.Label)
+			anchor.Source = strings.TrimSpace(anchor.Source)
+			anchor.CaptureStatus = strings.TrimSpace(anchor.CaptureStatus)
+		}
+	}
+	if input.LOF != nil {
+		lof := input.LOF
+		lof.BaseNAVDate = normalizeDate(lof.BaseNAVDate)
+		lof.BaseNAVSource = strings.TrimSpace(lof.BaseNAVSource)
+		lof.BaseReference.Symbol = strings.ToUpper(strings.TrimSpace(lof.BaseReference.Symbol))
+		lof.BaseReference.PriceBasis = strings.TrimSpace(lof.BaseReference.PriceBasis)
+		lof.BaseReference.Source = strings.TrimSpace(lof.BaseReference.Source)
+		lof.BaseReference.CaptureStatus = strings.TrimSpace(lof.BaseReference.CaptureStatus)
+		lof.BaseFX = normalizeFXInput(lof.BaseFX)
+		lof.CurrentFX = normalizeFXInput(lof.CurrentFX)
+		lof.EffectiveRatio.Source = strings.TrimSpace(lof.EffectiveRatio.Source)
+		lof.EffectiveRatio.DefaultSource = strings.TrimSpace(lof.EffectiveRatio.DefaultSource)
+		lof.EffectiveRatio.OverrideSource = strings.TrimSpace(lof.EffectiveRatio.OverrideSource)
+		lof.EffectiveRatio.OverrideUpdatedBy = strings.TrimSpace(lof.EffectiveRatio.OverrideUpdatedBy)
+	}
+	if input.Silver != nil {
+		silver := input.Silver
+		silver.BaseNAVDate = normalizeDate(silver.BaseNAVDate)
+		silver.BaseNAVSource = strings.TrimSpace(silver.BaseNAVSource)
+		silver.TradingDay = normalizeDate(silver.TradingDay)
+		silver.Contract = strings.ToUpper(strings.TrimSpace(silver.Contract))
+		silver.ContractSelectionVersion = strings.TrimSpace(silver.ContractSelectionVersion)
+		silver.PreviousSettlementDate = normalizeDate(silver.PreviousSettlementDate)
+		silver.PreviousSettlementSource = strings.TrimSpace(silver.PreviousSettlementSource)
+		silver.IntradayAverageBasis = strings.TrimSpace(silver.IntradayAverageBasis)
+		silver.Source = strings.TrimSpace(silver.Source)
+	}
+	input.Source = strings.TrimSpace(input.Source)
+	if input.ReceivedAt.IsZero() {
+		input.ReceivedAt = receivedAt
+	}
+	return input
+}
+
+func (input Input) Validate() error {
+	if input.SchemaVersion != InputSchemaVersion {
+		return fmt.Errorf("unsupported schema_version %d", input.SchemaVersion)
+	}
+	definition, ok := Definition(input.Symbol)
+	if !ok {
+		return fmt.Errorf("unsupported private symbol %q", input.Symbol)
+	}
+	if input.ModelVersion != definition.ModelVersion {
+		return fmt.Errorf("unsupported model_version %q", input.ModelVersion)
+	}
+	if input.ValuationKind != "" && input.ValuationKind != definition.CalculationMode {
+		return fmt.Errorf("valuation_kind must be %s", definition.CalculationMode)
+	}
+	if definition.CalculationMode == CalculationModeIndiaT2MultiMarket {
+		return input.validateIndiaT2MultiMarket(definition)
+	}
+	if definition.CalculationMode == CalculationModeLOFWeightedAnchor {
+		return input.validateLOFWeightedAnchor(definition)
+	}
+	if definition.CalculationMode == CalculationModeSilverSettlement {
+		return input.validateSilverSettlement(definition)
+	}
+	if input.PCF.TradingDay == "" {
+		return fmt.Errorf("pcf.trading_day is required")
+	}
+	if input.PCF.HistoricalFixedProxy && !input.IsHistoricalFixedIndexProxy() {
+		return fmt.Errorf("pcf.historical_fixed_proxy requires HistoricalBidAsk index-futures input")
+	}
+	if input.PCF.SecurityID != definition.SecurityID {
+		return fmt.Errorf("pcf.security_id must be %s", definition.SecurityID)
+	}
+	if input.PCF.Redemption == "" {
+		return fmt.Errorf("pcf.redemption is required")
+	}
+	if input.PCF.Redemption != "Y" && input.PCF.Redemption != "N" {
+		return fmt.Errorf("pcf.redemption must be Y or N")
+	}
+	if input.PCF.CreationRedemptionUnit == nil || !finitePositive(*input.PCF.CreationRedemptionUnit) {
+		return fmt.Errorf("pcf.creation_redemption_unit must be positive")
+	}
+	if definition.ExpectedRedemptionUnit > 0 && math.Abs(*input.PCF.CreationRedemptionUnit-definition.ExpectedRedemptionUnit) > 0.001 {
+		return fmt.Errorf("pcf.creation_redemption_unit must equal %.0f", definition.ExpectedRedemptionUnit)
+	}
+	if input.PCF.EstimateCashComponentCNY == nil || !finite(*input.PCF.EstimateCashComponentCNY) {
+		return fmt.Errorf("pcf.estimate_cash_component_cny is required")
+	}
+	if input.PCF.ComponentCount <= 0 {
+		return fmt.Errorf("pcf.component_count must be positive")
+	}
+	if input.PCF.SourceURL == "" || len(input.PCF.SHA256) != 64 {
+		return fmt.Errorf("pcf source_url and sha256 are required")
+	}
+	if _, err := hex.DecodeString(input.PCF.SHA256); err != nil {
+		return fmt.Errorf("pcf.sha256 must be 64 hexadecimal characters")
+	}
+	if definition.CalculationMode == CalculationModeFullCashSubstitutionPCF {
+		return input.validateFullCashSubstitution(definition)
+	}
+	expectedFXPair := definition.FXPair
+	if expectedFXPair == "" {
+		expectedFXPair = "USD/CNY"
+	}
+	if input.FX.Pair != expectedFXPair {
+		return fmt.Errorf("fx.pair must be %s", expectedFXPair)
+	}
+	if input.FX.Rate == nil || !finitePositive(*input.FX.Rate) {
+		return fmt.Errorf("fx.rate must be positive")
+	}
+	if input.FX.TradingDay == "" || input.FX.QuoteTime == "" {
+		return fmt.Errorf("fx trading_day and quote_time are required")
+	}
+	switch input.FX.Source {
+	case CFETSReferenceRateSource:
+		if input.FX.QuoteTime < "10:00" || input.FX.QuoteTime > "18:00" || !strings.HasSuffix(input.FX.QuoteTime, ":00") {
+			return fmt.Errorf("fx.quote_time must be a CFETS hour from 10:00 to 18:00")
+		}
+	case CFETSSpotRateSource:
+		// The shared ChinaMoney snapshot is a live BID/ASK observation. Its
+		// source timestamp is intentionally not rounded to an hourly fixing.
+	case CFETSPreopenFallbackSource:
+		observed := input.FX.SourceObservedAt.In(shanghaiLocation)
+		if input.FX.SourceObservedAt.IsZero() || observed.Format("2006-01-02") != input.FX.TradingDay || observed.Format("15:04") != input.FX.QuoteTime || input.FX.FallbackReason != "CURRENT_DAY_CFETS_UNAVAILABLE" {
+			return fmt.Errorf("CFETS fallback must preserve source observation and reason")
+		}
+		if definition.CalculationMode != CalculationModeNQProxy &&
+			definition.CalculationMode != CalculationModeESProxy &&
+			definition.CalculationMode != CalculationModeN225MProxy &&
+			definition.CalculationMode != CalculationModeDAXProxy {
+			return fmt.Errorf("CFETS pre-open fallback is only valid for index-futures proxy models")
+		}
+	case CFETSUSDCNYSpotCloseSource:
+		historicalIndexProxy := (definition.CalculationMode == CalculationModeNQProxy || definition.CalculationMode == CalculationModeESProxy) && input.IB.MarketDataType == "HistoricalBidAsk"
+		if (definition.Symbol != SH513350Symbol && !historicalIndexProxy) || input.FX.QuoteTime != "16:30" {
+			return fmt.Errorf("CFETS USD/CNY spot close is only valid for SH513350 or historical NQ/ES replay at 16:30")
+		}
+	default:
+		return fmt.Errorf("unsupported fx.source %q", input.FX.Source)
+	}
+	if input.FX.FetchedAt.IsZero() {
+		return fmt.Errorf("fx.fetched_at is required")
+	}
+	if input.IB.Symbol != definition.ReferenceSymbol {
+		return fmt.Errorf("ib.symbol must be %s", definition.ReferenceSymbol)
+	}
+	if input.IB.Bid == nil || !finitePositive(*input.IB.Bid) {
+		return fmt.Errorf("ib.bid must be positive")
+	}
+	if input.IB.Ask == nil || !finitePositive(*input.IB.Ask) {
+		return fmt.Errorf("ib.ask must be positive")
+	}
+	if *input.IB.Ask < *input.IB.Bid {
+		return fmt.Errorf("ib.ask must be greater than or equal to ib.bid")
+	}
+	if input.IB.ObservedAt.IsZero() {
+		return fmt.Errorf("ib.observed_at is required")
+	}
+	if input.IB.Source == "" || input.IB.MarketDataType == "" {
+		return fmt.Errorf("ib.source and market_data_type are required")
+	}
+	if input.GeneratedAt.IsZero() {
+		return fmt.Errorf("generated_at is required")
+	}
+	if input.Source == "" {
+		return fmt.Errorf("source is required")
+	}
+	if definition.XOPEquivalentShares <= 0 && (input.PCF.XOPEquivalentShares == nil || !finitePositive(*input.PCF.XOPEquivalentShares)) {
+		return fmt.Errorf("pcf.xop_equivalent_shares must carry a positive fund-specific reference calibration")
+	}
+	if isIndexFuturesProxyMode(definition.CalculationMode) {
+		return input.validateIndexFuturesProxy(definition)
+	}
+	return nil
+}
+
+type indiaAnchorRule struct {
+	Key      string
+	Label    string
+	Weight   float64
+	Timezone string
+	Hour     int
+	Minute   int
+	DayShift int
+}
+
+var indiaAnchorRules = []indiaAnchorRule{
+	// Normalised to the disclosed 89.37% overseas risk sleeve. The underlying
+	// proxy is INDA at all four timestamps; the market label describes the
+	// portfolio leg whose closing window is being represented.
+	{Key: "jp_close", Label: "日本收盘", Weight: 0.0475551079780687, Timezone: "Asia/Tokyo", Hour: 15, Minute: 0},
+	{Key: "hk_close", Label: "香港收盘", Weight: 0.0097348103390399, Timezone: "Asia/Hong_Kong", Hour: 16, Minute: 0},
+	{Key: "eu_close", Label: "欧洲收盘", Weight: 0.3541456864719705, Timezone: "Europe/Berlin", Hour: 17, Minute: 30},
+	{Key: "us_close", Label: "美国收盘", Weight: 0.5885643952109209, Timezone: "America/New_York", Hour: 16, Minute: 0},
+}
+
+func (input Input) validateIndiaT2MultiMarket(definition FundDefinition) error {
+	if definition.Symbol != SZ164824Symbol || input.India == nil {
+		return fmt.Errorf("india.t2 input is required")
+	}
+	india := input.India
+	if !finitePositive(india.BaseNAV) || india.BaseNAVDate == "" {
+		return fmt.Errorf("india.base_nav and india.base_nav_date are required")
+	}
+	if _, err := time.ParseInLocation("2006-01-02", india.BaseNAVDate, shanghaiLocation); err != nil {
+		return fmt.Errorf("invalid india.base_nav_date: %w", err)
+	}
+	if india.PortfolioAsOf == "" || india.PortfolioSource == "" {
+		return fmt.Errorf("india.portfolio_as_of and india.portfolio_source are required")
+	}
+	if _, err := time.ParseInLocation("2006-01-02", india.PortfolioAsOf, shanghaiLocation); err != nil {
+		return fmt.Errorf("invalid india.portfolio_as_of: %w", err)
+	}
+	if math.Abs(india.InvestmentRatio-IndiaInvestmentRatio) > 1e-9 || math.Abs(india.StaticRatio-IndiaStaticRatio) > 1e-9 {
+		return fmt.Errorf("india investment/static ratios must equal %.4f/%.4f", IndiaInvestmentRatio, IndiaStaticRatio)
+	}
+	if math.Abs(india.InvestmentRatio+india.StaticRatio-1) > 1e-9 {
+		return fmt.Errorf("india investment and static ratios must sum to one")
+	}
+	if err := validateIndiaCentralParity(india.BaseFX, "base_fx"); err != nil {
+		return err
+	}
+	if india.BaseFX.TradingDay != india.BaseNAVDate {
+		return fmt.Errorf("india.base_fx.trading_day must equal india.base_nav_date")
+	}
+	if err := validateCurrentFX(india.CurrentFX, "india.current_fx"); err != nil {
+		return err
+	}
+	if input.IB.Symbol != IndiaReferenceSymbol || input.IB.Bid == nil || input.IB.Ask == nil || !finitePositive(*input.IB.Bid) || !finitePositive(*input.IB.Ask) || *input.IB.Ask < *input.IB.Bid {
+		return fmt.Errorf("ib must contain positive %s bid/ask", IndiaReferenceSymbol)
+	}
+	if input.IB.ObservedAt.IsZero() || input.IB.Source == "" || input.IB.MarketDataType == "" {
+		return fmt.Errorf("ib observed_at, source and market_data_type are required")
+	}
+	if err := validateIndiaNiftyBridge(india.NiftyBridge); err != nil {
+		return err
+	}
+	if input.GeneratedAt.IsZero() || input.Source == "" {
+		return fmt.Errorf("generated_at and source are required")
+	}
+	if len(india.Anchors) != len(indiaAnchorRules) {
+		return fmt.Errorf("india.anchors must contain %d market closes", len(indiaAnchorRules))
+	}
+	byKey := make(map[string]IndiaAnchorInput, len(india.Anchors))
+	for _, anchor := range india.Anchors {
+		if _, exists := byKey[anchor.Key]; exists {
+			return fmt.Errorf("duplicate india anchor %s", anchor.Key)
+		}
+		byKey[anchor.Key] = anchor
+	}
+	for _, rule := range indiaAnchorRules {
+		anchor, ok := byKey[rule.Key]
+		if !ok {
+			return fmt.Errorf("missing india anchor %s", rule.Key)
+		}
+		if anchor.Label != rule.Label || !finitePositive(anchor.Weight) || math.Abs(anchor.Weight-rule.Weight) > 1e-9 || !finitePositive(anchor.Price) {
+			return fmt.Errorf("invalid india anchor %s", rule.Key)
+		}
+		if anchor.TargetAt.IsZero() || anchor.ObservedAt.IsZero() || anchor.Source == "" || anchor.CaptureStatus == "" {
+			return fmt.Errorf("india anchor %s timestamp/source/status are required", rule.Key)
+		}
+		expectedTarget, err := indiaAnchorTarget(india.BaseNAVDate, rule)
+		if err != nil {
+			return err
+		}
+		if math.Abs(anchor.TargetAt.Sub(expectedTarget).Seconds()) > 60 {
+			return fmt.Errorf("india anchor %s target must be %s", rule.Key, expectedTarget.Format(time.RFC3339))
+		}
+	}
+	return nil
+}
+
+func validateIndiaCentralParity(value FXInput, name string) error {
+	if value.Pair != "USD/CNY" || value.Rate == nil || !finitePositive(*value.Rate) || value.TradingDay == "" || value.QuoteTime == "" || value.Source != "SAFE_CENTRAL_PARITY" || value.FetchedAt.IsZero() {
+		return fmt.Errorf("india.%s must be a dated SAFE USD/CNY central parity", name)
+	}
+	if _, err := time.ParseInLocation("2006-01-02", value.TradingDay, shanghaiLocation); err != nil {
+		return fmt.Errorf("invalid india.%s.trading_day: %w", name, err)
+	}
+	return nil
+}
+
+func (input Input) validateLOFWeightedAnchor(definition FundDefinition) error {
+	if definition.Symbol != SZ162411Symbol || input.LOF == nil {
+		return fmt.Errorf("lof weighted-anchor input is required")
+	}
+	if input.India != nil || hasPCFInput(input.PCF) || hasFXInput(input.FX) || len(input.FXRates) != 0 || len(input.MarketQuotes) != 0 {
+		return fmt.Errorf("lof weighted-anchor input must not contain PCF or CFETS fields")
+	}
+	lof := input.LOF
+	if !finitePositive(lof.BaseNAV) || lof.BaseNAVDate == "" || lof.BaseNAVSource == "" || lof.BaseNAVFetchedAt.IsZero() {
+		return fmt.Errorf("lof base_nav, base_nav_date and source audit are required")
+	}
+	baseDate, err := time.ParseInLocation("2006-01-02", lof.BaseNAVDate, shanghaiLocation)
+	if err != nil {
+		return fmt.Errorf("invalid lof.base_nav_date: %w", err)
+	}
+	if err := validateLOFCentralParity(lof.BaseFX, "base_fx"); err != nil {
+		return err
+	}
+	if lof.BaseFX.TradingDay != lof.BaseNAVDate {
+		return fmt.Errorf("lof.base_fx.trading_day must equal lof.base_nav_date")
+	}
+	if lof.CurrentFX.Pair != "USD/CNY" || lof.CurrentFX.Rate == nil || !finitePositive(*lof.CurrentFX.Rate) ||
+		lof.CurrentFX.TradingDay == "" || lof.CurrentFX.QuoteTime == "" || lof.CurrentFX.Source != "SAFE_CENTRAL_PARITY" || lof.CurrentFX.FetchedAt.IsZero() {
+		return fmt.Errorf("lof.current_fx must be a dated SAFE USD/CNY central parity")
+	}
+	if _, err := time.ParseInLocation("2006-01-02", lof.CurrentFX.TradingDay, shanghaiLocation); err != nil {
+		return fmt.Errorf("invalid lof.current_fx.trading_day: %w", err)
+	}
+	reference := lof.BaseReference
+	if reference.Symbol != definition.ReferenceSymbol || !finitePositive(reference.Price) ||
+		reference.PriceBasis != LOFReferencePriceRegularClose || reference.TargetAt.IsZero() ||
+		reference.ObservedAt.IsZero() || reference.Source == "" || reference.CaptureStatus == "" {
+		return fmt.Errorf("lof.base_reference must be an auditable %s %s", definition.ReferenceSymbol, LOFReferencePriceRegularClose)
+	}
+	newYork, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		return err
+	}
+	targetLocal := reference.TargetAt.In(newYork)
+	// Compare calendar dates in UTC so a DST transition cannot turn a
+	// one-day carry into a 23/25-hour duration and an off-by-one result.
+	baseCalendarDay := time.Date(baseDate.Year(), baseDate.Month(), baseDate.Day(), 0, 0, 0, 0, time.UTC)
+	targetCalendarDay := time.Date(targetLocal.Year(), targetLocal.Month(), targetLocal.Day(), 0, 0, 0, 0, time.UTC)
+	carryDays := int(baseCalendarDay.Sub(targetCalendarDay).Hours() / 24)
+	if targetLocal.Hour() != 16 || targetLocal.Minute() != 0 || targetLocal.Second() != 0 ||
+		carryDays < 0 || carryDays > 7 {
+		return fmt.Errorf("lof.base_reference.target_at must be a 16:00 America/New_York close on base_nav_date or within the prior seven days")
+	}
+	// target_at already records any bounded holiday carry. observed_at is the
+	// actual source event chosen for that target and must stay inside the same
+	// ±180-second public capture window; it may never inherit the carry range.
+	if reference.ObservedAt.Before(reference.TargetAt.Add(-3*time.Minute)) || reference.ObservedAt.After(reference.TargetAt.Add(3*time.Minute)) {
+		return fmt.Errorf("lof.base_reference.observed_at must be within ±180 seconds of target_at")
+	}
+	ratio := lof.EffectiveRatio
+	if !finitePositive(ratio.Value) || ratio.Value > 2 ||
+		math.Abs(ratio.DefaultValue-SZ162411DefaultEffectiveRatio) > 1e-9 ||
+		ratio.DefaultSource != LOFEffectiveRatioWeightedAnchor {
+		return fmt.Errorf("lof.effective_ratio must retain the %.4f weighted-anchor default", SZ162411DefaultEffectiveRatio)
+	}
+	switch ratio.Source {
+	case LOFEffectiveRatioWeightedAnchor:
+		if math.Abs(ratio.Value-ratio.DefaultValue) > 1e-9 || ratio.OverrideSource != "" ||
+			!ratio.OverrideUpdatedAt.IsZero() || ratio.OverrideUpdatedBy != "" {
+			return fmt.Errorf("weighted-anchor effective ratio must equal its default without override metadata")
+		}
+	case LOFEffectiveRatioManualOverride:
+		if ratio.OverrideSource == "" || ratio.OverrideUpdatedAt.IsZero() || ratio.OverrideUpdatedBy == "" {
+			return fmt.Errorf("manual effective ratio override audit is incomplete")
+		}
+	default:
+		return fmt.Errorf("unsupported lof.effective_ratio.source %q", ratio.Source)
+	}
+	if err := validateIBQuoteForSymbol(input.IB, definition.ReferenceSymbol, "ib"); err != nil {
+		return err
+	}
+	if input.IB.QuoteSession == "" {
+		return fmt.Errorf("ib.quote_session is required for the LOF XOP quote")
+	}
+	if input.IB.Last != nil && !finitePositive(*input.IB.Last) {
+		return fmt.Errorf("ib.last must be positive when provided")
+	}
+	if input.GeneratedAt.IsZero() || input.Source == "" {
+		return fmt.Errorf("generated_at and source are required")
+	}
+	return nil
+}
+
+func hasPCFInput(value PCFInput) bool {
+	return value.SecurityID != "" || value.TradingDay != "" || value.PreTradingDay != "" ||
+		value.Creation != "" || value.Redemption != "" || value.CreationRedemptionUnit != nil ||
+		value.EstimateCashComponentCNY != nil || value.NAVPerCU != nil || value.ComponentCount != 0 ||
+		len(value.Components) != 0 || value.XOPEquivalentShares != nil || value.HistoricalFixedProxy ||
+		value.SourceURL != "" || value.SHA256 != ""
+}
+
+func hasFXInput(value FXInput) bool {
+	return value.Pair != "" || value.Rate != nil || value.TradingDay != "" || value.QuoteTime != "" ||
+		value.Source != "" || !value.FetchedAt.IsZero()
+}
+
+func validateLOFCentralParity(value FXInput, name string) error {
+	if value.Pair != "USD/CNY" || value.Rate == nil || !finitePositive(*value.Rate) ||
+		value.TradingDay == "" || value.QuoteTime == "" || value.Source != "SAFE_CENTRAL_PARITY" || value.FetchedAt.IsZero() {
+		return fmt.Errorf("lof.%s must be a dated SAFE USD/CNY central parity", name)
+	}
+	if _, err := time.ParseInLocation("2006-01-02", value.TradingDay, shanghaiLocation); err != nil {
+		return fmt.Errorf("invalid lof.%s.trading_day: %w", name, err)
+	}
+	return nil
+}
+
+func validateCurrentFX(value FXInput, name string) error {
+	if value.Pair != "USD/CNY" || value.Rate == nil || !finitePositive(*value.Rate) ||
+		value.TradingDay == "" || value.QuoteTime == "" || value.FetchedAt.IsZero() {
+		return fmt.Errorf("%s must be a dated USD/CNY quote", name)
+	}
+	// SAFE remains readable for persisted historical inputs. The LOF
+	// weighted-anchor model is SAFE-only; live uploaders publish
+	// SAFE_CENTRAL_PARITY after the 162411 SAFE cutover.
+	if value.Source != CFETSSpotRateSource && value.Source != "SAFE_CENTRAL_PARITY" {
+		return fmt.Errorf("%s source must be CFETS_SPOT_RATE or legacy SAFE_CENTRAL_PARITY", name)
+	}
+	if _, err := time.ParseInLocation("2006-01-02", value.TradingDay, shanghaiLocation); err != nil {
+		return fmt.Errorf("invalid %s.trading_day: %w", name, err)
+	}
+	return nil
+}
+
+func validateIndiaNiftyBridge(bridge *IndiaNiftyBridgeInput) error {
+	if bridge == nil {
+		return nil
+	}
+	if !finitePositive(bridge.Beta) || math.Abs(bridge.Beta-1) > 1e-9 {
+		return fmt.Errorf("india.nifty_bridge.beta must equal 1 until an out-of-sample calibration is approved")
+	}
+	if bridge.ReferenceAt.IsZero() {
+		return fmt.Errorf("india.nifty_bridge.reference_at is required")
+	}
+	newYork, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		return err
+	}
+	reference := bridge.ReferenceAt.In(newYork)
+	if reference.Weekday() == time.Saturday || reference.Weekday() == time.Sunday || reference.Hour() != 15 || reference.Minute() < 49 || reference.Minute() > 51 {
+		return fmt.Errorf("india.nifty_bridge.reference_at must be a weekday America/New_York 15:49-15:51 capture")
+	}
+	if err := validateIBQuoteForSymbol(bridge.Nifty, "NIFTY", "india.nifty_bridge.nifty"); err != nil {
+		return err
+	}
+	if err := validateIBQuoteForSymbol(bridge.INDAReference, IndiaReferenceSymbol, "india.nifty_bridge.inda_reference"); err != nil {
+		return err
+	}
+	if err := validateIBQuoteForSymbol(bridge.NiftyReference, "NIFTY", "india.nifty_bridge.nifty_reference"); err != nil {
+		return err
+	}
+	if bridge.ContractSelectionVersion != "" && bridge.ContractSelectionVersion != NiftyContractSelectionVersion {
+		// Legacy bridge rows remain readable, but the calculation path will
+		// deliberately withhold them rather than compare different monthly
+		// contract conventions.
+		return nil
+	}
+	if bridge.RollAdjustment == nil {
+		return nil
+	}
+	return validateIndiaNiftyRollAdjustment(bridge.RollAdjustment)
+}
+
+func validateIndiaNiftyRollAdjustment(value *IndiaNiftyRollAdjustmentInput) error {
+	if value == nil {
+		return nil
+	}
+	rollDay, err := time.ParseInLocation("2006-01-02", value.RollDate, shanghaiLocation)
+	if err != nil || !indiaLastTuesdayOfMonth(rollDay).Equal(rollDay) {
+		return fmt.Errorf("india.nifty_bridge.roll_adjustment.roll_date must be a monthly last Tuesday")
+	}
+	if value.CapturedAt.IsZero() || value.OldContract == "" || value.NewContract == "" || value.OldContract == value.NewContract ||
+		(value.Source != IndiaNiftyLiveRollSource && value.Source != IndiaNiftyHistoricalRollSource) {
+		return fmt.Errorf("india.nifty_bridge.roll_adjustment requires distinct contracts, capture time and source")
+	}
+	captured := value.CapturedAt.In(shanghaiLocation)
+	if captured.Weekday() != time.Monday || captured.Year() != rollDay.Year() || captured.Month() != rollDay.Month() || captured.Day()+1 != rollDay.Day() {
+		return fmt.Errorf("india.nifty_bridge.roll_adjustment must be captured on the Monday before roll date")
+	}
+	minute := captured.Hour()*60 + captured.Minute()
+	if minute < 12*60+28 || minute > 12*60+32 || !finitePositive(value.BidFactor) || !finitePositive(value.AskFactor) {
+		return fmt.Errorf("india.nifty_bridge.roll_adjustment has invalid 12:30 BJT factors")
+	}
+	if value.Direction != "new_to_old" && value.Direction != "old_to_new" {
+		return fmt.Errorf("india.nifty_bridge.roll_adjustment.direction is invalid")
+	}
+	return nil
+}
+
+func indiaLastTuesdayOfMonth(value time.Time) time.Time {
+	local := value.In(shanghaiLocation)
+	firstNext := time.Date(local.Year(), local.Month()+1, 1, 0, 0, 0, 0, shanghaiLocation)
+	last := firstNext.AddDate(0, 0, -1)
+	return last.AddDate(0, 0, -((int(last.Weekday()) - int(time.Tuesday) + 7) % 7))
+}
+
+func validateIBQuoteForSymbol(quote IBQuoteInput, symbol, name string) error {
+	if quote.Symbol != symbol || quote.Bid == nil || quote.Ask == nil || !finitePositive(*quote.Bid) || !finitePositive(*quote.Ask) || *quote.Ask < *quote.Bid {
+		return fmt.Errorf("%s must contain positive %s bid/ask", name, symbol)
+	}
+	if quote.ObservedAt.IsZero() || quote.Source == "" || quote.MarketDataType == "" {
+		return fmt.Errorf("%s observed_at, source and market_data_type are required", name)
+	}
+	return nil
+}
+
+func normalizeIBQuoteInput(value IBQuoteInput) IBQuoteInput {
+	value.Symbol = strings.ToUpper(strings.TrimSpace(value.Symbol))
+	value.Contract = strings.TrimSpace(value.Contract)
+	value.Source = strings.TrimSpace(value.Source)
+	value.MarketDataType = strings.TrimSpace(value.MarketDataType)
+	value.QuoteSession = strings.TrimSpace(value.QuoteSession)
+	return value
+}
+
+func indiaAnchorTarget(baseNAVDate string, rule indiaAnchorRule) (time.Time, error) {
+	base, err := time.ParseInLocation("2006-01-02", baseNAVDate, shanghaiLocation)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("invalid india base NAV date: %w", err)
+	}
+	location, err := time.LoadLocation(rule.Timezone)
+	if err != nil {
+		return time.Time{}, err
+	}
+	day := base.AddDate(0, 0, rule.DayShift).In(shanghaiLocation)
+	return time.Date(day.Year(), day.Month(), day.Day(), rule.Hour, rule.Minute, 0, 0, location), nil
+}
+
+// IsHistoricalFixedIndexProxy identifies the sole historical exception where
+// a later, auditable PCF calibrates an older index-futures proxy chart minute. It must
+// never enable the live estimator or a non-index PCF model.
+func (input Input) IsHistoricalFixedIndexProxy() bool {
+	definition, ok := Definition(input.Symbol)
+	if !ok || !input.PCF.HistoricalFixedProxy || input.IB.MarketDataType != "HistoricalBidAsk" {
+		return false
+	}
+	return isIndexFuturesProxyMode(definition.CalculationMode)
+}
+
+// ValuationAnchorDate is the dated asset/NAV anchor used by a private model.
+// Legacy ETF models use the PCF day; the 164824 LOF stores its released NAV
+// date instead. The database column retains its old pcf_trading_day name for
+// backwards compatibility, but callers must use this method rather than read
+// PCF fields directly.
+func (input Input) ValuationAnchorDate() string {
+	definition, ok := Definition(input.Symbol)
+	if ok && definition.CalculationMode == CalculationModeIndiaT2MultiMarket && input.India != nil {
+		return input.India.BaseNAVDate
+	}
+	if ok && definition.CalculationMode == CalculationModeLOFWeightedAnchor && input.LOF != nil {
+		return input.LOF.BaseNAVDate
+	}
+	if ok && definition.CalculationMode == CalculationModeSilverSettlement && input.Silver != nil {
+		return input.Silver.BaseNAVDate
+	}
+	return input.PCF.TradingDay
+}
+
+func isIndexFuturesProxyMode(mode CalculationMode) bool {
+	return mode == CalculationModeNQProxy || mode == CalculationModeESProxy || mode == CalculationModeN225MProxy || mode == CalculationModeDAXProxy
+}
+
+// validateIndexFuturesProxy keeps the PCF constituent list auditable even
+// though the China-session screen values a liquid exchange-traded index future rather than
+// sparse overnight stock quotes. The caller must upload the complete dated
+// positive-share list; a composition change cannot silently retain an old
+// proxy calibration.
+func (input Input) validateIndexFuturesProxy(definition FundDefinition) error {
+	if len(input.PCF.Components) != input.PCF.ComponentCount {
+		return fmt.Errorf("index-futures proxy pcf.components count must equal pcf.component_count")
+	}
+	components := make(map[string]struct{}, len(input.PCF.Components))
+	for _, component := range input.PCF.Components {
+		if component.Symbol == "" || component.Name == "" || !finitePositive(component.Quantity) {
+			return fmt.Errorf("index-futures proxy pcf component symbol, name and quantity are required")
+		}
+		expectedMarket, expectedCurrency := definition.ExpectedComponentMarket, definition.ExpectedComponentCurrency
+		if expectedMarket == "" {
+			expectedMarket = "US"
+		}
+		if expectedCurrency == "" {
+			expectedCurrency = "USD"
+		}
+		if component.Market != expectedMarket || component.Currency != expectedCurrency {
+			return fmt.Errorf("index-futures proxy pcf component %s must be %s/%s", component.Symbol, expectedMarket, expectedCurrency)
+		}
+		if _, exists := components[component.Symbol]; exists {
+			return fmt.Errorf("duplicate index-futures proxy pcf component %s", component.Symbol)
+		}
+		components[component.Symbol] = struct{}{}
+	}
+	if definition.ExpectedSecurityComponentCount > 0 && len(components) != definition.ExpectedSecurityComponentCount && input.IB.MarketDataType != "HistoricalBidAsk" {
+		return fmt.Errorf("index-futures proxy pcf component count must equal %d", definition.ExpectedSecurityComponentCount)
+	}
+	return nil
+}
+
+func (input Input) validateFullCashSubstitution(definition FundDefinition) error {
+	if input.PCF.Creation != "Y" && input.PCF.Creation != "N" {
+		return fmt.Errorf("pcf.creation must be Y or N for full cash substitution")
+	}
+	if len(input.PCF.Components) != input.PCF.ComponentCount {
+		return fmt.Errorf("pcf.components count must equal pcf.component_count")
+	}
+	components := make(map[string]PCFComponentInput, len(input.PCF.Components))
+	for _, component := range input.PCF.Components {
+		if component.Symbol == "" || component.Name == "" || !finitePositive(component.Quantity) {
+			return fmt.Errorf("pcf component symbol, name and quantity are required")
+		}
+		if !supportedComponentMarket(component.Market, component.Currency) {
+			return fmt.Errorf("pcf component %s must be HK/HKD, US/USD or CN/CNY", component.Symbol)
+		}
+		key := marketQuoteKey(component.Market, component.Symbol)
+		if _, exists := components[key]; exists {
+			return fmt.Errorf("duplicate pcf component %s", key)
+		}
+		components[key] = component
+	}
+	fxRates := make(map[string]FXInput, len(input.FXRates))
+	for _, rate := range input.FXRates {
+		if err := validateFXInput(rate); err != nil {
+			return err
+		}
+		if rate.Pair != "USD/CNY" && rate.Pair != "HKD/CNY" {
+			return fmt.Errorf("unsupported full-cash-substitution fx pair %s", rate.Pair)
+		}
+		if _, exists := fxRates[rate.Pair]; exists {
+			return fmt.Errorf("duplicate fx rate %s", rate.Pair)
+		}
+		fxRates[rate.Pair] = rate
+	}
+	for pair := range requiredFXPairs(components) {
+		if _, ok := fxRates[pair]; !ok {
+			return fmt.Errorf("fx_rates must contain %s", pair)
+		}
+	}
+	if len(fxRates) != len(requiredFXPairs(components)) {
+		return fmt.Errorf("fx_rates contains a pair not used by the PCF components")
+	}
+	if len(input.MarketQuotes) != len(components) {
+		return fmt.Errorf("market_quotes count must equal pcf.components count")
+	}
+	quotes := make(map[string]MarketQuoteInput, len(input.MarketQuotes))
+	for _, quote := range input.MarketQuotes {
+		if _, exists := components[marketQuoteKey(quote.Market, quote.Symbol)]; !exists {
+			return fmt.Errorf("market quote %s has no matching pcf component", marketQuoteKey(quote.Market, quote.Symbol))
+		}
+		if !supportedComponentMarket(quote.Market, quote.Currency) {
+			return fmt.Errorf("market quote %s must be HK/HKD, US/USD or CN/CNY", quote.Symbol)
+		}
+		if quote.Bid == nil || !finitePositive(*quote.Bid) || quote.Ask == nil || !finitePositive(*quote.Ask) || *quote.Ask < *quote.Bid {
+			return fmt.Errorf("market quote %s must contain positive ordered bid and ask", quote.Symbol)
+		}
+		if quote.ObservedAt.IsZero() || quote.Source == "" || quote.MarketDataType == "" {
+			return fmt.Errorf("market quote %s source, market_data_type and observed_at are required", quote.Symbol)
+		}
+		key := marketQuoteKey(quote.Market, quote.Symbol)
+		if _, exists := quotes[key]; exists {
+			return fmt.Errorf("duplicate market quote %s", key)
+		}
+		quotes[key] = quote
+	}
+	if input.GeneratedAt.IsZero() || input.Source == "" {
+		return fmt.Errorf("generated_at and source are required")
+	}
+	return nil
+}
+
+func supportedComponentMarket(market, currency string) bool {
+	return (market == "HK" && currency == "HKD") ||
+		(market == "US" && currency == "USD") ||
+		(market == "CN" && currency == "CNY")
+}
+
+func requiredFXPairs(components map[string]PCFComponentInput) map[string]struct{} {
+	pairs := make(map[string]struct{}, 2)
+	for _, component := range components {
+		if component.Currency != "CNY" {
+			pairs[component.Currency+"/CNY"] = struct{}{}
+		}
+	}
+	return pairs
+}
+
+func validateFXInput(value FXInput) error {
+	if (value.Pair != "USD/CNY" && value.Pair != "HKD/CNY") || value.Rate == nil || !finitePositive(*value.Rate) {
+		return fmt.Errorf("fx rate pair and positive rate are required")
+	}
+	if value.TradingDay == "" || value.QuoteTime == "" {
+		return fmt.Errorf("fx trading_day and quote_time are required")
+	}
+	if value.Source == CFETSReferenceRateSource &&
+		(value.QuoteTime < "10:00" || value.QuoteTime > "18:00" || !strings.HasSuffix(value.QuoteTime, ":00")) {
+		return fmt.Errorf("CFETS reference fx quote_time must be an hour from 10:00 to 18:00")
+	}
+	if value.Source != CFETSReferenceRateSource && value.Source != CFETSSpotRateSource {
+		return fmt.Errorf("fx source must be CFETS_REFERENCE_RATE or CFETS_SPOT_RATE")
+	}
+	if value.FetchedAt.IsZero() {
+		return fmt.Errorf("fx fetched_at is required")
+	}
+	return nil
+}
+
+func normalizeFXInput(value FXInput) FXInput {
+	value.Pair = strings.ToUpper(strings.TrimSpace(value.Pair))
+	value.TradingDay = normalizeDate(value.TradingDay)
+	value.QuoteTime = normalizeHour(value.QuoteTime)
+	value.Source = strings.TrimSpace(value.Source)
+	return value
+}
+
+func marketQuoteKey(market, symbol string) string {
+	return strings.ToUpper(strings.TrimSpace(market)) + ":" + strings.ToUpper(strings.TrimSpace(symbol))
+}
+
+type BasketValuation struct {
+	RedemptionUnit           float64 `json:"redemption_unit"`
+	XOPEquivalentShares      float64 `json:"xop_equivalent_shares"`
+	EstimateCashComponentCNY float64 `json:"estimate_cash_component_cny"`
+	StockComponentBidCNY     float64 `json:"stock_component_bid_cny"`
+	StockComponentAskCNY     float64 `json:"stock_component_ask_cny"`
+	BasketBidCNY             float64 `json:"basket_bid_cny"`
+	BasketAskCNY             float64 `json:"basket_ask_cny"`
+	NAVBid                   float64 `json:"nav_bid"`
+	NAVAsk                   float64 `json:"nav_ask"`
+	BuyDirectionPremiumRate  float64 `json:"buy_direction_premium_rate"`
+	SellDirectionPremiumRate float64 `json:"sell_direction_premium_rate"`
+	Formula                  string  `json:"formula"`
+}
+
+// IndiaValuationVariant is one auditable reading of the same T-2 NAV model.
+// DirectINDA remains the final-NAV proxy. NiftyBridge is a separate China
+// session IOPV/hedge reading with its own order-book premiums.
+type IndiaValuationVariant struct {
+	Key         string               `json:"key"`
+	Label       string               `json:"label"`
+	Description string               `json:"description"`
+	QuoteSymbol string               `json:"quote_symbol"`
+	Valuation   BasketValuation      `json:"valuation"`
+	OrderBook   []OrderBookValuation `json:"order_book"`
+}
+
+type IndiaValuations struct {
+	DefaultKey  string                 `json:"default_key"`
+	DirectINDA  IndiaValuationVariant  `json:"direct_inda"`
+	NiftyBridge *IndiaValuationVariant `json:"nifty_bridge,omitempty"`
+}
+
+// LOFWeightedAnchorValuation is a denormalised calculation trace for the
+// SZ162411 screen. Input keeps the full source records; this trace exposes the
+// exact values and multipliers that produced the displayed Bid/Ask NAVs.
+type LOFWeightedAnchorValuation struct {
+	BaseNAV                        float64   `json:"base_nav"`
+	BaseNAVDate                    string    `json:"base_nav_date"`
+	BaseNAVSource                  string    `json:"base_nav_source"`
+	BaseNAVFetchedAt               time.Time `json:"base_nav_fetched_at"`
+	BaseReferenceSymbol            string    `json:"base_reference_symbol"`
+	BaseReferencePrice             float64   `json:"base_reference_price"`
+	BaseReferencePriceBasis        string    `json:"base_reference_price_basis"`
+	BaseReferenceTargetAt          time.Time `json:"base_reference_target_at"`
+	BaseReferenceObservedAt        time.Time `json:"base_reference_observed_at"`
+	BaseReferenceSource            string    `json:"base_reference_source"`
+	BaseReferenceCaptureStatus     string    `json:"base_reference_capture_status"`
+	BaseFX                         float64   `json:"base_fx"`
+	BaseFXTradingDay               string    `json:"base_fx_trading_day"`
+	BaseFXSource                   string    `json:"base_fx_source"`
+	CurrentFX                      float64   `json:"current_fx"`
+	CurrentFXTradingDay            string    `json:"current_fx_trading_day"`
+	CurrentFXSource                string    `json:"current_fx_source"`
+	FXMultiplier                   float64   `json:"fx_multiplier"`
+	EffectiveRatio                 float64   `json:"effective_ratio"`
+	EffectiveRatioSource           string    `json:"effective_ratio_source"`
+	DefaultEffectiveRatio          float64   `json:"default_effective_ratio"`
+	DefaultEffectiveRatioSource    string    `json:"default_effective_ratio_source"`
+	StaticRatio                    float64   `json:"static_ratio"`
+	CurrentReferenceBid            float64   `json:"current_reference_bid"`
+	CurrentReferenceAsk            float64   `json:"current_reference_ask"`
+	CurrentReferenceLast           *float64  `json:"current_reference_last,omitempty"`
+	CurrentReferenceObservedAt     time.Time `json:"current_reference_observed_at"`
+	CurrentReferenceSource         string    `json:"current_reference_source"`
+	CurrentReferenceMarketDataType string    `json:"current_reference_market_data_type"`
+	CurrentReferenceQuoteSession   string    `json:"current_reference_quote_session"`
+	ReferenceBidMultiplier         float64   `json:"reference_bid_multiplier"`
+	ReferenceAskMultiplier         float64   `json:"reference_ask_multiplier"`
+	NAVBid                         float64   `json:"nav_bid"`
+	NAVAsk                         float64   `json:"nav_ask"`
+}
+
+// SilverSettlementValuation exposes both economically distinct 161226
+// readings. SettlementNAV estimates the next struck fund NAV from the SHFE
+// cumulative intraday average; TradingNAV marks the same base against the
+// current AG trade price for an executable intraday comparison.
+type SilverSettlementValuation struct {
+	BaseNAV                  float64   `json:"base_nav"`
+	BaseNAVDate              string    `json:"base_nav_date"`
+	BaseNAVSource            string    `json:"base_nav_source"`
+	BaseNAVFetchedAt         time.Time `json:"base_nav_fetched_at"`
+	TradingDay               string    `json:"trading_day"`
+	Contract                 string    `json:"contract"`
+	ContractSelectionVersion string    `json:"contract_selection_version"`
+	PreviousSettlement       float64   `json:"previous_settlement"`
+	PreviousSettlementDate   string    `json:"previous_settlement_date"`
+	PreviousSettlementSource string    `json:"previous_settlement_source"`
+	FuturesPrice             float64   `json:"futures_price"`
+	IntradayAverage          float64   `json:"intraday_average"`
+	IntradayAverageBasis     string    `json:"intraday_average_basis"`
+	ObservedAt               time.Time `json:"observed_at"`
+	Source                   string    `json:"source"`
+	SettlementNAV            float64   `json:"settlement_nav"`
+	TradingNAV               float64   `json:"trading_nav"`
+	SettlementPremiumRate    float64   `json:"settlement_premium_rate"`
+	TradingPremiumRate       float64   `json:"trading_premium_rate"`
+}
+
+type ComponentValuation struct {
+	Symbol      string    `json:"symbol"`
+	Name        string    `json:"name"`
+	Market      string    `json:"market"`
+	Currency    string    `json:"currency"`
+	Quantity    float64   `json:"quantity"`
+	Bid         float64   `json:"bid"`
+	Ask         float64   `json:"ask"`
+	FXPair      string    `json:"fx_pair"`
+	FXRate      float64   `json:"fx_rate"`
+	BidValueCNY float64   `json:"bid_value_cny"`
+	AskValueCNY float64   `json:"ask_value_cny"`
+	Source      string    `json:"source"`
+	ObservedAt  time.Time `json:"observed_at"`
+}
+
+type OrderBookValuation struct {
+	Side                      string  `json:"side"`
+	Level                     int     `json:"level"`
+	Price                     float64 `json:"price"`
+	Volume                    float64 `json:"volume"`
+	PremiumRateVsBasketBidNAV float64 `json:"premium_rate_vs_basket_bid_nav"`
+	PremiumRateVsBasketAskNAV float64 `json:"premium_rate_vs_basket_ask_nav"`
+}
+
+type Snapshot struct {
+	CalculationState string                      `json:"calculation_state,omitempty"`
+	SchemaVersion    string                      `json:"schema_version"`
+	Symbol           string                      `json:"symbol"`
+	Name             string                      `json:"name"`
+	ModelVersion     string                      `json:"model_version"`
+	ValuationKind    CalculationMode             `json:"valuation_kind"`
+	Ready            bool                        `json:"ready"`
+	Actionable       bool                        `json:"actionable"`
+	AsOf             time.Time                   `json:"as_of"`
+	Input            *Input                      `json:"input,omitempty"`
+	DomesticQuote    *domain.Quote               `json:"domestic_quote,omitempty"`
+	Valuation        *BasketValuation            `json:"valuation,omitempty"`
+	IndiaValuations  *IndiaValuations            `json:"india_valuations,omitempty"`
+	LOFValuation     *LOFWeightedAnchorValuation `json:"lof_valuation,omitempty"`
+	SilverValuation  *SilverSettlementValuation  `json:"silver_valuation,omitempty"`
+	Components       []ComponentValuation        `json:"components,omitempty"`
+	OrderBook        []OrderBookValuation        `json:"order_book"`
+	Warnings         []string                    `json:"warnings"`
+}
+
+type ListItem struct {
+	Symbol                   string          `json:"symbol"`
+	Name                     string          `json:"name"`
+	ModelVersion             string          `json:"model_version"`
+	ValuationKind            CalculationMode `json:"valuation_kind"`
+	Ready                    bool            `json:"ready"`
+	Actionable               bool            `json:"actionable"`
+	AsOf                     time.Time       `json:"as_of"`
+	MarketBid                *float64        `json:"market_bid"`
+	MarketAsk                *float64        `json:"market_ask"`
+	BasketBidNAV             *float64        `json:"basket_bid_nav"`
+	BasketAskNAV             *float64        `json:"basket_ask_nav"`
+	BuyDirectionPremiumRate  *float64        `json:"buy_direction_premium_rate"`
+	SellDirectionPremiumRate *float64        `json:"sell_direction_premium_rate"`
+	SettlementNAV            *float64        `json:"settlement_nav,omitempty"`
+	TradingNAV               *float64        `json:"trading_nav,omitempty"`
+	SettlementPremiumRate    *float64        `json:"settlement_premium_rate,omitempty"`
+	TradingPremiumRate       *float64        `json:"trading_premium_rate,omitempty"`
+	ActiveContract           string          `json:"active_contract,omitempty"`
+	ShareDate                string          `json:"share_date,omitempty"`
+	Shares10K                *float64        `json:"shares_10k,omitempty"`
+	ShareChange10K           *float64        `json:"share_change_10k,omitempty"`
+	ShareChangePct           *float64        `json:"share_change_pct,omitempty"`
+	Warnings                 []string        `json:"warnings"`
+}
+
+type ListResponse struct {
+	SchemaVersion string     `json:"schema_version"`
+	AsOf          time.Time  `json:"as_of"`
+	Funds         []ListItem `json:"funds"`
+}
+
+// MinuteHistoryPoint is a private-only time-series point. It intentionally
+// stores both basket sides and both executable directions rather than mapping
+// them into the public estimator's single-NAV history contract.
+type MinuteHistoryPoint struct {
+	Minute       time.Time `json:"minute"`
+	MarketPrice  float64   `json:"market_price"`
+	BasketBidNAV float64   `json:"basket_bid_nav"`
+	BasketAskNAV float64   `json:"basket_ask_nav"`
+	// NiftyBridge* are deliberately optional.  basket_* always remains the
+	// struck/final NAV model (direct INDA for SZ164824); bridge fields are a
+	// separately auditable China-session IOPV and must never overwrite it.
+	NiftyBridgeBidNAV           *float64 `json:"nifty_bridge_bid_nav,omitempty"`
+	NiftyBridgeAskNAV           *float64 `json:"nifty_bridge_ask_nav,omitempty"`
+	NiftyBridgeSelectionVersion string   `json:"nifty_bridge_selection_version,omitempty"`
+	SettlementNAV               *float64 `json:"settlement_nav,omitempty"`
+	TradingNAV                  *float64 `json:"trading_nav,omitempty"`
+	ActiveContract              string   `json:"active_contract,omitempty"`
+	FuturesPrice                *float64 `json:"futures_price,omitempty"`
+	IntradayAverage             *float64 `json:"intraday_average,omitempty"`
+	BuyDirectionPremiumRate     float64  `json:"buy_direction_premium_rate"`
+	SellDirectionPremiumRate    float64  `json:"sell_direction_premium_rate"`
+	PCFTradingDay               string   `json:"pcf_trading_day,omitempty"`
+	XOPEquivalentShares         *float64 `json:"xop_equivalent_shares,omitempty"`
+}
+
+type MinuteHistoryResponse struct {
+	Symbol string               `json:"symbol"`
+	Days   int                  `json:"days"`
+	Rows   []MinuteHistoryPoint `json:"rows"`
+}
+
+// SilverCloseHistoryRow is the persisted final China-session checkpoint for
+// one SZ161226 trading day. OfficialNAV is joined by trading day when Eastmoney
+// publishes it, so the historical estimate remains frozen while the audit
+// comparison fills in automatically on the following NAV sync.
+type SilverCloseHistoryRow struct {
+	TradingDay              string    `json:"trading_day"`
+	CloseMinute             time.Time `json:"close_minute"`
+	OfficialNAV             *float64  `json:"official_nav,omitempty"`
+	OfficialNAVSource       string    `json:"official_nav_source,omitempty"`
+	MarketPrice             float64   `json:"market_price"`
+	SettlementNAV           float64   `json:"settlement_nav"`
+	SettlementPremiumRate   float64   `json:"settlement_premium_rate"`
+	TradingNAV              float64   `json:"trading_nav"`
+	TradingPremiumRate      float64   `json:"trading_premium_rate"`
+	SettlementDeviationRate *float64  `json:"settlement_deviation_rate,omitempty"`
+	ActiveContract          string    `json:"active_contract,omitempty"`
+	FuturesPrice            *float64  `json:"futures_price,omitempty"`
+	IntradayAverage         *float64  `json:"intraday_average,omitempty"`
+}
+
+type SilverCloseHistoryResponse struct {
+	SchemaVersion   string                  `json:"schema_version"`
+	Symbol          string                  `json:"symbol"`
+	Name            string                  `json:"name"`
+	ModelVersion    string                  `json:"model_version"`
+	MethodologyNote string                  `json:"methodology_note"`
+	Rows            []SilverCloseHistoryRow `json:"rows"`
+}
+
+// IndiaFinalNAVHistoryInput is a complete, end-of-day SZ164824 valuation
+// replay.  It deliberately contains no China-session quote: the historical
+// review compares the T-day four-market close with the published T-day NAV.
+// The live NIFTY bridge remains a separate intraday IOPV data set.
+type IndiaFinalNAVHistoryInput struct {
+	TargetDate        string    `json:"target_date"`
+	BaseNAVDate       string    `json:"base_nav_date"`
+	BaseNAV           float64   `json:"base_nav"`
+	InvestmentRatio   float64   `json:"investment_ratio"`
+	StaticRatio       float64   `json:"static_ratio"`
+	BaseAnchorPrice   float64   `json:"base_anchor_price"`
+	TargetAnchorPrice float64   `json:"target_anchor_price"`
+	BaseFX            float64   `json:"base_fx"`
+	TargetFX          float64   `json:"target_fx"`
+	Source            string    `json:"source"`
+	GeneratedAt       time.Time `json:"generated_at"`
+}
+
+// IndiaFinalNAVHistoryPoint is the validated, deterministic result persisted
+// for the India-only historical review.  The component values are retained so
+// every displayed number can be independently rechecked.
+type IndiaFinalNAVHistoryPoint struct {
+	IndiaFinalNAVHistoryInput
+	FinalEstimateNAV float64 `json:"final_estimate_nav"`
+}
+
+// IndiaHistoryReviewSource is one persisted final-NAV replay, joined with the
+// subsequently published official NAV. It is intentionally India/LOF-specific:
+// no ETF creation basket or "effective ratio" semantics are implied.
+type IndiaHistoryReviewSource struct {
+	TargetDate        string
+	OfficialNAV       *float64
+	BaseNAVDate       string
+	BaseNAV           *float64
+	FinalEstimateNAV  float64
+	InvestmentRatio   float64
+	StaticRatio       float64
+	BaseAnchorPrice   float64
+	TargetAnchorPrice float64
+	BaseFX            float64
+	TargetFX          float64
+	Source            string
+}
+
+type IndiaHistoryReviewRow struct {
+	TargetDate        string   `json:"target_date"`
+	OfficialNAV       *float64 `json:"official_nav,omitempty"`
+	BaseNAVDate       string   `json:"base_nav_date,omitempty"`
+	BaseNAV           *float64 `json:"base_nav,omitempty"`
+	FinalEstimateNAV  *float64 `json:"final_estimate_nav,omitempty"`
+	FinalDeviationPct *float64 `json:"final_deviation_pct,omitempty"`
+	FittedExposure    *float64 `json:"fitted_exposure,omitempty"`
+	WindowMAPEPct     *float64 `json:"window_mape_pct,omitempty"`
+	InvestmentRatio   *float64 `json:"investment_ratio,omitempty"`
+	StaticRatio       *float64 `json:"static_ratio,omitempty"`
+	BaseAnchorPrice   *float64 `json:"base_anchor_price,omitempty"`
+	TargetAnchorPrice *float64 `json:"target_anchor_price,omitempty"`
+	BaseFX            *float64 `json:"base_fx,omitempty"`
+	TargetFX          *float64 `json:"target_fx,omitempty"`
+	Source            string   `json:"source,omitempty"`
+	FitWindowSize     int      `json:"fit_window_size"`
+	Status            string   `json:"status"`
+	Note              string   `json:"note,omitempty"`
+}
+
+type IndiaHistoryReviewResponse struct {
+	Symbol          string                  `json:"symbol"`
+	Name            string                  `json:"name"`
+	ModelVersion    string                  `json:"model_version"`
+	FitWindow       int                     `json:"fit_window"`
+	Rows            []IndiaHistoryReviewRow `json:"rows"`
+	MethodologyNote string                  `json:"methodology_note"`
+}
+
+const (
+	IndiaNiftyBridgeStatusOrdinarySameContract        = "ordinary_same_contract"
+	IndiaNiftyBridgeStatusCalendarRollDaySameContract = "calendar_roll_day_same_contract"
+	IndiaNiftyBridgeStatusCrossContractAdjusted       = "cross_contract_adjusted"
+)
+
+// IndiaNiftyBridgeRollAudit is the exact, observed cross-contract basis that
+// was already applied to the NIFTY quote used by the production engine. It is
+// absent on same-contract observations, including an ordinary calendar roll
+// day where both the current and reference legs already select the new month.
+type IndiaNiftyBridgeRollAudit struct {
+	RollDate    string    `json:"roll_date"`
+	CapturedAt  time.Time `json:"captured_at"`
+	OldContract string    `json:"old_contract"`
+	NewContract string    `json:"new_contract"`
+	Direction   string    `json:"direction"`
+	BidFactor   float64   `json:"bid_factor"`
+	AskFactor   float64   `json:"ask_factor"`
+	Source      string    `json:"source"`
+}
+
+// IndiaNiftyBridgeAudit retains the typed values needed to reproduce both the
+// direct-INDA and NIFTY-bridge valuation. The complete original Input is also
+// persisted in input_json, but is intentionally not echoed in every API row.
+type IndiaNiftyBridgeAudit struct {
+	BaseNAVDate              string                     `json:"base_nav_date"`
+	BaseNAV                  float64                    `json:"base_nav"`
+	InvestmentRatio          float64                    `json:"investment_ratio"`
+	StaticRatio              float64                    `json:"static_ratio"`
+	BaseAnchorPrice          float64                    `json:"base_anchor_price"`
+	BaseFX                   float64                    `json:"base_fx"`
+	CurrentFX                float64                    `json:"current_fx"`
+	CurrentFXTradingDay      string                     `json:"current_fx_trading_day"`
+	DirectINDABid            float64                    `json:"direct_inda_bid"`
+	DirectINDAAsk            float64                    `json:"direct_inda_ask"`
+	DirectINDAObservedAt     time.Time                  `json:"direct_inda_observed_at"`
+	CurrentNiftyBid          float64                    `json:"current_nifty_bid"`
+	CurrentNiftyAsk          float64                    `json:"current_nifty_ask"`
+	CurrentNiftyContract     string                     `json:"current_nifty_contract"`
+	CurrentNiftyObservedAt   time.Time                  `json:"current_nifty_observed_at"`
+	ReferenceAt              time.Time                  `json:"reference_at"`
+	ReferenceINDABid         float64                    `json:"reference_inda_bid"`
+	ReferenceINDAAsk         float64                    `json:"reference_inda_ask"`
+	ReferenceINDAContract    string                     `json:"reference_inda_contract"`
+	ReferenceINDAObservedAt  time.Time                  `json:"reference_inda_observed_at"`
+	ReferenceNiftyBid        float64                    `json:"reference_nifty_bid"`
+	ReferenceNiftyAsk        float64                    `json:"reference_nifty_ask"`
+	ReferenceNiftyContract   string                     `json:"reference_nifty_contract"`
+	ReferenceNiftyObservedAt time.Time                  `json:"reference_nifty_observed_at"`
+	Beta                     float64                    `json:"beta"`
+	SyntheticINDABid         float64                    `json:"synthetic_inda_bid"`
+	SyntheticINDAAsk         float64                    `json:"synthetic_inda_ask"`
+	ContractSelectionVersion string                     `json:"contract_selection_version"`
+	RollAdjustment           *IndiaNiftyBridgeRollAudit `json:"roll_adjustment,omitempty"`
+	InputSource              string                     `json:"input_source"`
+	InputGeneratedAt         time.Time                  `json:"input_generated_at"`
+}
+
+// IndiaNiftyBridgeHistoryPoint is written only for snapshots whose production
+// calculation exposes a complete, valid NIFTY bridge variant.
+type IndiaNiftyBridgeHistoryPoint struct {
+	Symbol       string
+	Minute       time.Time
+	MarketPrice  float64
+	DirectBidNAV float64
+	DirectAskNAV float64
+	BridgeBidNAV float64
+	BridgeAskNAV float64
+	RollStatus   string
+	Audit        IndiaNiftyBridgeAudit
+	Input        Input
+}
+
+// IndiaNiftyBridgeReviewSource is one persisted minute joined with the later
+// official T-day NAV. OfficialNAV can be absent while disclosure is pending.
+type IndiaNiftyBridgeReviewSource struct {
+	IndiaNiftyBridgeHistoryPoint
+	OfficialNAV *float64
+}
+
+type IndiaNiftyBridgeReviewCheckpoint struct {
+	Minute string `json:"minute"`
+	Label  string `json:"label"`
+	Kind   string `json:"kind"`
+}
+
+type IndiaNiftyBridgeReviewTiming struct {
+	ChinaSessions      []string `json:"china_sessions"`
+	NiftyActiveWindow  string   `json:"nifty_active_window"`
+	ReferenceWindowET  string   `json:"reference_window_et"`
+	ReferenceCenterET  string   `json:"reference_center_et"`
+	RollRule           string   `json:"roll_rule"`
+	RollBasisWindowBJT string   `json:"roll_basis_window_bjt"`
+	RollBasisCenterBJT string   `json:"roll_basis_center_bjt"`
+	SelectionVersion   string   `json:"selection_version"`
+}
+
+type IndiaNiftyBridgeReviewRow struct {
+	Minute                 time.Time                  `json:"minute"`
+	TradingDay             string                     `json:"trading_day"`
+	Checkpoint             string                     `json:"checkpoint"`
+	State                  string                     `json:"state"`
+	MarketPrice            float64                    `json:"market_price"`
+	OfficialNAV            *float64                   `json:"official_nav"`
+	DirectNAVBid           float64                    `json:"direct_nav_bid"`
+	DirectNAVAsk           float64                    `json:"direct_nav_ask"`
+	BridgeNAVBid           float64                    `json:"bridge_nav_bid"`
+	BridgeNAVAsk           float64                    `json:"bridge_nav_ask"`
+	OfficialPremiumPct     *float64                   `json:"official_premium_pct"`
+	DirectPremiumVsBidPct  float64                    `json:"direct_premium_vs_bid_pct"`
+	DirectPremiumVsAskPct  float64                    `json:"direct_premium_vs_ask_pct"`
+	BridgePremiumVsBidPct  float64                    `json:"bridge_premium_vs_bid_pct"`
+	BridgePremiumVsAskPct  float64                    `json:"bridge_premium_vs_ask_pct"`
+	DirectErrorVsBidBPS    *float64                   `json:"direct_error_vs_bid_bps"`
+	DirectErrorVsAskBPS    *float64                   `json:"direct_error_vs_ask_bps"`
+	BridgeErrorVsBidBPS    *float64                   `json:"bridge_error_vs_bid_bps"`
+	BridgeErrorVsAskBPS    *float64                   `json:"bridge_error_vs_ask_bps"`
+	PairedAbsErrorDeltaBPS *float64                   `json:"paired_abs_error_delta_bps"`
+	BridgeCloser           *bool                      `json:"bridge_closer"`
+	BridgeContainsOfficial *bool                      `json:"bridge_contains_official"`
+	BaseNAVDate            string                     `json:"base_nav_date"`
+	BaseNAV                float64                    `json:"base_nav"`
+	InvestmentRatio        float64                    `json:"investment_ratio"`
+	StaticRatio            float64                    `json:"static_ratio"`
+	AnchorPrice            float64                    `json:"anchor_price"`
+	BaseFX                 float64                    `json:"base_fx"`
+	CurrentFX              float64                    `json:"current_fx"`
+	SyntheticINDABid       float64                    `json:"synthetic_inda_bid"`
+	SyntheticINDAAsk       float64                    `json:"synthetic_inda_ask"`
+	NiftyBid               float64                    `json:"nifty_bid"`
+	NiftyAsk               float64                    `json:"nifty_ask"`
+	NiftyContract          string                     `json:"nifty_contract"`
+	NiftyObservedAt        time.Time                  `json:"nifty_observed_at"`
+	INDAReferenceBid       float64                    `json:"inda_reference_bid"`
+	INDAReferenceAsk       float64                    `json:"inda_reference_ask"`
+	INDAReferenceContract  string                     `json:"inda_reference_contract"`
+	NiftyReferenceBid      float64                    `json:"nifty_reference_bid"`
+	NiftyReferenceAsk      float64                    `json:"nifty_reference_ask"`
+	NiftyReferenceContract string                     `json:"nifty_reference_contract"`
+	ReferenceAt            time.Time                  `json:"reference_at"`
+	Beta                   float64                    `json:"beta"`
+	SelectionVersion       string                     `json:"selection_version"`
+	RollAdjustment         *IndiaNiftyBridgeRollAudit `json:"roll_adjustment,omitempty"`
+}
+
+type IndiaNiftyBridgeReviewSummary struct {
+	TradingDays               int      `json:"trading_days"`
+	MinuteSamples             int      `json:"minute_samples"`
+	PairedSamples             int      `json:"paired_samples"`
+	BridgeBidPremiumMAEBPS    *float64 `json:"bridge_bid_premium_mae_bps"`
+	BridgeAskPremiumMAEBPS    *float64 `json:"bridge_ask_premium_mae_bps"`
+	DirectBidPremiumMAEBPS    *float64 `json:"direct_bid_premium_mae_bps"`
+	DirectAskPremiumMAEBPS    *float64 `json:"direct_ask_premium_mae_bps"`
+	PairedMAEDeltaBPS         *float64 `json:"paired_mae_delta_bps"`
+	BridgeWinRatePct          *float64 `json:"bridge_win_rate_pct"`
+	BridgeIntervalCoveragePct *float64 `json:"bridge_interval_coverage_pct"`
+	OrdinaryDays              int      `json:"ordinary_days"`
+	CalendarRollDays          int      `json:"calendar_roll_days"`
+	CrossContractAdjustedDays int      `json:"cross_contract_adjusted_days"`
+}
+
+type IndiaNiftyBridgeReviewResponse struct {
+	SchemaVersion   string                             `json:"schema_version"`
+	Symbol          string                             `json:"symbol"`
+	Name            string                             `json:"name"`
+	ModelVersion    string                             `json:"model_version"`
+	AsOf            time.Time                          `json:"as_of"`
+	MethodologyNote string                             `json:"methodology_note"`
+	Checkpoints     []IndiaNiftyBridgeReviewCheckpoint `json:"checkpoints"`
+	Timing          IndiaNiftyBridgeReviewTiming       `json:"timing"`
+	Summary         IndiaNiftyBridgeReviewSummary      `json:"summary"`
+	Rows            []IndiaNiftyBridgeReviewRow        `json:"rows"`
+}
+
+// HistoricalMinuteInput is an auditable, private-only replay input. MarketPrice
+// is the public minute last price; Input contains the dated PCF/CFETS/IB data
+// used to calculate the corresponding private basket values.
+type HistoricalMinuteInput struct {
+	Minute      time.Time `json:"minute"`
+	MarketPrice float64   `json:"market_price"`
+	Input       Input     `json:"input"`
+}
+
+func NormalizeMinuteHistoryDays(days int) (int, error) {
+	if days == 0 {
+		return 1, nil
+	}
+	switch days {
+	case 1, 3, 5:
+		return days, nil
+	default:
+		return 0, fmt.Errorf("private minute history days must be one of 1, 3, 5")
+	}
+}
+
+// IsMinuteHistoryTradingSession reports whether a point belongs to the same
+// China A-share continuous-auction windows used by the public minute chart.
+// The afternoon session is deliberately separate so the lunch break never
+// produces a private minute-history point.
+func IsMinuteHistoryTradingSession(value time.Time) bool {
+	return isMinuteHistoryTradingSessionFrom(value, 9*60+30)
+}
+
+// IsMinuteHistoryTradingSessionForSymbol applies the requested common-trading
+// window to 161226 without changing every existing private fund's 09:30 rule.
+// Night trading and the 11:30-13:00 lunch break are always excluded.
+func IsMinuteHistoryTradingSessionForSymbol(symbol string, value time.Time) bool {
+	start := 9*60 + 30
+	if strings.EqualFold(strings.TrimSpace(symbol), SZ161226Symbol) {
+		start = 9*60 + 15
+	}
+	return isMinuteHistoryTradingSessionFrom(value, start)
+}
+
+func isMinuteHistoryTradingSessionFrom(value time.Time, morningStart int) bool {
+	if value.IsZero() {
+		return false
+	}
+	local := value.In(shanghaiLocation)
+	if local.Weekday() == time.Saturday || local.Weekday() == time.Sunday {
+		return false
+	}
+	minute := local.Hour()*60 + local.Minute()
+	return (minute >= morningStart && minute <= 11*60+30) ||
+		(minute >= 13*60 && minute <= 15*60)
+}
+
+func MinuteHistoryPointFromSnapshot(snapshot Snapshot) (MinuteHistoryPoint, bool) {
+	if snapshot.Valuation == nil || !IsMinuteHistoryTradingSessionForSymbol(snapshot.Symbol, snapshot.AsOf) {
+		return MinuteHistoryPoint{}, false
+	}
+	marketPrice := 0.0
+	if snapshot.DomesticQuote != nil {
+		marketPrice = snapshot.DomesticQuote.Price
+		if !finitePositive(marketPrice) {
+			bid, hasBid := firstFiniteLevelPrice(snapshot.DomesticQuote.BidLevels)
+			ask, hasAsk := firstFiniteLevelPrice(snapshot.DomesticQuote.AskLevels)
+			switch {
+			case hasBid && hasAsk:
+				marketPrice = (bid + ask) / 2
+			case hasBid:
+				marketPrice = bid
+			case hasAsk:
+				marketPrice = ask
+			}
+		}
+	}
+	point := MinuteHistoryPoint{
+		Minute:                   snapshot.AsOf.In(shanghaiLocation),
+		MarketPrice:              marketPrice,
+		BasketBidNAV:             snapshot.Valuation.NAVBid,
+		BasketAskNAV:             snapshot.Valuation.NAVAsk,
+		BuyDirectionPremiumRate:  snapshot.Valuation.BuyDirectionPremiumRate,
+		SellDirectionPremiumRate: snapshot.Valuation.SellDirectionPremiumRate,
+	}
+	if snapshot.Input != nil {
+		point.PCFTradingDay = snapshot.Input.ValuationAnchorDate()
+	}
+	if silver := snapshot.SilverValuation; silver != nil {
+		settlementNAV, tradingNAV := silver.SettlementNAV, silver.TradingNAV
+		futuresPrice, intradayAverage := silver.FuturesPrice, silver.IntradayAverage
+		point.BasketBidNAV = settlementNAV
+		point.BasketAskNAV = tradingNAV
+		point.SettlementNAV = &settlementNAV
+		point.TradingNAV = &tradingNAV
+		point.ActiveContract = silver.Contract
+		point.FuturesPrice = &futuresPrice
+		point.IntradayAverage = &intradayAverage
+		if finitePositive(marketPrice) {
+			point.BuyDirectionPremiumRate = round(marketPrice/settlementNAV-1, 10)
+			point.SellDirectionPremiumRate = round(marketPrice/tradingNAV-1, 10)
+		}
+		return point, true
+	}
+	if finitePositive(snapshot.Valuation.XOPEquivalentShares) {
+		shares := snapshot.Valuation.XOPEquivalentShares
+		point.XOPEquivalentShares = &shares
+	}
+	if snapshot.IndiaValuations != nil && snapshot.IndiaValuations.NiftyBridge != nil {
+		bridge := snapshot.IndiaValuations.NiftyBridge.Valuation
+		if finitePositive(bridge.NAVBid) && finitePositive(bridge.NAVAsk) {
+			bid, ask := bridge.NAVBid, bridge.NAVAsk
+			point.NiftyBridgeBidNAV = &bid
+			point.NiftyBridgeAskNAV = &ask
+			if snapshot.Input != nil && snapshot.Input.India != nil && snapshot.Input.India.NiftyBridge != nil {
+				point.NiftyBridgeSelectionVersion = snapshot.Input.India.NiftyBridge.ContractSelectionVersion
+			}
+		}
+	}
+	return point, true
+}
+
+func firstFiniteLevelPrice(levels []domain.Level) (float64, bool) {
+	for _, level := range levels {
+		if finitePositive(level.Price) {
+			return level.Price, true
+		}
+	}
+	return 0, false
+}
+
+func Supported(symbol string) bool {
+	_, ok := Definition(symbol)
+	return ok
+}
+
+func finite(value float64) bool {
+	return !math.IsNaN(value) && !math.IsInf(value, 0)
+}
+
+func finitePositive(value float64) bool {
+	return finite(value) && value > 0
+}
+
+func normalizeDate(value string) string {
+	value = strings.TrimSpace(value)
+	for _, layout := range []string{"2006-01-02", "20060102"} {
+		if parsed, err := time.Parse(layout, value); err == nil {
+			return parsed.Format("2006-01-02")
+		}
+	}
+	return ""
+}
+
+func normalizeHour(value string) string {
+	value = strings.TrimSpace(value)
+	for _, layout := range []string{"15:04", "15:04:05"} {
+		if parsed, err := time.Parse(layout, value); err == nil {
+			return parsed.Format("15:04")
+		}
+	}
+	return ""
+}

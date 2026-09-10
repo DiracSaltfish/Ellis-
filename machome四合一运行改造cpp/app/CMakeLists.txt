@@ -467,6 +467,7 @@ qt_add_executable(machome-hub-ui MACOSX_BUNDLE
     src/ui/AlertController.h
     src/ui/MonitorSyncPage.cpp
     src/ui/MonitorSyncPage.h
+    src/ui/UiWidgets.cpp
     src/ui/ModulePages.cpp
     src/ui/UiText.cpp
     src/ui/UiText.h
@@ -903,10 +904,13 @@ if(BUILD_TESTING)
     )
 
     qt_add_executable(tst-module-pages
+        src/ui/MainWindow.cpp src/ui/MainWindow.h
+        src/ui/HubClient.cpp src/ui/HubClient.h
         tests/tst_module_pages.cpp
         src/ui/AlertController.cpp
         src/ui/AlertController.h
         src/ui/MonitorSyncPage.cpp src/ui/MonitorSyncPage.h
+        src/ui/UiWidgets.cpp
         src/ui/ModulePages.cpp
         src/ui/UiText.cpp
         src/ui/UiText.h
@@ -925,6 +929,7 @@ if(BUILD_TESTING)
         src/ui/HubClient.cpp src/ui/HubClient.h
         src/ui/AlertController.cpp src/ui/AlertController.h
         src/ui/MonitorSyncPage.cpp src/ui/MonitorSyncPage.h
+        src/ui/UiWidgets.cpp
         src/ui/ModulePages.cpp src/ui/ModulePages.h
         src/ui/ServiceOverview.cpp src/ui/ServiceOverview.h
         src/ui/UiText.cpp src/ui/UiText.h

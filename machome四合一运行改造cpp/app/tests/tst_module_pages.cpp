@@ -1,4 +1,13 @@
 #include "ui/ModulePages.h"
+#include "ui/UiWidgets.h"
+#include "ui/MonitorSyncPage.h"
+#include "ui/MainWindow.h"
+#include <QTableView>
+#include <QSortFilterProxyModel>
+#include <QComboBox>
+#include <QScrollArea>
+#include <QHeaderView>
+#include <QTabWidget>
 #include "ui/PremiumHistory.h"
 #include "ui/UiText.h"
 #include "ui/ServiceOverview.h"
@@ -21,6 +30,60 @@ class ModulePagesTests final : public QObject {
     Q_OBJECT
 
 private slots:
+    void viewSortingPreservesSourceRowsAndDetailIdentity() {
+        auto *source=hub::ui::jsonTable({"代码","价格"});source->setRowCount(2);
+        source->setItem(0,0,new QTableWidgetItem("AAA"));source->setItem(0,1,new QTableWidgetItem("10.5"));
+        source->setItem(1,0,new QTableWidgetItem("BBB"));source->setItem(1,1,new QTableWidgetItem("2.5"));
+        QScopedPointer<QWidget> panel(hub::ui::tablePanel(source,"sortRegression",QStringLiteral("查看盘口")));
+        auto *view=panel->findChild<QTableView *>("sortRegressionView");QVERIFY(view);
+        view->sortByColumn(1,Qt::AscendingOrder);QCOMPARE(view->model()->index(0,0).data().toString(),QString("BBB"));
+        QCOMPARE(source->item(0,0)->text(),QString("AAA"));
+        // Incoming source-row update must not land on the sorted first row.
+        source->item(0,1)->setText("1.5");QCOMPARE(view->model()->index(0,0).data().toString(),QString("AAA"));
+        panel->findChild<QLineEdit *>("sortRegressionSearch")->setText("BBB");QCOMPARE(view->model()->rowCount(),1);
+        QSignalSpy detail(source,&QTableWidget::cellDoubleClicked);
+        view->setCurrentIndex(view->model()->index(0,0));
+        for(auto *button:panel->findChildren<QPushButton *>())if(button->text()==QStringLiteral("查看盘口"))button->click();
+        QCOMPARE(detail.size(),1);QCOMPARE(detail.first().first().toInt(),1);
+    }
+    void syncStructuredViewUsesUnknownForMissingAcknowledgementAndDisablesWrites() {
+        hub::ModuleConfig config;config.id="monitor_sync";config.adapter="monitor_sync";config.engine="native";config.controlEnabled=false;config.ownership="shadow";
+        hub::MonitorSyncPage page(config);QSignalSpy commands(&page,&hub::ModulePage::commandRequested);
+        page.applySnapshot({{"payload",QJsonObject{{"control_enabled",false},{"ownership","shadow"},{"telemetry",QJsonObject{{"engine",QJsonObject{{"running",true},{"clients",QJsonArray{QJsonObject{{"name","test"},{"device_id","test-id"}}}}}}}}}}});
+        auto *devices=page.findChild<QTableWidget *>("syncDevices");QVERIFY(devices);QCOMPARE(devices->rowCount(),1);
+        QCOMPARE(devices->item(0,4)->text(),QStringLiteral("未报告"));QCOMPARE(devices->item(0,5)->text(),QStringLiteral("未报告"));
+        for(auto *button:page.findChildren<QPushButton *>())if(button->text()==QStringLiteral("备份全部文件")||button->text()==QStringLiteral("设置监听端口"))QVERIFY(!button->isEnabled());
+        QVERIFY(commands.isEmpty());
+    }
+    void fiveModuleOverviewDoesNotWaitForSyncModeOrUseWindMetrics() {
+        hub::AppConfig config;
+        for(const auto &id:QStringList{"upload","premium","webull","redemption","monitor_sync"}){hub::ModuleConfig m;m.id=id;m.adapter=id=="redemption"?"realtime":id;m.engine="native";m.enabled=true;if(id!="monitor_sync")m.allowedActions<<"set_operating_mode";config.modules<<m;}
+        hub::MainWindow window(config,{}, {},nullptr,hub::MainWindow::StartMode::OfflinePreview);
+        for(const auto &id:QStringList{"upload","premium","webull","redemption"}){
+            QJsonObject message{{"module_id",id},{"payload",QJsonObject{{"telemetry",QJsonObject{{"engine",QJsonObject{{"operating_mode","work"}}}}}}}};
+            QVERIFY(QMetaObject::invokeMethod(&window,"onSnapshot",Q_ARG(QJsonObject,message)));
+        }
+        QCOMPARE(window.findChild<QLabel *>("globalOperatingModeState")->text(),QStringLiteral("当前：工作模式"));
+        QJsonObject message{{"module_id","monitor_sync"},{"payload",QJsonObject{{"telemetry",QJsonObject{{"engine",QJsonObject{{"clients",QJsonArray{}},{"pending",0},{"free_bytes",1073741824.0}}}}}}}};
+        QVERIFY(QMetaObject::invokeMethod(&window,"onSnapshot",Q_ARG(QJsonObject,message)));
+        bool sync=false;for(auto *label:window.findChildren<QLabel *>("metric"))sync|=label->text().contains(QStringLiteral("在线设备 0 · 处理中 0"));QVERIFY(sync);
+        window.resize(1120,720);window.show();QTest::qWait(50);
+        auto *scroll=window.findChild<QScrollArea *>("overviewCardsScroll");QVERIFY(scroll);
+        QCOMPARE(scroll->widget()->findChildren<QFrame *>("moduleCard").size(),5);
+        for(auto *card:scroll->widget()->findChildren<QFrame *>("moduleCard")){QVERIFY(card->height()>=180);for(auto *button:card->findChildren<QPushButton *>())QVERIFY(card->rect().contains(QRect(button->mapTo(card,QPoint()),button->size())));}
+    }
+    void pcfProvidesStructuredComponentsWithoutCommands() {
+        hub::PcfDetailWindow page("159518");QSignalSpy commands(&page,&hub::PcfDetailWindow::qmtCommandRequested);
+        page.applyData({{"status","ready"},{"summary",QJsonObject{{"TradingDay","20260908"}}},{"components",QJsonArray{QJsonObject{{"SecurityID","000001"},{"Quantity",100}}}}});
+        auto *table=page.findChild<QTableWidget *>("pcfComponentsTable");QVERIFY(table);QCOMPARE(table->rowCount(),1);
+        bool quantity=false,security=false;for(int c=0;c<table->columnCount();++c){quantity|=table->item(0,c)->text()=="100";security|=table->item(0,c)->text()=="000001";}QVERIFY(quantity&&security);QVERIFY(commands.isEmpty());
+    }
+    void diagnosticRefreshRetainsUserExpansion() {
+        hub::ModuleConfig config;config.id="upload";config.adapter="upload";hub::UploadPage page(config);
+        auto snapshot=[](int n){return QJsonObject{{"payload",QJsonObject{{"telemetry",QJsonObject{{"engine",QJsonObject{{"nested",QJsonObject{{"value",n}}}}}}}}}};};
+        page.applySnapshot(snapshot(1));auto *tree=page.findChild<QTreeWidget *>();QVERIFY(tree);
+        tree->collapseAll();page.applySnapshot(snapshot(2));for(int i=0;i<tree->topLevelItemCount();++i)QVERIFY(!tree->topLevelItem(i)->isExpanded());
+    }
     void windShutdownIsAvailableOnOverviewAndRespectsControlGate() {
         hub::ModuleConfig config;config.id="redemption";config.adapter="realtime";
         config.controlEnabled=true;config.ownership="logic";

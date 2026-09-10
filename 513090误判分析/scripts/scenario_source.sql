@@ -1,0 +1,1 @@
+WITH counts(C) AS (VALUES(1),(10),(50),(100),(200),(500)), basket AS (SELECT sum(quantity*price_HKD) AS stock_HKD FROM minute_quotes WHERE time='16:08') SELECT C,C+17 AS R, printf('%.2f%%',1700.0/(C+17)) AS fraction, printf('%.2f',stock_HKD*(0.855441-0.86482)*17.0/(C+17)) AS pnl FROM counts CROSS JOIN basket ORDER BY C;

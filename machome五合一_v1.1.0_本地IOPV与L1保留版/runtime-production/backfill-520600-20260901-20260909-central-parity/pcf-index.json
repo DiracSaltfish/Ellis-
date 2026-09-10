@@ -1,0 +1,1479 @@
+{
+  "2026-09-01": {
+    "symbol": "520600.SH",
+    "name": "广发中证港股通汽车ETF",
+    "trade_date": "2026-09-01",
+    "pcf_sha256": "311b9468583a19f7339c1bda250ad9fb2369803ef1c12100437313cd56f76f9b",
+    "unit": 500000.0,
+    "cash": 4.43,
+    "components": [
+      {
+        "symbol": "00175.HK",
+        "quantity": 4937.0
+      },
+      {
+        "symbol": "00179.HK",
+        "quantity": 204.0
+      },
+      {
+        "symbol": "00425.HK",
+        "quantity": 358.0
+      },
+      {
+        "symbol": "00470.HK",
+        "quantity": 28.0
+      },
+      {
+        "symbol": "00501.HK",
+        "quantity": 13.0
+      },
+      {
+        "symbol": "00564.HK",
+        "quantity": 106.0
+      },
+      {
+        "symbol": "00666.HK",
+        "quantity": 286.0
+      },
+      {
+        "symbol": "00699.HK",
+        "quantity": 53.0
+      },
+      {
+        "symbol": "00800.HK",
+        "quantity": 346.0
+      },
+      {
+        "symbol": "00868.HK",
+        "quantity": 965.0
+      },
+      {
+        "symbol": "00881.HK",
+        "quantity": 620.0
+      },
+      {
+        "symbol": "01057.HK",
+        "quantity": 95.0
+      },
+      {
+        "symbol": "01114.HK",
+        "quantity": 2310.0
+      },
+      {
+        "symbol": "01211.HK",
+        "quantity": 1130.0
+      },
+      {
+        "symbol": "01304.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "01316.HK",
+        "quantity": 438.0
+      },
+      {
+        "symbol": "01772.HK",
+        "quantity": 194.0
+      },
+      {
+        "symbol": "01810.HK",
+        "quantity": 724.0
+      },
+      {
+        "symbol": "02015.HK",
+        "quantity": 1137.0
+      },
+      {
+        "symbol": "02026.HK",
+        "quantity": 112.0
+      },
+      {
+        "symbol": "02050.HK",
+        "quantity": 125.0
+      },
+      {
+        "symbol": "02238.HK",
+        "quantity": 2146.0
+      },
+      {
+        "symbol": "02333.HK",
+        "quantity": 1761.0
+      },
+      {
+        "symbol": "02338.HK",
+        "quantity": 1482.0
+      },
+      {
+        "symbol": "02382.HK",
+        "quantity": 257.0
+      },
+      {
+        "symbol": "02402.HK",
+        "quantity": 20.0
+      },
+      {
+        "symbol": "02431.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "02465.HK",
+        "quantity": 59.0
+      },
+      {
+        "symbol": "02473.HK",
+        "quantity": 568.0
+      },
+      {
+        "symbol": "02498.HK",
+        "quantity": 165.0
+      },
+      {
+        "symbol": "02525.HK",
+        "quantity": 436.0
+      },
+      {
+        "symbol": "02533.HK",
+        "quantity": 311.0
+      },
+      {
+        "symbol": "02570.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "02582.HK",
+        "quantity": 5.0
+      },
+      {
+        "symbol": "02650.HK",
+        "quantity": 14.0
+      },
+      {
+        "symbol": "02665.HK",
+        "quantity": 74.0
+      },
+      {
+        "symbol": "02889.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "03606.HK",
+        "quantity": 265.0
+      },
+      {
+        "symbol": "03677.HK",
+        "quantity": 26.0
+      },
+      {
+        "symbol": "03750.HK",
+        "quantity": 29.0
+      },
+      {
+        "symbol": "03808.HK",
+        "quantity": 632.0
+      },
+      {
+        "symbol": "03881.HK",
+        "quantity": 15.0
+      },
+      {
+        "symbol": "03931.HK",
+        "quantity": 233.0
+      },
+      {
+        "symbol": "09660.HK",
+        "quantity": 4275.0
+      },
+      {
+        "symbol": "09690.HK",
+        "quantity": 247.0
+      },
+      {
+        "symbol": "09696.HK",
+        "quantity": 103.0
+      },
+      {
+        "symbol": "09863.HK",
+        "quantity": 518.0
+      },
+      {
+        "symbol": "09868.HK",
+        "quantity": 1168.0
+      },
+      {
+        "symbol": "09927.HK",
+        "quantity": 46.0
+      },
+      {
+        "symbol": "09973.HK",
+        "quantity": 126.0
+      }
+    ],
+    "source": "https://www.gffunds.com.cn/proxy/pcflist/520600?date=20260901"
+  },
+  "2026-09-02": {
+    "symbol": "520600.SH",
+    "name": "广发中证港股通汽车ETF",
+    "trade_date": "2026-09-02",
+    "pcf_sha256": "78f4748bb6c4ace00ee1c7232b6f685d3145392b81dcfe5e0cbf3ad37d1109a7",
+    "unit": 500000.0,
+    "cash": -14.28,
+    "components": [
+      {
+        "symbol": "00175.HK",
+        "quantity": 4936.0
+      },
+      {
+        "symbol": "00179.HK",
+        "quantity": 204.0
+      },
+      {
+        "symbol": "00425.HK",
+        "quantity": 358.0
+      },
+      {
+        "symbol": "00470.HK",
+        "quantity": 28.0
+      },
+      {
+        "symbol": "00501.HK",
+        "quantity": 13.0
+      },
+      {
+        "symbol": "00564.HK",
+        "quantity": 106.0
+      },
+      {
+        "symbol": "00666.HK",
+        "quantity": 285.0
+      },
+      {
+        "symbol": "00699.HK",
+        "quantity": 53.0
+      },
+      {
+        "symbol": "00800.HK",
+        "quantity": 346.0
+      },
+      {
+        "symbol": "00868.HK",
+        "quantity": 965.0
+      },
+      {
+        "symbol": "00881.HK",
+        "quantity": 619.0
+      },
+      {
+        "symbol": "01057.HK",
+        "quantity": 94.0
+      },
+      {
+        "symbol": "01114.HK",
+        "quantity": 2308.0
+      },
+      {
+        "symbol": "01211.HK",
+        "quantity": 1130.0
+      },
+      {
+        "symbol": "01304.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "01316.HK",
+        "quantity": 438.0
+      },
+      {
+        "symbol": "01772.HK",
+        "quantity": 194.0
+      },
+      {
+        "symbol": "01810.HK",
+        "quantity": 724.0
+      },
+      {
+        "symbol": "02015.HK",
+        "quantity": 1137.0
+      },
+      {
+        "symbol": "02026.HK",
+        "quantity": 112.0
+      },
+      {
+        "symbol": "02050.HK",
+        "quantity": 125.0
+      },
+      {
+        "symbol": "02238.HK",
+        "quantity": 2145.0
+      },
+      {
+        "symbol": "02333.HK",
+        "quantity": 1761.0
+      },
+      {
+        "symbol": "02338.HK",
+        "quantity": 1482.0
+      },
+      {
+        "symbol": "02382.HK",
+        "quantity": 257.0
+      },
+      {
+        "symbol": "02402.HK",
+        "quantity": 20.0
+      },
+      {
+        "symbol": "02431.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "02465.HK",
+        "quantity": 59.0
+      },
+      {
+        "symbol": "02473.HK",
+        "quantity": 566.0
+      },
+      {
+        "symbol": "02498.HK",
+        "quantity": 165.0
+      },
+      {
+        "symbol": "02525.HK",
+        "quantity": 436.0
+      },
+      {
+        "symbol": "02533.HK",
+        "quantity": 311.0
+      },
+      {
+        "symbol": "02570.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "02582.HK",
+        "quantity": 5.0
+      },
+      {
+        "symbol": "02650.HK",
+        "quantity": 14.0
+      },
+      {
+        "symbol": "02665.HK",
+        "quantity": 74.0
+      },
+      {
+        "symbol": "02889.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "03606.HK",
+        "quantity": 265.0
+      },
+      {
+        "symbol": "03677.HK",
+        "quantity": 26.0
+      },
+      {
+        "symbol": "03750.HK",
+        "quantity": 29.0
+      },
+      {
+        "symbol": "03808.HK",
+        "quantity": 632.0
+      },
+      {
+        "symbol": "03881.HK",
+        "quantity": 15.0
+      },
+      {
+        "symbol": "03931.HK",
+        "quantity": 233.0
+      },
+      {
+        "symbol": "09660.HK",
+        "quantity": 4273.0
+      },
+      {
+        "symbol": "09690.HK",
+        "quantity": 247.0
+      },
+      {
+        "symbol": "09696.HK",
+        "quantity": 103.0
+      },
+      {
+        "symbol": "09863.HK",
+        "quantity": 518.0
+      },
+      {
+        "symbol": "09868.HK",
+        "quantity": 1168.0
+      },
+      {
+        "symbol": "09927.HK",
+        "quantity": 46.0
+      },
+      {
+        "symbol": "09973.HK",
+        "quantity": 126.0
+      }
+    ],
+    "source": "https://www.gffunds.com.cn/proxy/pcflist/520600?date=20260902"
+  },
+  "2026-09-03": {
+    "symbol": "520600.SH",
+    "name": "广发中证港股通汽车ETF",
+    "trade_date": "2026-09-03",
+    "pcf_sha256": "5945f4a00187053a5bed1a986be5e692785e6d4917ccde70c7c35e0dfa2f86e2",
+    "unit": 500000.0,
+    "cash": -70.04,
+    "components": [
+      {
+        "symbol": "00175.HK",
+        "quantity": 4938.0
+      },
+      {
+        "symbol": "00179.HK",
+        "quantity": 204.0
+      },
+      {
+        "symbol": "00425.HK",
+        "quantity": 358.0
+      },
+      {
+        "symbol": "00470.HK",
+        "quantity": 28.0
+      },
+      {
+        "symbol": "00501.HK",
+        "quantity": 13.0
+      },
+      {
+        "symbol": "00564.HK",
+        "quantity": 106.0
+      },
+      {
+        "symbol": "00666.HK",
+        "quantity": 286.0
+      },
+      {
+        "symbol": "00699.HK",
+        "quantity": 54.0
+      },
+      {
+        "symbol": "00800.HK",
+        "quantity": 346.0
+      },
+      {
+        "symbol": "00868.HK",
+        "quantity": 966.0
+      },
+      {
+        "symbol": "00881.HK",
+        "quantity": 619.0
+      },
+      {
+        "symbol": "01057.HK",
+        "quantity": 95.0
+      },
+      {
+        "symbol": "01114.HK",
+        "quantity": 2310.0
+      },
+      {
+        "symbol": "01211.HK",
+        "quantity": 1131.0
+      },
+      {
+        "symbol": "01304.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "01316.HK",
+        "quantity": 438.0
+      },
+      {
+        "symbol": "01772.HK",
+        "quantity": 194.0
+      },
+      {
+        "symbol": "01810.HK",
+        "quantity": 724.0
+      },
+      {
+        "symbol": "02015.HK",
+        "quantity": 1138.0
+      },
+      {
+        "symbol": "02026.HK",
+        "quantity": 112.0
+      },
+      {
+        "symbol": "02050.HK",
+        "quantity": 125.0
+      },
+      {
+        "symbol": "02238.HK",
+        "quantity": 2148.0
+      },
+      {
+        "symbol": "02333.HK",
+        "quantity": 1762.0
+      },
+      {
+        "symbol": "02338.HK",
+        "quantity": 1483.0
+      },
+      {
+        "symbol": "02382.HK",
+        "quantity": 257.0
+      },
+      {
+        "symbol": "02402.HK",
+        "quantity": 20.0
+      },
+      {
+        "symbol": "02431.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "02465.HK",
+        "quantity": 59.0
+      },
+      {
+        "symbol": "02473.HK",
+        "quantity": 564.0
+      },
+      {
+        "symbol": "02498.HK",
+        "quantity": 165.0
+      },
+      {
+        "symbol": "02525.HK",
+        "quantity": 436.0
+      },
+      {
+        "symbol": "02533.HK",
+        "quantity": 311.0
+      },
+      {
+        "symbol": "02570.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "02582.HK",
+        "quantity": 5.0
+      },
+      {
+        "symbol": "02650.HK",
+        "quantity": 14.0
+      },
+      {
+        "symbol": "02665.HK",
+        "quantity": 75.0
+      },
+      {
+        "symbol": "02889.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "03606.HK",
+        "quantity": 265.0
+      },
+      {
+        "symbol": "03677.HK",
+        "quantity": 26.0
+      },
+      {
+        "symbol": "03750.HK",
+        "quantity": 29.0
+      },
+      {
+        "symbol": "03808.HK",
+        "quantity": 632.0
+      },
+      {
+        "symbol": "03881.HK",
+        "quantity": 15.0
+      },
+      {
+        "symbol": "03931.HK",
+        "quantity": 233.0
+      },
+      {
+        "symbol": "09660.HK",
+        "quantity": 4276.0
+      },
+      {
+        "symbol": "09690.HK",
+        "quantity": 247.0
+      },
+      {
+        "symbol": "09696.HK",
+        "quantity": 103.0
+      },
+      {
+        "symbol": "09863.HK",
+        "quantity": 518.0
+      },
+      {
+        "symbol": "09868.HK",
+        "quantity": 1169.0
+      },
+      {
+        "symbol": "09927.HK",
+        "quantity": 46.0
+      },
+      {
+        "symbol": "09973.HK",
+        "quantity": 126.0
+      }
+    ],
+    "source": "https://www.gffunds.com.cn/proxy/pcflist/520600?date=20260903"
+  },
+  "2026-09-04": {
+    "symbol": "520600.SH",
+    "name": "广发中证港股通汽车ETF",
+    "trade_date": "2026-09-04",
+    "pcf_sha256": "6da2482249863544325e6a83ca66b59734884c4cc0fff324f612f5e5d9289738",
+    "unit": 500000.0,
+    "cash": 48.31,
+    "components": [
+      {
+        "symbol": "00175.HK",
+        "quantity": 4948.0
+      },
+      {
+        "symbol": "00179.HK",
+        "quantity": 204.0
+      },
+      {
+        "symbol": "00425.HK",
+        "quantity": 359.0
+      },
+      {
+        "symbol": "00470.HK",
+        "quantity": 28.0
+      },
+      {
+        "symbol": "00501.HK",
+        "quantity": 13.0
+      },
+      {
+        "symbol": "00564.HK",
+        "quantity": 106.0
+      },
+      {
+        "symbol": "00666.HK",
+        "quantity": 286.0
+      },
+      {
+        "symbol": "00699.HK",
+        "quantity": 54.0
+      },
+      {
+        "symbol": "00800.HK",
+        "quantity": 347.0
+      },
+      {
+        "symbol": "00868.HK",
+        "quantity": 967.0
+      },
+      {
+        "symbol": "00881.HK",
+        "quantity": 622.0
+      },
+      {
+        "symbol": "01057.HK",
+        "quantity": 95.0
+      },
+      {
+        "symbol": "01114.HK",
+        "quantity": 2315.0
+      },
+      {
+        "symbol": "01211.HK",
+        "quantity": 1133.0
+      },
+      {
+        "symbol": "01304.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "01316.HK",
+        "quantity": 439.0
+      },
+      {
+        "symbol": "01772.HK",
+        "quantity": 194.0
+      },
+      {
+        "symbol": "01810.HK",
+        "quantity": 725.0
+      },
+      {
+        "symbol": "02015.HK",
+        "quantity": 1140.0
+      },
+      {
+        "symbol": "02026.HK",
+        "quantity": 112.0
+      },
+      {
+        "symbol": "02050.HK",
+        "quantity": 125.0
+      },
+      {
+        "symbol": "02238.HK",
+        "quantity": 2150.0
+      },
+      {
+        "symbol": "02333.HK",
+        "quantity": 1765.0
+      },
+      {
+        "symbol": "02338.HK",
+        "quantity": 1486.0
+      },
+      {
+        "symbol": "02382.HK",
+        "quantity": 258.0
+      },
+      {
+        "symbol": "02402.HK",
+        "quantity": 20.0
+      },
+      {
+        "symbol": "02431.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "02465.HK",
+        "quantity": 59.0
+      },
+      {
+        "symbol": "02473.HK",
+        "quantity": 562.0
+      },
+      {
+        "symbol": "02498.HK",
+        "quantity": 165.0
+      },
+      {
+        "symbol": "02525.HK",
+        "quantity": 437.0
+      },
+      {
+        "symbol": "02533.HK",
+        "quantity": 312.0
+      },
+      {
+        "symbol": "02570.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "02582.HK",
+        "quantity": 5.0
+      },
+      {
+        "symbol": "02650.HK",
+        "quantity": 14.0
+      },
+      {
+        "symbol": "02665.HK",
+        "quantity": 75.0
+      },
+      {
+        "symbol": "02889.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "03606.HK",
+        "quantity": 265.0
+      },
+      {
+        "symbol": "03677.HK",
+        "quantity": 26.0
+      },
+      {
+        "symbol": "03750.HK",
+        "quantity": 29.0
+      },
+      {
+        "symbol": "03808.HK",
+        "quantity": 633.0
+      },
+      {
+        "symbol": "03881.HK",
+        "quantity": 15.0
+      },
+      {
+        "symbol": "03931.HK",
+        "quantity": 233.0
+      },
+      {
+        "symbol": "09660.HK",
+        "quantity": 4284.0
+      },
+      {
+        "symbol": "09690.HK",
+        "quantity": 248.0
+      },
+      {
+        "symbol": "09696.HK",
+        "quantity": 103.0
+      },
+      {
+        "symbol": "09863.HK",
+        "quantity": 519.0
+      },
+      {
+        "symbol": "09868.HK",
+        "quantity": 1171.0
+      },
+      {
+        "symbol": "09927.HK",
+        "quantity": 46.0
+      },
+      {
+        "symbol": "09973.HK",
+        "quantity": 126.0
+      }
+    ],
+    "source": "https://www.gffunds.com.cn/proxy/pcflist/520600?date=20260904"
+  },
+  "2026-09-07": {
+    "symbol": "520600.SH",
+    "name": "广发中证港股通汽车ETF",
+    "trade_date": "2026-09-07",
+    "pcf_sha256": "35887e8291007d43e828df9ca6e58158e13123f0a6315273eee2466a8cc91237",
+    "unit": 500000.0,
+    "cash": 20.18,
+    "components": [
+      {
+        "symbol": "00175.HK",
+        "quantity": 4939.0
+      },
+      {
+        "symbol": "00179.HK",
+        "quantity": 204.0
+      },
+      {
+        "symbol": "00425.HK",
+        "quantity": 358.0
+      },
+      {
+        "symbol": "00470.HK",
+        "quantity": 28.0
+      },
+      {
+        "symbol": "00501.HK",
+        "quantity": 13.0
+      },
+      {
+        "symbol": "00564.HK",
+        "quantity": 106.0
+      },
+      {
+        "symbol": "00666.HK",
+        "quantity": 286.0
+      },
+      {
+        "symbol": "00699.HK",
+        "quantity": 54.0
+      },
+      {
+        "symbol": "00800.HK",
+        "quantity": 346.0
+      },
+      {
+        "symbol": "00868.HK",
+        "quantity": 966.0
+      },
+      {
+        "symbol": "00881.HK",
+        "quantity": 621.0
+      },
+      {
+        "symbol": "01057.HK",
+        "quantity": 95.0
+      },
+      {
+        "symbol": "01114.HK",
+        "quantity": 2309.0
+      },
+      {
+        "symbol": "01211.HK",
+        "quantity": 1131.0
+      },
+      {
+        "symbol": "01304.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "01316.HK",
+        "quantity": 438.0
+      },
+      {
+        "symbol": "01772.HK",
+        "quantity": 194.0
+      },
+      {
+        "symbol": "01810.HK",
+        "quantity": 724.0
+      },
+      {
+        "symbol": "02015.HK",
+        "quantity": 1138.0
+      },
+      {
+        "symbol": "02026.HK",
+        "quantity": 112.0
+      },
+      {
+        "symbol": "02050.HK",
+        "quantity": 125.0
+      },
+      {
+        "symbol": "02238.HK",
+        "quantity": 2148.0
+      },
+      {
+        "symbol": "02333.HK",
+        "quantity": 1762.0
+      },
+      {
+        "symbol": "02338.HK",
+        "quantity": 1483.0
+      },
+      {
+        "symbol": "02382.HK",
+        "quantity": 257.0
+      },
+      {
+        "symbol": "02402.HK",
+        "quantity": 20.0
+      },
+      {
+        "symbol": "02431.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "02465.HK",
+        "quantity": 59.0
+      },
+      {
+        "symbol": "02473.HK",
+        "quantity": 563.0
+      },
+      {
+        "symbol": "02498.HK",
+        "quantity": 165.0
+      },
+      {
+        "symbol": "02525.HK",
+        "quantity": 436.0
+      },
+      {
+        "symbol": "02533.HK",
+        "quantity": 311.0
+      },
+      {
+        "symbol": "02570.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "02582.HK",
+        "quantity": 5.0
+      },
+      {
+        "symbol": "02650.HK",
+        "quantity": 14.0
+      },
+      {
+        "symbol": "02665.HK",
+        "quantity": 74.0
+      },
+      {
+        "symbol": "02889.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "03606.HK",
+        "quantity": 265.0
+      },
+      {
+        "symbol": "03677.HK",
+        "quantity": 26.0
+      },
+      {
+        "symbol": "03750.HK",
+        "quantity": 29.0
+      },
+      {
+        "symbol": "03808.HK",
+        "quantity": 632.0
+      },
+      {
+        "symbol": "03881.HK",
+        "quantity": 15.0
+      },
+      {
+        "symbol": "03931.HK",
+        "quantity": 233.0
+      },
+      {
+        "symbol": "09660.HK",
+        "quantity": 4277.0
+      },
+      {
+        "symbol": "09690.HK",
+        "quantity": 248.0
+      },
+      {
+        "symbol": "09696.HK",
+        "quantity": 103.0
+      },
+      {
+        "symbol": "09863.HK",
+        "quantity": 518.0
+      },
+      {
+        "symbol": "09868.HK",
+        "quantity": 1169.0
+      },
+      {
+        "symbol": "09927.HK",
+        "quantity": 46.0
+      },
+      {
+        "symbol": "09973.HK",
+        "quantity": 126.0
+      }
+    ],
+    "source": "https://www.gffunds.com.cn/proxy/pcflist/520600?date=20260907"
+  },
+  "2026-09-08": {
+    "symbol": "520600.SH",
+    "name": "广发中证港股通汽车ETF",
+    "trade_date": "2026-09-08",
+    "pcf_sha256": "da3677e84d50692c8177b5b99f8e63973d2c7b200a16097bfcfd6117c2039207",
+    "unit": 500000.0,
+    "cash": 60.71,
+    "components": [
+      {
+        "symbol": "00175.HK",
+        "quantity": 4944.0
+      },
+      {
+        "symbol": "00179.HK",
+        "quantity": 204.0
+      },
+      {
+        "symbol": "00425.HK",
+        "quantity": 358.0
+      },
+      {
+        "symbol": "00470.HK",
+        "quantity": 28.0
+      },
+      {
+        "symbol": "00501.HK",
+        "quantity": 13.0
+      },
+      {
+        "symbol": "00564.HK",
+        "quantity": 106.0
+      },
+      {
+        "symbol": "00666.HK",
+        "quantity": 286.0
+      },
+      {
+        "symbol": "00699.HK",
+        "quantity": 53.0
+      },
+      {
+        "symbol": "00800.HK",
+        "quantity": 346.0
+      },
+      {
+        "symbol": "00868.HK",
+        "quantity": 967.0
+      },
+      {
+        "symbol": "00881.HK",
+        "quantity": 620.0
+      },
+      {
+        "symbol": "01057.HK",
+        "quantity": 95.0
+      },
+      {
+        "symbol": "01114.HK",
+        "quantity": 2311.0
+      },
+      {
+        "symbol": "01211.HK",
+        "quantity": 1132.0
+      },
+      {
+        "symbol": "01304.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "01316.HK",
+        "quantity": 438.0
+      },
+      {
+        "symbol": "01772.HK",
+        "quantity": 194.0
+      },
+      {
+        "symbol": "01810.HK",
+        "quantity": 725.0
+      },
+      {
+        "symbol": "02015.HK",
+        "quantity": 1139.0
+      },
+      {
+        "symbol": "02026.HK",
+        "quantity": 112.0
+      },
+      {
+        "symbol": "02050.HK",
+        "quantity": 125.0
+      },
+      {
+        "symbol": "02238.HK",
+        "quantity": 2151.0
+      },
+      {
+        "symbol": "02333.HK",
+        "quantity": 1763.0
+      },
+      {
+        "symbol": "02338.HK",
+        "quantity": 1484.0
+      },
+      {
+        "symbol": "02382.HK",
+        "quantity": 257.0
+      },
+      {
+        "symbol": "02402.HK",
+        "quantity": 20.0
+      },
+      {
+        "symbol": "02431.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "02465.HK",
+        "quantity": 59.0
+      },
+      {
+        "symbol": "02473.HK",
+        "quantity": 566.0
+      },
+      {
+        "symbol": "02498.HK",
+        "quantity": 165.0
+      },
+      {
+        "symbol": "02525.HK",
+        "quantity": 437.0
+      },
+      {
+        "symbol": "02533.HK",
+        "quantity": 311.0
+      },
+      {
+        "symbol": "02570.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "02582.HK",
+        "quantity": 6.0
+      },
+      {
+        "symbol": "02650.HK",
+        "quantity": 14.0
+      },
+      {
+        "symbol": "02665.HK",
+        "quantity": 75.0
+      },
+      {
+        "symbol": "02889.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "03606.HK",
+        "quantity": 265.0
+      },
+      {
+        "symbol": "03677.HK",
+        "quantity": 26.0
+      },
+      {
+        "symbol": "03750.HK",
+        "quantity": 29.0
+      },
+      {
+        "symbol": "03808.HK",
+        "quantity": 633.0
+      },
+      {
+        "symbol": "03881.HK",
+        "quantity": 15.0
+      },
+      {
+        "symbol": "03931.HK",
+        "quantity": 233.0
+      },
+      {
+        "symbol": "09660.HK",
+        "quantity": 4280.0
+      },
+      {
+        "symbol": "09690.HK",
+        "quantity": 248.0
+      },
+      {
+        "symbol": "09696.HK",
+        "quantity": 103.0
+      },
+      {
+        "symbol": "09863.HK",
+        "quantity": 519.0
+      },
+      {
+        "symbol": "09868.HK",
+        "quantity": 1170.0
+      },
+      {
+        "symbol": "09927.HK",
+        "quantity": 46.0
+      },
+      {
+        "symbol": "09973.HK",
+        "quantity": 126.0
+      }
+    ],
+    "source": "https://www.gffunds.com.cn/proxy/pcflist/520600?date=20260908"
+  },
+  "2026-09-09": {
+    "symbol": "520600.SH",
+    "name": "广发中证港股通汽车ETF",
+    "trade_date": "2026-09-09",
+    "pcf_sha256": "0fb91502b262707183cee201b49e2d52c5e53ae130e314cc654d286a3ee3ef7f",
+    "unit": 500000.0,
+    "cash": 74.12,
+    "components": [
+      {
+        "symbol": "00175.HK",
+        "quantity": 4946.0
+      },
+      {
+        "symbol": "00179.HK",
+        "quantity": 204.0
+      },
+      {
+        "symbol": "00425.HK",
+        "quantity": 359.0
+      },
+      {
+        "symbol": "00470.HK",
+        "quantity": 28.0
+      },
+      {
+        "symbol": "00501.HK",
+        "quantity": 13.0
+      },
+      {
+        "symbol": "00564.HK",
+        "quantity": 107.0
+      },
+      {
+        "symbol": "00666.HK",
+        "quantity": 286.0
+      },
+      {
+        "symbol": "00699.HK",
+        "quantity": 53.0
+      },
+      {
+        "symbol": "00800.HK",
+        "quantity": 346.0
+      },
+      {
+        "symbol": "00868.HK",
+        "quantity": 967.0
+      },
+      {
+        "symbol": "00881.HK",
+        "quantity": 621.0
+      },
+      {
+        "symbol": "01057.HK",
+        "quantity": 95.0
+      },
+      {
+        "symbol": "01114.HK",
+        "quantity": 2315.0
+      },
+      {
+        "symbol": "01211.HK",
+        "quantity": 1133.0
+      },
+      {
+        "symbol": "01304.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "01316.HK",
+        "quantity": 439.0
+      },
+      {
+        "symbol": "01772.HK",
+        "quantity": 194.0
+      },
+      {
+        "symbol": "01810.HK",
+        "quantity": 725.0
+      },
+      {
+        "symbol": "02015.HK",
+        "quantity": 1139.0
+      },
+      {
+        "symbol": "02026.HK",
+        "quantity": 112.0
+      },
+      {
+        "symbol": "02050.HK",
+        "quantity": 125.0
+      },
+      {
+        "symbol": "02238.HK",
+        "quantity": 2151.0
+      },
+      {
+        "symbol": "02333.HK",
+        "quantity": 1765.0
+      },
+      {
+        "symbol": "02338.HK",
+        "quantity": 1485.0
+      },
+      {
+        "symbol": "02382.HK",
+        "quantity": 257.0
+      },
+      {
+        "symbol": "02402.HK",
+        "quantity": 20.0
+      },
+      {
+        "symbol": "02431.HK",
+        "quantity": 7.0
+      },
+      {
+        "symbol": "02465.HK",
+        "quantity": 59.0
+      },
+      {
+        "symbol": "02473.HK",
+        "quantity": 568.0
+      },
+      {
+        "symbol": "02498.HK",
+        "quantity": 165.0
+      },
+      {
+        "symbol": "02525.HK",
+        "quantity": 437.0
+      },
+      {
+        "symbol": "02533.HK",
+        "quantity": 312.0
+      },
+      {
+        "symbol": "02570.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "02582.HK",
+        "quantity": 6.0
+      },
+      {
+        "symbol": "02650.HK",
+        "quantity": 13.0
+      },
+      {
+        "symbol": "02665.HK",
+        "quantity": 74.0
+      },
+      {
+        "symbol": "02889.HK",
+        "quantity": 3.0
+      },
+      {
+        "symbol": "03606.HK",
+        "quantity": 265.0
+      },
+      {
+        "symbol": "03677.HK",
+        "quantity": 26.0
+      },
+      {
+        "symbol": "03750.HK",
+        "quantity": 29.0
+      },
+      {
+        "symbol": "03808.HK",
+        "quantity": 633.0
+      },
+      {
+        "symbol": "03881.HK",
+        "quantity": 15.0
+      },
+      {
+        "symbol": "03931.HK",
+        "quantity": 233.0
+      },
+      {
+        "symbol": "09660.HK",
+        "quantity": 4283.0
+      },
+      {
+        "symbol": "09690.HK",
+        "quantity": 248.0
+      },
+      {
+        "symbol": "09696.HK",
+        "quantity": 103.0
+      },
+      {
+        "symbol": "09863.HK",
+        "quantity": 519.0
+      },
+      {
+        "symbol": "09868.HK",
+        "quantity": 1171.0
+      },
+      {
+        "symbol": "09927.HK",
+        "quantity": 46.0
+      },
+      {
+        "symbol": "09973.HK",
+        "quantity": 126.0
+      }
+    ],
+    "source": "https://www.gffunds.com.cn/proxy/pcflist/520600?date=20260909"
+  }
+}

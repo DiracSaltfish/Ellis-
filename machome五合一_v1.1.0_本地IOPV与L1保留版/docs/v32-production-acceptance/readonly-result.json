@@ -1,0 +1,223 @@
+{
+  "v3_summary": {
+    "types": [
+      "hello",
+      "sync_begin",
+      "summary",
+      "sync_complete"
+    ],
+    "snapshots": 197
+  },
+  "v3_detail": {
+    "s": "159101.SZ",
+    "iopv_e6": 714033,
+    "exchange_iopv_e6": 706700,
+    "valuation_basis": "midpoint",
+    "sell_premium_ppm": -9850,
+    "calculated_at": "2026-09-09T14:50:08.778041792+08:00"
+  },
+  "settings": {
+    "premium_pct": 1.5,
+    "pull_pct": 0.6,
+    "radar_pct": 0.6,
+    "revision": 1
+  },
+  "health": {
+    "run_id": "1788935831885188000",
+    "pcf_ready": 120,
+    "candidates": 120,
+    "frames": 85472,
+    "quote_count": 744,
+    "subscriptions": 750,
+    "written_rows": 1560,
+    "last_write_at": "2026-09-09T14:50:00.778296042+08:00",
+    "active_date": "2026-09-09",
+    "pcf_next_attempt": "2026-09-10T08:40:00+08:00",
+    "errors": {}
+  },
+  "history_rows": 261,
+  "last_history_row": {
+    "suspended": null,
+    "suspension_pending": null,
+    "fx_error": "",
+    "fx_generated_at": "2026-09-09T14:49:58.841971357+08:00",
+    "hkd_assets": 1060612.845,
+    "cny_assets": 9331.24,
+    "book_premiums": [
+      {
+        "side": "bid",
+        "level": 1,
+        "price": 1.844,
+        "volume": 15357100,
+        "midpoint_premium_pct": -0.4203135862450136,
+        "settlement_buy_premium_pct": 0.5554371511154121,
+        "settlement_sell_premium_pct": 0.5575221032642741
+      },
+      {
+        "side": "ask",
+        "level": 1,
+        "price": 1.845,
+        "volume": 7148100,
+        "midpoint_premium_pct": -0.36631158710523914,
+        "settlement_buy_premium_pct": 0.6099682992450672,
+        "settlement_sell_premium_pct": 0.6120543820621327
+      },
+      {
+        "side": "bid",
+        "level": 2,
+        "price": 1.843,
+        "volume": 6544600,
+        "midpoint_premium_pct": -0.4743155853847991,
+        "settlement_buy_premium_pct": 0.5009060029857348,
+        "settlement_sell_premium_pct": 0.5029898244663933
+      },
+      {
+        "side": "ask",
+        "level": 2,
+        "price": 1.846,
+        "volume": 5165300,
+        "midpoint_premium_pct": -0.3123095879654536,
+        "settlement_buy_premium_pct": 0.6644994473747445,
+        "settlement_sell_premium_pct": 0.6665866608599913
+      },
+      {
+        "side": "bid",
+        "level": 3,
+        "price": 1.842,
+        "volume": 4305600,
+        "midpoint_premium_pct": -0.5283175845245736,
+        "settlement_buy_premium_pct": 0.44637485485605755,
+        "settlement_sell_premium_pct": 0.4484575456685347
+      },
+      {
+        "side": "ask",
+        "level": 3,
+        "price": 1.847,
+        "volume": 4071800,
+        "midpoint_premium_pct": -0.25830758882567917,
+        "settlement_buy_premium_pct": 0.7190305955044218,
+        "settlement_sell_premium_pct": 0.7211189396578499
+      },
+      {
+        "side": "bid",
+        "level": 4,
+        "price": 1.841,
+        "volume": 3259700,
+        "midpoint_premium_pct": -0.5823195836643591,
+        "settlement_buy_premium_pct": 0.39184370672638025,
+        "settlement_sell_premium_pct": 0.3939252668706539
+      },
+      {
+        "side": "ask",
+        "level": 4,
+        "price": 1.848,
+        "volume": 5423500,
+        "midpoint_premium_pct": -0.20430558968589363,
+        "settlement_buy_premium_pct": 0.7735617436340991,
+        "settlement_sell_premium_pct": 0.7756512184557307
+      },
+      {
+        "side": "bid",
+        "level": 5,
+        "price": 1.84,
+        "volume": 3803300,
+        "midpoint_premium_pct": -0.6363215828041335,
+        "settlement_buy_premium_pct": 0.33731255859670295,
+        "settlement_sell_premium_pct": 0.3393929880727953
+      },
+      {
+        "side": "ask",
+        "level": 5,
+        "price": 1.849,
+        "volume": 4852900,
+        "midpoint_premium_pct": -0.1503035905461192,
+        "settlement_buy_premium_pct": 0.8280928917637542,
+        "settlement_sell_premium_pct": 0.8301834972535893
+      }
+    ],
+    "symbol": "513090.SH",
+    "name": "香港证券ETF易方达",
+    "trade_date": "2026-09-09",
+    "calculated_at": "2026-09-09T14:49:59.7783525+08:00",
+    "minute": "14:49",
+    "pcf_sha256": "cb52738d22c12633784377d7d946510148757588f8bf339c1de94e3ad3cad2da",
+    "channel": "shanghai",
+    "midpoint_iopv": 1.8517832967841998,
+    "settlement_buy_iopv": 1.833814314017475,
+    "settlement_sell_iopv": 1.8337762918485248,
+    "etf_price": 1.845,
+    "midpoint_premium_pct": -0.36631158710523914,
+    "settlement_buy_premium_pct": 0.6099682992450672,
+    "settlement_sell_premium_pct": 0.6120543820621327,
+    "midpoint_fx": 0.86418,
+    "settlement_buy_fx": 0.855708962311066,
+    "settlement_sell_fx": 0.8556910376889338,
+    "fx_at": "2026-09-09T14:47:57+08:00",
+    "fx_model": "cfets-hkd-cny.1600.rolling-median-180.q005.by-direction.v1",
+    "fx_status": "live",
+    "fx_actionable": true,
+    "components": 17,
+    "priced": 17,
+    "missing": [],
+    "stale": [],
+    "reasons": [],
+    "eligible_for_signal": true,
+    "oldest_quote_at": "2026-09-09T14:48:37+08:00",
+    "etf_quote_at": "2026-09-09T14:50:00.192+08:00",
+    "book": {
+      "bids": [
+        {
+          "price": 1.844,
+          "volume": 15357100
+        },
+        {
+          "price": 1.843,
+          "volume": 6544600
+        },
+        {
+          "price": 1.842,
+          "volume": 4305600
+        },
+        {
+          "price": 1.841,
+          "volume": 3259700
+        },
+        {
+          "price": 1.84,
+          "volume": 3803300
+        }
+      ],
+      "asks": [
+        {
+          "price": 1.845,
+          "volume": 7148100
+        },
+        {
+          "price": 1.846,
+          "volume": 5165300
+        },
+        {
+          "price": 1.847,
+          "volume": 4071800
+        },
+        {
+          "price": 1.848,
+          "volume": 5423500
+        },
+        {
+          "price": 1.849,
+          "volume": 4852900
+        }
+      ],
+      "observed_at": "2026-09-09T14:50:00.192+08:00"
+    },
+    "sequence": 257,
+    "run_id": "1788935831885188000",
+    "mode": "live",
+    "unit": 500000,
+    "cash": 9331.24
+  },
+  "sqlite_quick_check": "ok",
+  "port80": "ok",
+  "at": "2026-09-09 14:50:09"
+}

@@ -1,0 +1,84 @@
+Test project /tmp/machome-ui-clean-build-20260908
+      Start  1: hub-common
+ 1/38 Test  #1: hub-common .......................   Passed    1.10 sec
+      Start  2: premium-client
+ 2/38 Test  #2: premium-client ...................   Passed    2.49 sec
+      Start  3: premium-engine-domain
+ 3/38 Test  #3: premium-engine-domain ............   Passed    0.46 sec
+      Start  4: premium-engine-l1
+ 4/38 Test  #4: premium-engine-l1 ................   Passed    3.76 sec
+      Start  5: premium-a-engine
+ 5/38 Test  #5: premium-a-engine .................   Passed    1.10 sec
+      Start  6: premium-pushplus
+ 6/38 Test  #6: premium-pushplus .................   Passed    0.44 sec
+      Start  7: premium-runtime-isolation
+ 7/38 Test  #7: premium-runtime-isolation ........   Passed    0.05 sec
+      Start  8: premium-baseline-invisible
+ 8/38 Test  #8: premium-baseline-invisible .......   Passed    0.78 sec
+      Start  9: webull-status
+ 9/38 Test  #9: webull-status ....................   Passed    0.45 sec
+      Start 10: webull-engine
+10/38 Test #10: webull-engine ....................   Passed    0.84 sec
+      Start 11: webull-browser-helper
+11/38 Test #11: webull-browser-helper ............   Passed    0.64 sec
+      Start 12: webull-baseline-invisible
+12/38 Test #12: webull-baseline-invisible ........   Passed    0.55 sec
+      Start 13: worker-schedule
+13/38 Test #13: worker-schedule ..................   Passed    0.30 sec
+      Start 14: ibkr-bridge-core
+14/38 Test #14: ibkr-bridge-core .................   Passed    0.40 sec
+      Start 15: upload-engine
+15/38 Test #15: upload-engine ....................   Passed    0.50 sec
+      Start 16: upload-baseline-invisible
+16/38 Test #16: upload-baseline-invisible ........   Passed    0.17 sec
+      Start 17: redemption-engine
+17/38 Test #17: redemption-engine ................   Passed   42.22 sec
+      Start 18: redemption-baseline-invisible
+18/38 Test #18: redemption-baseline-invisible ....   Passed   41.48 sec
+      Start 19: redemption-wind-helper
+19/38 Test #19: redemption-wind-helper ...........   Passed    0.43 sec
+      Start 20: qmt-contract
+20/38 Test #20: qmt-contract .....................   Passed    0.39 sec
+      Start 21: command-journal
+21/38 Test #21: command-journal ..................   Passed    0.35 sec
+      Start 22: audit-writer
+22/38 Test #22: audit-writer .....................   Passed    0.75 sec
+      Start 23: lifecycle-controller
+23/38 Test #23: lifecycle-controller .............   Passed    0.29 sec
+      Start 24: contract-files
+24/38 Test #24: contract-files ...................   Passed    0.04 sec
+      Start 25: ibkr-shared-client-unit
+25/38 Test #25: ibkr-shared-client-unit ..........   Passed    0.05 sec
+      Start 26: ibkr-shared-client-integration
+26/38 Test #26: ibkr-shared-client-integration ...   Passed    1.01 sec
+      Start 27: owner-handoff
+27/38 Test #27: owner-handoff ....................   Passed    0.77 sec
+      Start 28: build-manifest
+28/38 Test #28: build-manifest ...................   Passed    0.02 sec
+      Start 29: upload-runtime-isolation
+29/38 Test #29: upload-runtime-isolation .........   Passed    0.21 sec
+      Start 30: webull-runtime-isolation
+30/38 Test #30: webull-runtime-isolation .........   Passed    0.15 sec
+      Start 31: release-script-dry-run
+31/38 Test #31: release-script-dry-run ...........   Passed    0.04 sec
+      Start 32: module-pages
+32/38 Test #32: module-pages .....................   Passed    4.04 sec
+      Start 33: full-smoke
+33/38 Test #33: full-smoke .......................   Passed    3.80 sec
+      Start 34: four-native-acceptance
+34/38 Test #34: four-native-acceptance ...........   Passed   12.46 sec
+      Start 35: bundled-upload-acceptance
+35/38 Test #35: bundled-upload-acceptance ........   Passed   12.50 sec
+      Start 36: alert-controller
+36/38 Test #36: alert-controller .................   Passed    1.75 sec
+      Start 37: upload-business-supervisor
+37/38 Test #37: upload-business-supervisor .......   Passed    6.09 sec
+      Start 38: monitor-sync-file-service
+38/38 Test #38: monitor-sync-file-service ........   Passed    0.35 sec
+
+100% tests passed, 0 tests failed out of 38
+
+Label Time Summary:
+integration    =  28.76 sec*proc (3 tests)
+
+Total Test time (real) = 143.24 sec

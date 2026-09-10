@@ -1,0 +1,258 @@
+[
+  {
+    "order": 12,
+    "raw": {
+      "标的代码": "159125.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 23,
+    "raw": {
+      "标的代码": "513240.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 35,
+    "raw": {
+      "标的代码": "520560.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 39,
+    "raw": {
+      "标的代码": "513990.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 43,
+    "raw": {
+      "标的代码": "159269.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 47,
+    "raw": {
+      "标的代码": "159126.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 48,
+    "raw": {
+      "标的代码": "520940.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 59,
+    "raw": {
+      "标的代码": "159615.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 70,
+    "raw": {
+      "标的代码": "520690.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 77,
+    "raw": {
+      "标的代码": "159102.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 80,
+    "raw": {
+      "标的代码": "520760.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 82,
+    "raw": {
+      "标的代码": "526050.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 83,
+    "raw": {
+      "标的代码": "159569.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 84,
+    "raw": {
+      "标的代码": "520950.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 86,
+    "raw": {
+      "标的代码": "520880.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 95,
+    "raw": {
+      "标的代码": "513630.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 103,
+    "raw": {
+      "标的代码": "159127.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 116,
+    "raw": {
+      "标的代码": "520550.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 132,
+    "raw": {
+      "标的代码": "159750.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 139,
+    "raw": {
+      "标的代码": "520780.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 144,
+    "raw": {
+      "标的代码": "520920.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 150,
+    "raw": {
+      "标的代码": "520740.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 153,
+    "raw": {
+      "标的代码": "520840.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 156,
+    "raw": {
+      "标的代码": "513770.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 159,
+    "raw": {
+      "标的代码": "159747.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 162,
+    "raw": {
+      "标的代码": "526070.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 164,
+    "raw": {
+      "标的代码": "159109.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 175,
+    "raw": {
+      "标的代码": "159740.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 179,
+    "raw": {
+      "标的代码": "159285.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 183,
+    "raw": {
+      "标的代码": "520720.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 185,
+    "raw": {
+      "标的代码": "159297.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  },
+  {
+    "order": 197,
+    "raw": {
+      "标的代码": "159688.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "TypeError(\"'<' not supported between instances of 're.Match' and 're.Match'\")"
+  }
+]

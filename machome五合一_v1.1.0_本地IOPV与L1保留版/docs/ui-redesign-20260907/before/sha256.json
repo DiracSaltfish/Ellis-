@@ -1,0 +1,6 @@
+{
+  "src/ui/ModulePages.cpp": "d25e729ab0a5d2e7243eef5d27c0dec905ab9f86bd478b7759fb41d303b74c22",
+  "src/ui/ModulePages.h": "5ce760a8914584615d627efa908905f1d8f75a9f36a74784f6fd1af18fdbc76d",
+  "src/ui/MainWindow.cpp": "5c04a29c9be85860f5603534ccb998927530584d2e5d4a70d5059414e05b03a9",
+  "CMakeLists.txt": "66a7333ab053d290321ebd8350e00fd94c414d019f57171f744f2b67da315891"
+}

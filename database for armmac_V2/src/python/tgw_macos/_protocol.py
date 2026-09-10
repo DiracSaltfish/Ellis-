@@ -75,6 +75,38 @@ def default_mac_addresses() -> list[str]:
     return [":".join(f"{(node >> shift) & 0xff:02x}" for shift in range(40, -1, -8))]
 
 
+# Server-side logon rejections observed in the authorized internet account
+# (2026-09): OnRspLogon status=-98 was returned both when the configured VIP
+# does not host the account (the Linux/native VIP 101.230.159.234 rejected the
+# dedicated macOS account) and when an earlier session for the same account was
+# still active.  The diagnostic text below keeps both causes actionable without
+# guessing a single server-side meaning.
+_LOGON_REJECTION_HINTS = {
+    -98: (
+        "the configured VIP does not host this account, or an earlier session "
+        "for the same account is still active; verify the account-to-VIP "
+        "mapping and retry with force_logout=True after confirming no other "
+        "session should be kicked"
+    ),
+}
+
+
+def _logon_rejection_message(status: Any, tag: Any, response: dict[str, Any]) -> str:
+    headers = response.get("headers")
+    instance = response.get("act_instanceid")
+    detail = []
+    if tag is not None or instance is not None:
+        detail.append("tag=%r" % (tag,))
+    if instance is not None:
+        detail.append("instance=%r" % (instance,))
+    extra = _LOGON_REJECTION_HINTS.get(status)
+    hint = f"; {extra}" if extra else ""
+    joined = ", ".join(detail)
+    if joined:
+        return f"TGW logon rejected (status={status!r}, {joined}){hint}"
+    return f"TGW logon rejected (status={status!r}){hint}"
+
+
 def build_logon_request(username: str, password: str, *, force_logout: bool = False,
                         client_version: str, process_id: int | None = None,
                         mac_addresses: list[str] | None = None) -> tuple[int, bytes]:
@@ -1471,7 +1503,7 @@ class TgwWssClient:
         tag = headers.get("tag") if isinstance(headers, dict) else None
         token = headers.get("token") if isinstance(headers, dict) else None
         if status != 0 or tag != "OnRspLogon" or not isinstance(token, str) or not token:
-            raise TgwProtocolError(f"TGW logon rejected (status={status!r}, tag={tag!r})")
+            raise TgwProtocolError(_logon_rejection_message(status, tag, response))
         self.username = username
         self.token = token
         self.logon_response = response

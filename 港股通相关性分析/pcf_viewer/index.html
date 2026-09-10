@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PCF Explorer · 每日成分券数量</title><link rel="stylesheet" href="/style.css"><script defer src="/app.js"></script></head>
+<body>
+<header><div class="brand"><span class="logo">P</span><div>PCF <b>EXPLORER</b><small>历史申赎清单 · 数量研究</small></div></div><div class="header-right"><span class="local"><i></i> 内网数据</span><button id="reload">刷新数据</button></div></header>
+<div id="error" role="alert" hidden></div>
+<div class="layout">
+<aside><label class="eyebrow" for="fund">基金 / FUND</label><select id="fund" aria-label="选择基金"></select><p id="fundName" class="muted"></p><div class="search"><input id="search" type="search" placeholder="搜索代码 / 股票名称" aria-label="搜索成分券"></div><div class="list-head"><span>历史成分券</span><span id="stockCount">—</span></div><div id="stockList" role="list" aria-label="成分券列表"></div><div class="aside-note">包含已调出的历史成分券<br><span class="dot"></span> 当前清单在列 <span class="dot inactive"></span> 历史在列</div></aside>
+<main>
+<div class="title-row"><div><div class="eyebrow">COMPONENT QUANTITY / 每日数量</div><h1><span id="stockName">正在读取数据</span><span id="stockCode" class="code"></span></h1><p id="stockMeta" class="muted">加载本地历史 PCF…</p></div><button id="export">导出当前区间 CSV ↗</button></div>
+<div class="stats"><article><span>区间末日清单数量</span><strong id="lastQty">—</strong><small id="lastDate">股 / 最小申赎单位</small></article><article><span>区间末日较前日</span><strong id="lastDelta">—</strong><small id="deltaPct">相邻有记录的 PCF 日比较</small></article><article><span>区间首末在列数量变化</span><strong id="rangeDelta">—</strong><small id="rangeDates">—</small></article><article><span>区间数量调整次数</span><strong id="changeCount">—</strong><small id="observed">仅连续在列日期间计数</small></article></div>
+<section class="chart-card">
+<div class="chart-top"><div><h2>逐日 PCF 数量</h2><span class="muted">阶梯线 · 股 / 最小申购赎回单位</span></div><div class="presets" aria-label="日期快捷选择"><button data-window="30">近30日</button><button data-window="90">近90日</button><button data-window="180">近180日</button><button data-window="all" class="active">全部</button></div></div>
+<div class="toolbar"><div class="date-controls"><input type="date" id="dateStart" aria-label="开始日期"><span>—</span><input type="date" id="dateEnd" aria-label="结束日期"><button id="applyDates">应用</button></div><div class="tools"><label><input id="zeroAxis" type="checkbox"> Y轴从0开始</label><button id="zoomIn" aria-label="放大">＋</button><button id="zoomOut" aria-label="缩小">−</button><button id="reset">重置视图</button></div></div>
+<div id="chartWrap"><canvas id="chart" aria-label="逐日PCF数量和增减股数图，支持滚轮缩放、拖动平移；精确数值见下方明细表" tabindex="0"></canvas><div id="tooltip" hidden></div><div id="noData" hidden>当前区间未列入 PCF，可切换至「全部」查看历史</div></div>
+<div class="overview-label"><span>全历史导航</span><span id="rangeLabel">—</span></div><canvas id="overview" aria-label="拖动选区或两侧手柄，调整时间范围"></canvas>
+<div class="chart-footer"><span><i class="legend"></i> PCF 数量 <i class="legend green"></i> 增加 <i class="legend red"></i> 减少</span><span>滚轮缩放 · 拖动平移 · 底部框选 · 双击重置 · ← → 平移</span></div>
+</section>
+<section class="detail-card"><div class="detail-header"><div><h2>每日清单明细</h2><p class="muted">入选 / 调出单独标记，不视为从 0 增加或减至 0。</p></div><label><input type="checkbox" id="onlyChanges"> 只看数量调整和名单变化</label></div><div class="table-scroll"><table><thead><tr><th>PCF 日期</th><th>清单数量（股）</th><th>较前日变化</th><th>变化比例</th><th>现金替代标志</th><th>记录状态</th></tr></thead><tbody id="details"></tbody></table></div></section>
+<footer id="sourceNote"></footer><p class="method-note">按 PCF 清单日期展示，非净值截止日。横轴按有数据的 PCF 日期等距排列；周末、休市及全日缺失不补点。未在清单出现的成分券留空，不填零、不延续上一日数量。图中数量不代表基金实际全量持仓。</p>
+</main></div>
+</body></html>

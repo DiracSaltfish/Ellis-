@@ -1,0 +1,1990 @@
+{
+  "policy": "SH single-day pass; SZ five-day pass; HK equities only",
+  "evidence_date": "2026-09-08",
+  "candidates": [
+    {
+      "symbol": "159217.SZ",
+      "name": "港股通创新药ETF工银",
+      "date": "2026-09-08",
+      "expected": 1.2081453593496,
+      "published": 1.2081,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159217_20260908.xml",
+      "sha256": "c6bab1c64edc6541e59d58eb9b58facbb7266df192cf3324a06a54e2009da71f",
+      "stale_components": []
+    },
+    {
+      "symbol": "520700.SH",
+      "name": "港股通创新药ETF万家",
+      "date": "2026-09-08",
+      "expected": 1.6545036410923,
+      "published": 1.6544,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520700",
+      "sha256": "e24f7c343f27407c60eb857f5f166fa7510340e5ff961c98b7ec4e478bc41c3f",
+      "stale_components": []
+    },
+    {
+      "symbol": "513920.SH",
+      "name": "港股通央企红利ETF华安",
+      "date": "2026-09-08",
+      "expected": 1.612431630081,
+      "published": 1.6117,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513920",
+      "sha256": "d4c2e5ff11ec51a62dbb26f9d3787a4e622108ae576b237d807553b0a2518532",
+      "stale_components": []
+    },
+    {
+      "symbol": "513830.SH",
+      "name": "港股通高股息ETF嘉实",
+      "date": "2026-09-08",
+      "expected": 1.2300387882244,
+      "published": 1.2299,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513830",
+      "sha256": "97a48aa0cd3bb0519358fe7b791d214779005a97eef797d8201da63adca3acc0",
+      "stale_components": []
+    },
+    {
+      "symbol": "513910.SH",
+      "name": "港股通央企红利ETF华夏",
+      "date": "2026-09-08",
+      "expected": 1.6191586378512,
+      "published": 1.6189,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513910",
+      "sha256": "dfa1b49780327cd378ad8b786f6dddd08cd84418254b6f2d3cbf6162b40b381f",
+      "stale_components": []
+    },
+    {
+      "symbol": "159125.SZ",
+      "name": "港股通科技ETF招商",
+      "date": "2026-09-08",
+      "expected": 0.7031070784741,
+      "published": 0.7032,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159125_20260908.xml",
+      "sha256": "8ff5336b01b2be0bcf55b6b74db0809a583aac903516d627be21eed39b4b8295",
+      "stale_components": []
+    },
+    {
+      "symbol": "520770.SH",
+      "name": "恒指港股通ETF建信",
+      "date": "2026-09-08",
+      "expected": 0.9465655231945,
+      "published": 0.9466,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520770",
+      "sha256": "45c09c818074786221cc7d50734bb0e5b0047d9b52124d756c95f66cb933176d",
+      "stale_components": []
+    },
+    {
+      "symbol": "526030.SH",
+      "name": "港股通信息技术ETF汇添富",
+      "date": "2026-09-08",
+      "expected": 0.8690222585895,
+      "published": 0.8693,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=526030",
+      "sha256": "87649dbb87f4ef5f6b1f95bb364da8633225f8109031d3c4610573e666cb526e",
+      "stale_components": []
+    },
+    {
+      "symbol": "513660.SH",
+      "name": "恒生ETF华夏",
+      "date": "2026-09-08",
+      "expected": 1.5144052695227,
+      "published": 1.5144,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513660",
+      "sha256": "184bc764ff70fc7537e9ba27bb744fd343383ec501fce5f8f292c162594830d0",
+      "stale_components": []
+    },
+    {
+      "symbol": "520990.SH",
+      "name": "港股央企红利ETF景顺",
+      "date": "2026-09-08",
+      "expected": 1.0227531846382,
+      "published": 1.0224,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520990",
+      "sha256": "6af88c64e4853bf81ded4132302efeb289e41d99db8b29ab5a479f85994fdb97",
+      "stale_components": []
+    },
+    {
+      "symbol": "513200.SH",
+      "name": "港股通医药ETF易方达",
+      "date": "2026-09-08",
+      "expected": 1.0956280164598,
+      "published": 1.0956,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513200",
+      "sha256": "b3932a0e9b555bc13081ef566b4a6d12e085bc17393ce0566cc7333f4a3a108e",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "520710.SH",
+      "name": "港股通信息技术ETF广发",
+      "date": "2026-09-08",
+      "expected": 0.9031642169028,
+      "published": 0.9035,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520710",
+      "sha256": "8956ff998daa496d8e237f70a678fdc61d5bcfb8bdf9fc14f7bc6af4d8c244dd",
+      "stale_components": []
+    },
+    {
+      "symbol": "513240.SH",
+      "name": "港股通信息技术ETF华安",
+      "date": "2026-09-08",
+      "expected": 1.0182447627111,
+      "published": 1.0186,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513240",
+      "sha256": "745ec6c2c6da59fc179341a35c920f89b60d9d913dddf83b54ab68987689e8e2",
+      "stale_components": []
+    },
+    {
+      "symbol": "159105.SZ",
+      "name": "恒生生物科技ETF易方达",
+      "date": "2026-09-08",
+      "expected": 0.9627358789809,
+      "published": 0.9626,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159105_20260908.xml",
+      "sha256": "d07cb0e729e7aacecde8e3f4758e3c0652edd3dc41c131cba797a498ae8f7c0d",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "513600.SH",
+      "name": "恒生指数ETF南方",
+      "date": "2026-09-08",
+      "expected": 2.7860920658956,
+      "published": 2.7861,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513600",
+      "sha256": "73e1826c87947d35649526b911380c249351d317c47c9e8f5b067050beaa4044",
+      "stale_components": []
+    },
+    {
+      "symbol": "159792.SZ",
+      "name": "港股通互联网ETF富国",
+      "date": "2026-09-08",
+      "expected": 0.57001973909,
+      "published": 0.57,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159792_20260908.xml",
+      "sha256": "27c54041a7a0f6048d340814eb50209f3fa372a443f2b230591175b52afc106d",
+      "stale_components": []
+    },
+    {
+      "symbol": "513810.SH",
+      "name": "港股国企ETF华夏",
+      "date": "2026-09-08",
+      "expected": 1.7890436998161,
+      "published": 1.7885,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513810",
+      "sha256": "a283630a2ee69f5882390f896c99031c6bb00a0ddc706f9dc8775e53d861fbbe",
+      "stale_components": []
+    },
+    {
+      "symbol": "513020.SH",
+      "name": "港股科技ETF国泰",
+      "date": "2026-09-08",
+      "expected": 0.935896714166,
+      "published": 0.9359,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513020",
+      "sha256": "e0da07527e02ab1439476f4bd0e313cf17d39e3e473ffb9a15641ec590454856",
+      "stale_components": []
+    },
+    {
+      "symbol": "526000.SH",
+      "name": "港股通信息技术ETF华夏",
+      "date": "2026-09-08",
+      "expected": 1.1838479114527,
+      "published": 1.1838,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=526000",
+      "sha256": "c0fd3753f1b42675274a95bd71a4dea0028d6c36b9cf5d80fce0a8abe87dfa0c",
+      "stale_components": []
+    },
+    {
+      "symbol": "513210.SH",
+      "name": "恒生ETF易方达",
+      "date": "2026-09-08",
+      "expected": 1.5172555926895,
+      "published": 1.5171,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513210",
+      "sha256": "bea324177cbc3df31015799a1f231975ad984ddbc32dafe1bb656078b4bc2a07",
+      "stale_components": []
+    },
+    {
+      "symbol": "520560.SH",
+      "name": "香港大盘30ETF华宝",
+      "date": "2026-09-08",
+      "expected": 0.8207365264332,
+      "published": 0.8207,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520560",
+      "sha256": "f09629d1bc7635a330c9441b18eab5ab692ffe676040262a7c6e6adfde0b8d2e",
+      "stale_components": []
+    },
+    {
+      "symbol": "159776.SZ",
+      "name": "港股医药ETF银华",
+      "date": "2026-09-08",
+      "expected": 1.2241505010441,
+      "published": 1.2239,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159776_20260908.xml",
+      "sha256": "88ddbc354554e2232ac166f44c9c5d61d342fa9c418658a4a8f960e4da36fe2e",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "159137.SZ",
+      "name": "港股通医疗ETF华宝",
+      "date": "2026-09-08",
+      "expected": 0.9847587321921,
+      "published": 0.9846,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159137_20260908.xml",
+      "sha256": "fbd660ad4526194a6150f32691d2b05c829fd716b9dd585d5d835204602211bf",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02172",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "513150.SH",
+      "name": "港股通科技ETF华泰柏瑞",
+      "date": "2026-09-08",
+      "expected": 0.9469500570414,
+      "published": 0.9472,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513150",
+      "sha256": "ec72e2736441568c320cb03c888101ffac1ee876956629c476daca3d27e030d9",
+      "stale_components": []
+    },
+    {
+      "symbol": "513990.SH",
+      "name": "港股通ETF招商",
+      "date": "2026-09-08",
+      "expected": 1.12078681937952,
+      "published": 1.1203,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513990",
+      "sha256": "d81c45886c44b4eda24a8262902f4348fff501fd1fd631ae5c5663dc2533f627",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02172",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "520530.SH",
+      "name": "港股通科技ETF东财",
+      "date": "2026-09-08",
+      "expected": 0.800500945076,
+      "published": 0.8006,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520530",
+      "sha256": "e0a843e4712689578f144f91789fdb7b7a6b447743404f0dffcf0732dcfc1747",
+      "stale_components": []
+    },
+    {
+      "symbol": "159269.SZ",
+      "name": "港股通科技ETF南方",
+      "date": "2026-09-08",
+      "expected": 0.8420965836339,
+      "published": 0.8421,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159269_20260908.xml",
+      "sha256": "40dd29e86651358bd86c406e1ac7791e11668dbcad480a6ae1dc23a393bfea21",
+      "stale_components": []
+    },
+    {
+      "symbol": "159251.SZ",
+      "name": "港股通科技ETF万家",
+      "date": "2026-09-08",
+      "expected": 0.7542897282278,
+      "published": 0.7543,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159251_20260908.xml",
+      "sha256": "f8094c2ee9db97ab62ba7124364e7a65603998f271ddf2fa81408522d3a238ae",
+      "stale_components": []
+    },
+    {
+      "symbol": "520940.SH",
+      "name": "港股通恒生ETF华安",
+      "date": "2026-09-08",
+      "expected": 1.0122844981424,
+      "published": 1.0125,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520940",
+      "sha256": "6dba0a0148f04492b2afd3d5d5ff23531a8f1eb9b4875889f16e69de2ee0d964",
+      "stale_components": []
+    },
+    {
+      "symbol": "513550.SH",
+      "name": "港股通50ETF华泰柏瑞",
+      "date": "2026-09-08",
+      "expected": 1.133036059216,
+      "published": 1.1331,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513550",
+      "sha256": "d6a4ed11785a7d9a976c4a1859516a4c5a7aea84d1fd5be879911ca01f3ee256",
+      "stale_components": []
+    },
+    {
+      "symbol": "510900.SH",
+      "name": "恒生中国企业ETF易方达",
+      "date": "2026-09-08",
+      "expected": 1.0465993113922,
+      "published": 1.0465,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=510900",
+      "sha256": "6b0d73d979d22bf9bd8fc5b3dfa429b6b97ac4713de71171ef11cce8ebe6dabb",
+      "stale_components": []
+    },
+    {
+      "symbol": "520890.SH",
+      "name": "港股通红利低波ETF华泰柏瑞",
+      "date": "2026-09-08",
+      "expected": 1.359109465259,
+      "published": 1.3585,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520890",
+      "sha256": "2687444cf679a817af854011f7796d88b1138806a14027da73b09abc9cce8356",
+      "stale_components": []
+    },
+    {
+      "symbol": "159131.SZ",
+      "name": "港股通信息技术ETF华宝",
+      "date": "2026-09-08",
+      "expected": 0.9637647375518,
+      "published": 0.9641,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159131_20260908.xml",
+      "sha256": "3b96367acdc88bc40997baae02dece6371c5341d5c28258e860c3b399e669dfb",
+      "stale_components": []
+    },
+    {
+      "symbol": "513750.SH",
+      "name": "港股通非银ETF广发",
+      "date": "2026-09-08",
+      "expected": 1.563834860364,
+      "published": 1.564,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513750",
+      "sha256": "5b0470a4b665c367da5637565c384513934456beaea3d01480929f5e99f402cb",
+      "stale_components": []
+    },
+    {
+      "symbol": "159892.SZ",
+      "name": "恒生医药ETF华夏",
+      "date": "2026-09-08",
+      "expected": 0.816369725271,
+      "published": 0.8163,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159892_20260908.xml",
+      "sha256": "aed2b8be81778bfe4175891be87a5fedc57ac5f0036b6365a32ed694f84e9255",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "513860.SH",
+      "name": "港股通科技ETF海富通",
+      "date": "2026-09-08",
+      "expected": 0.6006429177766,
+      "published": 0.6007,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513860",
+      "sha256": "7a8aed52e806b13237952f9b5def2571cee8fbd43a58985695d60eba4fca7a97",
+      "stale_components": []
+    },
+    {
+      "symbol": "159615.SZ",
+      "name": "恒生生物科技ETF南方",
+      "date": "2026-09-08",
+      "expected": 1.1697339630953,
+      "published": 1.1696,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159615_20260908.xml",
+      "sha256": "b51c8b3d2ddbdc29ad17f21e1cd338c4586b8dea80e9a76ab5f7874ce157248e",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "159167.SZ",
+      "name": "港股通医疗ETF工银",
+      "date": "2026-09-08",
+      "expected": 0.973488139233,
+      "published": 0.9733,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159167_20260908.xml",
+      "sha256": "17ba3956987617d93482da7bcc01a490708927f43d90a17acebf6794ffdf1afe",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02172",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "520750.SH",
+      "name": "港股通信息ETF华富",
+      "date": "2026-09-08",
+      "expected": 0.895987726726,
+      "published": 0.8962,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520750",
+      "sha256": "65cc2304a0adbe161a850ce57a8285e221c35106a192e627fc3bf72eb7d9d08b",
+      "stale_components": []
+    },
+    {
+      "symbol": "513780.SH",
+      "name": "港股创新药ETF景顺",
+      "date": "2026-09-08",
+      "expected": 1.7179219620802,
+      "published": 1.7177,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513780",
+      "sha256": "41b53dcfd5e9361a8e81d7c080b7999e75ba976ec042b89d4d2c394d980826a5",
+      "stale_components": []
+    },
+    {
+      "symbol": "159185.SZ",
+      "name": "鹏华中证港股通信息技术综合ETF",
+      "date": "2026-09-08",
+      "expected": 1.0963602847898,
+      "published": 1.0968,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159185_20260908.xml",
+      "sha256": "62580e1d6c79465c21c8bdd1bc90403fda4401001f53209883b31afc4945f698",
+      "stale_components": []
+    },
+    {
+      "symbol": "513980.SH",
+      "name": "港股科技ETF景顺",
+      "date": "2026-09-08",
+      "expected": 0.5992674184315,
+      "published": 0.5993,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513980",
+      "sha256": "f02c3af702bed882547f5015cd8341e85399e0d13046c7052f948be566840fd4",
+      "stale_components": []
+    },
+    {
+      "symbol": "520510.SH",
+      "name": "港股通医疗ETF华夏",
+      "date": "2026-09-08",
+      "expected": 0.9633029537934,
+      "published": 0.9631,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520510",
+      "sha256": "7510b5a2cfa7e0535d3973bbce662da58656f042421a40a9d55b0268fbd8495f",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02172",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "159169.SZ",
+      "name": "恒生生物科技ETF广发",
+      "date": "2026-09-08",
+      "expected": 1.0236450376985,
+      "published": 1.0236,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159169_20260908.xml",
+      "sha256": "58c13179f626ff79d260fcea5e2c75ab008d6fc277335b1d06011b3dc65ecbaa",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "513120.SH",
+      "name": "港股创新药ETF广发",
+      "date": "2026-09-08",
+      "expected": 1.328366698972,
+      "published": 1.3281,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513120",
+      "sha256": "02ccff78167d7228c58d41620df0dbb1699f692234170988c99968f7d1423e8f",
+      "stale_components": []
+    },
+    {
+      "symbol": "513280.SH",
+      "name": "恒生生物科技ETF汇添富",
+      "date": "2026-09-08",
+      "expected": 1.1534741781048,
+      "published": 1.1534,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513280",
+      "sha256": "48c5735411b2a2741c442e99200f111b17da7f47df3db28b97ed999665132528",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "159506.SZ",
+      "name": "港股通医疗ETF富国",
+      "date": "2026-09-08",
+      "expected": 1.3162467050602,
+      "published": 1.3162,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159506_20260908.xml",
+      "sha256": "8d66d7cf6adad47f0929f60690661d184f1f0dfab3049e4511b3b9d7bdc1cfc5",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "520690.SH",
+      "name": "港股创新药ETF博时",
+      "date": "2026-09-08",
+      "expected": 0.7572011820129,
+      "published": 0.7571,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520690",
+      "sha256": "180c35684023faf7c71b7a6e65c4c255e5e1e03a2369f3fc889ebb00262e2dc7",
+      "stale_components": []
+    },
+    {
+      "symbol": "520810.SH",
+      "name": "港股通红利ETF易方达",
+      "date": "2026-09-08",
+      "expected": 1.0493047626884,
+      "published": 1.0493,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520810",
+      "sha256": "3cd89500bf544b2dade0546040fa5184498478dd7b9f610480c6cd309f531dce",
+      "stale_components": []
+    },
+    {
+      "symbol": "159130.SZ",
+      "name": "恒生生物科技ETF鹏华",
+      "date": "2026-09-08",
+      "expected": 0.9654508103133,
+      "published": 0.9654,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159130_20260908.xml",
+      "sha256": "6f5aadc2f69fc77ea891ebc5ad23ca8e1e9a42cd8926cbc148f4b9b1e94fb44d",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "520930.SH",
+      "name": "恒生生物科技ETF国泰",
+      "date": "2026-09-08",
+      "expected": 0.9996685648599,
+      "published": 0.9994,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520930",
+      "sha256": "4cd2e2c4c429d4e55ad832473e1d8e6472943433d8579ca25126f69b59b785a3",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "159316.SZ",
+      "name": "港股通创新药ETF易方达",
+      "date": "2026-09-08",
+      "expected": 1.1834828779909,
+      "published": 1.1835,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159316_20260908.xml",
+      "sha256": "e4aa7fac858d3ef35e84b02d2218804bab14bb3d8e3da2f9587ba06b26b6b4c5",
+      "stale_components": []
+    },
+    {
+      "symbol": "159102.SZ",
+      "name": "港股通生物科技ETF华安",
+      "date": "2026-09-08",
+      "expected": 0.8481700944144,
+      "published": 0.848,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159102_20260908.xml",
+      "sha256": "f66d34d3af5d7b7acd9e209a1b0ddc2dfa934673b4d256737bc974ca4c2e05e7",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "520500.SH",
+      "name": "恒生创新药ETF华泰柏瑞",
+      "date": "2026-09-08",
+      "expected": 1.4458475511558,
+      "published": 1.4457,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520500",
+      "sha256": "3431251b03b62015a3e5672d03ab0a488b95f18d9deb3b1d1d56a9bf83385199",
+      "stale_components": []
+    },
+    {
+      "symbol": "520970.SH",
+      "name": "港股通创新药ETF嘉实",
+      "date": "2026-09-08",
+      "expected": 0.9250410440489,
+      "published": 0.925,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520970",
+      "sha256": "74fa10a14594ddb21350ba3bfee85d8bc5cea4c66e10fbf3322693c28cc41fa1",
+      "stale_components": []
+    },
+    {
+      "symbol": "520760.SH",
+      "name": "恒生生物科技ETF摩根",
+      "date": "2026-09-08",
+      "expected": 1.0015855777556,
+      "published": 1.0014,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520760",
+      "sha256": "7ba1f39efcb1251fbb81cbb97fb076af8a0fa80ce16c5cfa5c90795d187eb3e5",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "513930.SH",
+      "name": "恒生生物科技ETF华泰柏瑞",
+      "date": "2026-09-08",
+      "expected": 1.0715111709092,
+      "published": 1.0713,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513930",
+      "sha256": "362226e222ac934f871143d58ccecfde63e66fd0afce2cee86f94e57848b351c",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "526050.SH",
+      "name": "港股通信息技术ETF招商",
+      "date": "2026-09-08",
+      "expected": 1.0699529157383,
+      "published": 1.0702,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=526050",
+      "sha256": "f6a745459fd8922b43f35c310f0c7b123f353042f59ae4d6aeb957bf959fdc7d",
+      "stale_components": []
+    },
+    {
+      "symbol": "159569.SZ",
+      "name": "港股红利低波ETF景顺",
+      "date": "2026-09-08",
+      "expected": 1.4269368636166,
+      "published": 1.4266,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159569_20260908.xml",
+      "sha256": "1b57a53d1631d70383c8c4c605070067e43add8b2e928c5291e7ce9abf753458",
+      "stale_components": []
+    },
+    {
+      "symbol": "520950.SH",
+      "name": "港股通50ETF摩根",
+      "date": "2026-09-08",
+      "expected": 0.8458112652172,
+      "published": 0.8458,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520950",
+      "sha256": "9859b36fd58610c7b6acd49219b1205e7174a859d0e9a0a4d11042cb548daa45",
+      "stale_components": []
+    },
+    {
+      "symbol": "513820.SH",
+      "name": "港股通红利ETF汇添富",
+      "date": "2026-09-08",
+      "expected": 1.2690476309396,
+      "published": 1.2688,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513820",
+      "sha256": "8b59ff3c99ee83e7bb896e9c920673503bd11646bd1d06256ab5c2197837c660",
+      "stale_components": []
+    },
+    {
+      "symbol": "520880.SH",
+      "name": "港股通创新药ETF华宝",
+      "date": "2026-09-08",
+      "expected": 0.46712687900325,
+      "published": 0.4671,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520880",
+      "sha256": "0d1f7bc31b14a120290b825314900bea0a1998b23e49b4a8647a876e726a3109",
+      "stale_components": []
+    },
+    {
+      "symbol": "159331.SZ",
+      "name": "红利港股ETF国泰",
+      "date": "2026-09-08",
+      "expected": 1.324197706798,
+      "published": 1.3241,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159331_20260908.xml",
+      "sha256": "b3b2d38025dd53e04ccd76a7a1e9e92ca4a9e438ddc4a8b72018efd5479cb5c5",
+      "stale_components": []
+    },
+    {
+      "symbol": "520900.SH",
+      "name": "港股通红利ETF广发",
+      "date": "2026-09-08",
+      "expected": 1.0338420932824,
+      "published": 1.0334,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520900",
+      "sha256": "76cd9265e85431e94a785946ac9f837f8759b36df0cc57b44000ef391b154073",
+      "stale_components": []
+    },
+    {
+      "symbol": "520660.SH",
+      "name": "港股通央企红利ETF南方",
+      "date": "2026-09-08",
+      "expected": 1.028519934859,
+      "published": 1.0283,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520660",
+      "sha256": "d7377c365104a65590984890540df329d039926b9986fdcb9649f76f8edfe92a",
+      "stale_components": []
+    },
+    {
+      "symbol": "159198.SZ",
+      "name": "富国中证港股通信息技术综合ETF",
+      "date": "2026-09-08",
+      "expected": 1.2344623275566,
+      "published": 1.2345,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159198_20260908.xml",
+      "sha256": "fbaf4fc639e3e7458ec6c29980f1bb4ceeb22b2e2500b7a7ac3ef0aa46caa98a",
+      "stale_components": []
+    },
+    {
+      "symbol": "513630.SH",
+      "name": "港股低波红利ETF摩根",
+      "date": "2026-09-08",
+      "expected": 1.6222672181549,
+      "published": 1.6219,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513630",
+      "sha256": "bca5158d0376699f4b067f439e1ff7b694db096326b3eaced962efe3cc09ab37",
+      "stale_components": []
+    },
+    {
+      "symbol": "520850.SH",
+      "name": "港股通医疗ETF易方达",
+      "date": "2026-09-08",
+      "expected": 0.9145224270327,
+      "published": 0.9144,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520850",
+      "sha256": "6aaf948f30a9e02c461b2d376f1f45ca93904cd4ae06422c8d60cba8a8f98e1e",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02172",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "513620.SH",
+      "name": "港股医疗ETF银华",
+      "date": "2026-09-08",
+      "expected": 1.117184216813,
+      "published": 1.117,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513620",
+      "sha256": "3d6cc2d0e8e1718a0ecbac6e8c2e6fa987ef90d5712b2709352a2ddf47f71dc9",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02172",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "159286.SZ",
+      "name": "港股通创新药ETF鹏华",
+      "date": "2026-09-08",
+      "expected": 0.7707878776918,
+      "published": 0.7709,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159286_20260908.xml",
+      "sha256": "8f634c1c5ce802b4faa2ac07a8872f9beb19d1e2a66d67d1cf8ce7eca894a744",
+      "stale_components": []
+    },
+    {
+      "symbol": "520820.SH",
+      "name": "恒指港股通ETF汇添富",
+      "date": "2026-09-08",
+      "expected": 0.9361696394882,
+      "published": 0.9361,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520820",
+      "sha256": "4a9c3ebea9551ea6c042b7e4918d71e9d585130cc7ee94f6b8155a3a455e30b1",
+      "stale_components": []
+    },
+    {
+      "symbol": "159132.SZ",
+      "name": "恒生生物科技ETF富国",
+      "date": "2026-09-08",
+      "expected": 0.9957546554302,
+      "published": 0.9958,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159132_20260908.xml",
+      "sha256": "73ba079b9f5e6eccfa0d503ffecbae53bbc6c48b882aed73f8adb861dcc8548f",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "159127.SZ",
+      "name": "港股通红利ETF南方",
+      "date": "2026-09-08",
+      "expected": 0.9836574618894,
+      "published": 0.9835,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159127_20260908.xml",
+      "sha256": "92a688efd3b9961a75019d6471528689e7c5cd388bb1f82b2fa8d8cb3fe1b715",
+      "stale_components": []
+    },
+    {
+      "symbol": "520960.SH",
+      "name": "恒指港股通ETF嘉实",
+      "date": "2026-09-08",
+      "expected": 0.9198308259173,
+      "published": 0.9198,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520960",
+      "sha256": "b90a92d87d93bda0c1e7f8b8f2563f582d07c0543c40bc0592cd8429f8123ba4",
+      "stale_components": []
+    },
+    {
+      "symbol": "513700.SH",
+      "name": "港股通医药ETF鹏华",
+      "date": "2026-09-08",
+      "expected": 0.6513385745967,
+      "published": 0.6511,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513700",
+      "sha256": "d4bb06a47b969e7b42046031762659c1ab0ed87a288da1aa3e1b276de7c53fee",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "520910.SH",
+      "name": "港股通互联网ETF华夏",
+      "date": "2026-09-08",
+      "expected": 0.6251499444077,
+      "published": 0.6251,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520910",
+      "sha256": "31fc98a8a4c3bea959b41a642bc968cc3994760c3775e84b863f8d0963c24a92",
+      "stale_components": []
+    },
+    {
+      "symbol": "513260.SH",
+      "name": "恒生科技ETF汇添富",
+      "date": "2026-09-08",
+      "expected": 1.0887897601286,
+      "published": 1.0888,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513260",
+      "sha256": "19cafdbdc7b102093e748ab5daf30c71c2158a4e4d9ab9704010b89b5607e465",
+      "stale_components": []
+    },
+    {
+      "symbol": "513010.SH",
+      "name": "恒生科技ETF易方达",
+      "date": "2026-09-08",
+      "expected": 0.584271652705,
+      "published": 0.5843,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513010",
+      "sha256": "7333df43576c82873476da5085a0f23aa47ad7a1e0acfc77fa0351a0a35fa3cd",
+      "stale_components": []
+    },
+    {
+      "symbol": "159366.SZ",
+      "name": "港股医疗ETF永赢",
+      "date": "2026-09-08",
+      "expected": 1.4687265784327,
+      "published": 1.4687,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159366_20260908.xml",
+      "sha256": "1d62b1b7888c943a7706908016fc73bf7e0e087f26d8d499d5d9044137762bb4",
+      "stale_components": [
+        {
+          "code": "00853",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02172",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        },
+        {
+          "code": "02252",
+          "price_date": "2026-08-31",
+          "quality": "stale_last_close"
+        }
+      ]
+    },
+    {
+      "symbol": "520550.SH",
+      "name": "港股红利低波ETF招商",
+      "date": "2026-09-08",
+      "expected": 1.1179151839842,
+      "published": 1.1183,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520550",
+      "sha256": "0f2462e7d5d3db7ffcfd8a5409e8de7e0cafc44ad783f5f852bda98c50ca69e2",
+      "stale_components": []
+    },
+    {
+      "symbol": "513180.SH",
+      "name": "恒生科技ETF华夏",
+      "date": "2026-09-08",
+      "expected": 0.5662043369745,
+      "published": 0.5661,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513180",
+      "sha256": "0b8d6da173d9e4aaa85035e6000b854c0ae9bb37dc806fc97cf53cdae6602c60",
+      "stale_components": []
+    },
+    {
+      "symbol": "513170.SH",
+      "name": "恒生央企ETF鹏华",
+      "date": "2026-09-08",
+      "expected": 1.6350049580919,
+      "published": 1.635,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513170",
+      "sha256": "4182066309dedec1afab93cff373f4da08632613b2ebc3f578caa83bce9bc9de",
+      "stale_components": []
+    },
+    {
+      "symbol": "159101.SZ",
+      "name": "港股通科技ETF华夏",
+      "date": "2026-09-08",
+      "expected": 0.7255643554279,
+      "published": 0.7255,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159101_20260908.xml",
+      "sha256": "2b10f6226039cb95c60810730871460b5962b11f06b9204dbca6a04b17c628d4",
+      "stale_components": []
+    },
+    {
+      "symbol": "159519.SZ",
+      "name": "港股国企ETF国泰",
+      "date": "2026-09-08",
+      "expected": 1.8219763639957,
+      "published": 1.8218,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159519_20260908.xml",
+      "sha256": "3c664561590a87f922ea21db2b6c47ce3d0e28a68063c4d9cba069aea868e7a1",
+      "stale_components": []
+    },
+    {
+      "symbol": "159280.SZ",
+      "name": "港股通互联网ETF汇添富",
+      "date": "2026-09-08",
+      "expected": 0.6899933982805,
+      "published": 0.6901,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159280_20260908.xml",
+      "sha256": "490a3752862167c1f18936a279d98c5609aea310110d0209922b25ae49ae0ee5",
+      "stale_components": []
+    },
+    {
+      "symbol": "513380.SH",
+      "name": "恒生科技ETF广发",
+      "date": "2026-09-08",
+      "expected": 0.5126003407578,
+      "published": 0.5126,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513380",
+      "sha256": "7530371ed6514e4ee9d9aef23b6989d33a4b93251132098121357b18bd5e8b39",
+      "stale_components": []
+    },
+    {
+      "symbol": "520680.SH",
+      "name": "港股通汽车ETF南方",
+      "date": "2026-09-08",
+      "expected": 0.7978661104271,
+      "published": 0.7979,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520680",
+      "sha256": "934bf8d0f8be7e0fc155abfe021c083771b924bf8e22126adeb294b976670207",
+      "stale_components": []
+    },
+    {
+      "symbol": "159750.SZ",
+      "name": "港股科技50ETF招商",
+      "date": "2026-09-08",
+      "expected": 0.8430353695152,
+      "published": 0.8431,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159750_20260908.xml",
+      "sha256": "c93ba46b1eb5f6ad1cb9e264208cebc3ebc48edd46e052e51029c0f8581281cc",
+      "stale_components": []
+    },
+    {
+      "symbol": "513330.SH",
+      "name": "恒生互联网ETF华夏",
+      "date": "2026-09-08",
+      "expected": 0.363306896654,
+      "published": 0.3632,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513330",
+      "sha256": "ab3228f207d21fba81c6133e5dd2f7aac3c673ad1aa8510ea089f0da8b4d0265",
+      "stale_components": []
+    },
+    {
+      "symbol": "520790.SH",
+      "name": "港股通互联网ETF兴业",
+      "date": "2026-09-08",
+      "expected": 0.8142327711858,
+      "published": 0.8143,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520790",
+      "sha256": "63f67181e57762f68416d84018afd9cbe767b11688800e168519e3b11dcc70ec",
+      "stale_components": []
+    },
+    {
+      "symbol": "513890.SH",
+      "name": "恒生科技ETF摩根",
+      "date": "2026-09-08",
+      "expected": 0.8649947497304,
+      "published": 0.8652,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513890",
+      "sha256": "714ad3a17a37dc64c62a995aa571cf3bab8474aad0a17077b1e610ff38e31c44",
+      "stale_components": []
+    },
+    {
+      "symbol": "520780.SH",
+      "name": "港股通汽车ETF华宝",
+      "date": "2026-09-08",
+      "expected": 0.8028011101706,
+      "published": 0.8029,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520780",
+      "sha256": "b74d97f8c07384ff12f7611a5da43c2879ade5c8a02d9f58cd5bbef91bbf030f",
+      "stale_components": []
+    },
+    {
+      "symbol": "520570.SH",
+      "name": "恒生科技ETF南方",
+      "date": "2026-09-08",
+      "expected": 0.7147441894426,
+      "published": 0.7147,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520570",
+      "sha256": "3b0fdf0082f9c438ae90d6ca59ba6b4fc3156a2c6eee91c6a2789fb13f1f895b",
+      "stale_components": []
+    },
+    {
+      "symbol": "159568.SZ",
+      "name": "港股互联网ETF博时",
+      "date": "2026-09-08",
+      "expected": 1.1195601965208,
+      "published": 1.1195,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159568_20260908.xml",
+      "sha256": "91a2a9bad2aa1fcc8fe6712ac76a1e1935f26a802d0cb280d37e62ce2225671c",
+      "stale_components": []
+    },
+    {
+      "symbol": "520920.SH",
+      "name": "天弘恒生科技ETF",
+      "date": "2026-09-08",
+      "expected": 0.6621184806514,
+      "published": 0.662,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520920",
+      "sha256": "f0eec0cbb2b2f704ea0c3f993259fe43a21c004b468cdd17b5f91bf2203e3dd9",
+      "stale_components": []
+    },
+    {
+      "symbol": "520650.SH",
+      "name": "港股通互联网ETF南方",
+      "date": "2026-09-08",
+      "expected": 0.5908617816436,
+      "published": 0.5909,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520650",
+      "sha256": "939c7150744a8dcf9dbfc09cbea94c63182889de39156758faa800a61b04bafb",
+      "stale_components": []
+    },
+    {
+      "symbol": "159135.SZ",
+      "name": "港股通科技ETF前海开源",
+      "date": "2026-09-08",
+      "expected": 0.7773610255816,
+      "published": 0.7774,
+      "qc": "MULTI_DAY_5D_PASS",
+      "source": "https://reportdocs.static.szse.cn/files/text/ETFDown/pcf_159135_20260908.xml",
+      "sha256": "98afe39627564d3b5a212358427eb7be1719bcc6ccca0f72635867c5079f551e",
+      "stale_components": []
+    },
+    {
+      "symbol": "520740.SH",
+      "name": "港股通互联网ETF华安",
+      "date": "2026-09-08",
+      "expected": 0.9074461392648,
+      "published": 0.9075,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520740",
+      "sha256": "87ca551b47de1e50780679dbecd85cdb46a811dcb8717b798c3b02d413675878",
+      "stale_components": []
+    },
+    {
+      "symbol": "520840.SH",
+      "name": "港股通恒生科技ETF华安",
+      "date": "2026-09-08",
+      "expected": 0.7480431105322,
+      "published": 0.7481,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520840",
+      "sha256": "0c1daa106ee00197b107f74668d7d21a38d87ff0fc9c9a3c4af22817868afaa0",
+      "stale_components": []
+    },
+    {
+      "symbol": "520610.SH",
+      "name": "港股红利低波ETF银华",
+      "date": "2026-09-08",
+      "expected": 0.9650055692067,
+      "published": 0.9649,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520610",
+      "sha256": "a16d3ef54d53543c24da0a7be266de18ddf99f2336b21142eff31f47e8a94ddd",
+      "stale_components": []
+    },
+    {
+      "symbol": "513770.SH",
+      "name": "港股互联网ETF华宝",
+      "date": "2026-09-08",
+      "expected": 0.3491388275837,
+      "published": 0.3491,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513770",
+      "sha256": "7f3726b0faadec735af158163879a57d7d9fa756b3ea42491c258642b3b523f2",
+      "stale_components": []
+    },
+    {
+      "symbol": "513130.SH",
+      "name": "恒生科技ETF华泰柏瑞",
+      "date": "2026-09-08",
+      "expected": 0.55834784717208,
+      "published": 0.5583,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513130",
+      "sha256": "f19acf29f40497e7ad07ea94f40afcae463c379e3fa1cdb5cfeb870d69e8bae0",
+      "stale_components": []
+    },
+    {
+      "symbol": "513160.SH",
+      "name": "港股科技ETF银华",
+      "date": "2026-09-08",
+      "expected": 0.9461812498596,
+      "published": 0.9464,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513160",
+      "sha256": "582fc78ae95d2fb36ea25af5a8b48d9fbed8daf60ffd7758966ee4de963fdcd6",
+      "stale_components": []
+    },
+    {
+      "symbol": "526070.SH",
+      "name": "恒指港股通ETF博时",
+      "date": "2026-09-08",
+      "expected": 1.0001251324032334,
+      "published": 1.0001,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=526070",
+      "sha256": "be9469f1b77371b5b638bbb126d7ab760ea6e56aec9af831180b41f131660038",
+      "stale_components": []
+    },
+    {
+      "symbol": "520980.SH",
+      "name": "港股通科技ETF汇添富",
+      "date": "2026-09-08",
+      "expected": 0.8529021524546,
+      "published": 0.8529,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520980",
+      "sha256": "12f5a92f07680fa27bc84feed5f3598442f44167b83baf4d1a64aa7c6455c8ab",
+      "stale_components": []
+    },
+    {
+      "symbol": "520860.SH",
+      "name": "港股通科技ETF富国",
+      "date": "2026-09-08",
+      "expected": 0.7760338991416,
+      "published": 0.776,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520860",
+      "sha256": "f59db2c0d12f96881d50434719e83829072056554a0430d9959f320c4ee6f8eb",
+      "stale_components": []
+    },
+    {
+      "symbol": "520730.SH",
+      "name": "港股通汽车ETF万家",
+      "date": "2026-09-08",
+      "expected": 0.7473665131275,
+      "published": 0.7476,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520730",
+      "sha256": "a858eda496d2f9e489249c7663ed4b18fc3b1f95f67b6cc0a365614692b969b2",
+      "stale_components": []
+    },
+    {
+      "symbol": "513190.SH",
+      "name": "港股通金融ETF华夏",
+      "date": "2026-09-08",
+      "expected": 1.867164046352,
+      "published": 1.8667,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513190",
+      "sha256": "7b017d68e35cde8c5638a5017932e6fa54087339abbdaf54b07b8d0310905e85",
+      "stale_components": []
+    },
+    {
+      "symbol": "513090.SH",
+      "name": "香港证券ETF易方达",
+      "date": "2026-09-08",
+      "expected": 1.8432886185282,
+      "published": 1.8433,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513090",
+      "sha256": "c8c0cb7b5993b0c22348e89bd040259669d28d9ee11b2da439a0ca3047378d26",
+      "stale_components": []
+    },
+    {
+      "symbol": "520670.SH",
+      "name": "港股通科技ETF嘉实",
+      "date": "2026-09-08",
+      "expected": 0.757037011862,
+      "published": 0.7571,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520670",
+      "sha256": "4c842db1b0406a420d3483a70400cf32b7c445d875428783ef4e1d23c0ebdd14",
+      "stale_components": []
+    },
+    {
+      "symbol": "513140.SH",
+      "name": "港股通金融ETF华泰柏瑞",
+      "date": "2026-09-08",
+      "expected": 1.7543663722096,
+      "published": 1.7546,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513140",
+      "sha256": "440b3ac0cf13cbf2b774d5e4d16c4729a7c6baac5574944d8ba4298f1965388d",
+      "stale_components": []
+    },
+    {
+      "symbol": "513040.SH",
+      "name": "港股通互联网ETF易方达",
+      "date": "2026-09-08",
+      "expected": 0.9161297293082,
+      "published": 0.9161,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513040",
+      "sha256": "0d75e31f2af45c6be906dc357f64ee58603465d2e7e41688a84c2b3620f580bb",
+      "stale_components": []
+    },
+    {
+      "symbol": "520630.SH",
+      "name": "港股通互联网ETF广发",
+      "date": "2026-09-08",
+      "expected": 0.6562134977828,
+      "published": 0.6562,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520630",
+      "sha256": "adbbd9bd6b675b8c24d94298fc7c9a94b1949a4a2f7558b17146c63eb698b3d8",
+      "stale_components": []
+    },
+    {
+      "symbol": "520720.SH",
+      "name": "港股汽车ETF国泰",
+      "date": "2026-09-08",
+      "expected": 0.7311162960481,
+      "published": 0.7312,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=520720",
+      "sha256": "e03f6174e019a81210e1a3ece9f580bb338b3538993cdea1af4cef68d0e568cb",
+      "stale_components": []
+    },
+    {
+      "symbol": "513530.SH",
+      "name": "港股通红利ETF华泰柏瑞",
+      "date": "2026-09-08",
+      "expected": 1.6287366890002,
+      "published": 1.6286,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513530",
+      "sha256": "489f3d96b1f2eda09c460b27b9dbd8f1d8fa089ffe731aa7432d91f5ff17bb1f",
+      "stale_components": []
+    },
+    {
+      "symbol": "513320.SH",
+      "name": "港股通新经济ETF易方达",
+      "date": "2026-09-08",
+      "expected": 1.0634943537503,
+      "published": 1.0635,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513320",
+      "sha256": "3bd6417ad90be0827a322b1d5d23a110776729d3f5c7a330c49518904d6105ad",
+      "stale_components": []
+    },
+    {
+      "symbol": "513900.SH",
+      "name": "港股通100ETF华安",
+      "date": "2026-09-08",
+      "expected": 0.9944644575222,
+      "published": 0.9945,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513900",
+      "sha256": "3b667656c5980d61f4235c8129145916c088fe53632a0f1e72b8aa65c5e9e10c",
+      "stale_components": []
+    },
+    {
+      "symbol": "513560.SH",
+      "name": "香港科技ETF兴银",
+      "date": "2026-09-08",
+      "expected": 1.1117827153394,
+      "published": 1.1122,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513560",
+      "sha256": "63c63eaa7257bc79ae905b00dd846a8e68817c3615e8d931f2dcf62bc584b607",
+      "stale_components": []
+    },
+    {
+      "symbol": "513720.SH",
+      "name": "港股互联网ETF国泰",
+      "date": "2026-09-08",
+      "expected": 0.6454811000214,
+      "published": 0.6455,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513720",
+      "sha256": "4cd9ce559758580ea31e6e86d8f4987adf2f26c63ae463fc41f154aebf0edd82",
+      "stale_components": []
+    },
+    {
+      "symbol": "513580.SH",
+      "name": "恒生科技ETF华安",
+      "date": "2026-09-08",
+      "expected": 0.5637703275534,
+      "published": 0.5638,
+      "qc": "SH_SINGLE_DAY_ONLY",
+      "source": "https://query.sse.com.cn/etfDownload/downloadETF2Bulletin.do?fundCode=513580",
+      "sha256": "5b2ed92ec4044207d3d1a523fbe67decedacb90385cf787394c5cda0da0a73b4",
+      "stale_components": []
+    }
+  ],
+  "deferred": [
+    {
+      "symbol": "159365.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159570.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159303.SZ",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159920.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159040.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159117.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159118.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159850.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159333.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "513060.SH",
+      "single": "BOUNDARY_ROUNDING",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159711.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159718.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159557.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159268.SZ",
+      "single": "BOUNDARY_ROUNDING",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159318.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159751.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159271.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159712.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159126.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159266.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159312.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "526010.SH",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159545.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "513800.SH",
+      "single": "NOT_APPLICABLE",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159302.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159735.SZ",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159091.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159691.SZ",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159726.SZ",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "513950.SH",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "513690.SH",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "520520.SH",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "513970.SH",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159237.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "520590.SH",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159323.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159742.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "513070.SH",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159245.SZ",
+      "single": "BOUNDARY_ROUNDING",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "520620.SH",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159121.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159281.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159152.SZ",
+      "single": "BOUNDARY_ROUNDING",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159010.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159202.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159186.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159960.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159239.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "513230.SH",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159028.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159210.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159699.SZ",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159015.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_5D_NOT_STABLE"
+    },
+    {
+      "symbol": "159262.SZ",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159120.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159567.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159741.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159747.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159109.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159220.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159277.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159128.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159740.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159143.SZ",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159170.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159285.SZ",
+      "single": "BOUNDARY_ROUNDING",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "513590.SH",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159179.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159265.SZ",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159297.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159954.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159636.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159191.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "520600.SH",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    },
+    {
+      "symbol": "159788.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159196.SZ",
+      "single": "PASS_SINGLE_DAY",
+      "multi": "MULTI_DAY_PARTIAL"
+    },
+    {
+      "symbol": "159688.SZ",
+      "single": "FAIL_5BP",
+      "multi": "NOT_RUN"
+    }
+  ]
+}

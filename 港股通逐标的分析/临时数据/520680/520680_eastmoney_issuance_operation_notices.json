@@ -1,0 +1,133 @@
+{
+  "retrieved_at_utc": "2026-09-09T04:13:36.422407+00:00",
+  "fund_code": "520680",
+  "source_page": "https://fundf10.eastmoney.com/jjgg_520680.html",
+  "source_api": "https://api.fund.eastmoney.com/f10/JJGG",
+  "api_meta": {
+    "total_count": 8,
+    "page_size": 50,
+    "pages": 1,
+    "type": 1
+  },
+  "latest_updated_prospectus": null,
+  "latest_prospectus_any": {
+    "FUNDCODE": "520680",
+    "TITLE": "南方中证港股通汽车产业主题交易型开放式指数证券投资基金招募说明书",
+    "ShortTitle": "南方中证港股通汽车产业主题ETF",
+    "NEWCATEGORY": "1",
+    "PUBLISHDATE": "2026-02-24T00:00:00",
+    "PUBLISHDATEDesc": "2026-02-24",
+    "ATTACHTYPE": "0",
+    "ID": "AN202602231819983430",
+    "notice_date": "2026-02-24",
+    "notice_url": "https://fund.eastmoney.com/gonggao/520680,AN202602231819983430.html",
+    "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202602231819983430_1.pdf"
+  },
+  "latest_product_summary_update": null,
+  "all_issuance_operation_notices": [
+    {
+      "FUNDCODE": "520680",
+      "TITLE": "南方中证港股通汽车产业主题交易型开放式指数证券投资基金上市交易公告",
+      "ShortTitle": "南方中证港股通汽车产业主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-03-26T00:00:00",
+      "PUBLISHDATEDesc": "2026-03-26",
+      "ATTACHTYPE": "0",
+      "ID": "AN202603261820759603",
+      "notice_date": "2026-03-26",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520680,AN202603261820759603.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202603261820759603_1.pdf"
+    },
+    {
+      "FUNDCODE": "520680",
+      "TITLE": "南方中证港股通汽车产业主题交易型开放式指数证券投资基金上市交易公告书",
+      "ShortTitle": "南方中证港股通汽车产业主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-03-23T00:00:00",
+      "PUBLISHDATEDesc": "2026-03-23",
+      "ATTACHTYPE": "0",
+      "ID": "AN202603231820689982",
+      "notice_date": "2026-03-23",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520680,AN202603231820689982.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202603231820689982_1.pdf"
+    },
+    {
+      "FUNDCODE": "520680",
+      "TITLE": "南方中证港股通汽车产业主题交易型开放式指数证券投资基金基金合同生效公告",
+      "ShortTitle": "南方中证港股通汽车产业主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-03-19T00:00:00",
+      "PUBLISHDATEDesc": "2026-03-19",
+      "ATTACHTYPE": "0",
+      "ID": "AN202603181820626054",
+      "notice_date": "2026-03-19",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520680,AN202603181820626054.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202603181820626054_1.pdf"
+    },
+    {
+      "FUNDCODE": "520680",
+      "TITLE": "南方中证港股通汽车产业主题交易型开放式指数证券投资基金基金份额发售公告",
+      "ShortTitle": "南方中证港股通汽车产业主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-02-24T00:00:00",
+      "PUBLISHDATEDesc": "2026-02-24",
+      "ATTACHTYPE": "0",
+      "ID": "AN202602241819988390",
+      "notice_date": "2026-02-24",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520680,AN202602241819988390.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202602241819988390_1.pdf"
+    },
+    {
+      "FUNDCODE": "520680",
+      "TITLE": "南方中证港股通汽车产业主题交易型开放式指数证券投资基金招募说明书",
+      "ShortTitle": "南方中证港股通汽车产业主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-02-24T00:00:00",
+      "PUBLISHDATEDesc": "2026-02-24",
+      "ATTACHTYPE": "0",
+      "ID": "AN202602231819983430",
+      "notice_date": "2026-02-24",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520680,AN202602231819983430.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202602231819983430_1.pdf"
+    },
+    {
+      "FUNDCODE": "520680",
+      "TITLE": "南方中证港股通汽车产业主题交易型开放式指数证券投资基金基金合同",
+      "ShortTitle": "南方中证港股通汽车产业主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-02-24T00:00:00",
+      "PUBLISHDATEDesc": "2026-02-24",
+      "ATTACHTYPE": "0",
+      "ID": "AN202602231819983429",
+      "notice_date": "2026-02-24",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520680,AN202602231819983429.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202602231819983429_1.pdf"
+    },
+    {
+      "FUNDCODE": "520680",
+      "TITLE": "南方中证港股通汽车产业主题交易型开放式指数证券投资基金托管协议",
+      "ShortTitle": "南方中证港股通汽车产业主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-02-24T00:00:00",
+      "PUBLISHDATEDesc": "2026-02-24",
+      "ATTACHTYPE": "0",
+      "ID": "AN202602231819983428",
+      "notice_date": "2026-02-24",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520680,AN202602231819983428.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202602231819983428_1.pdf"
+    },
+    {
+      "FUNDCODE": "520680",
+      "TITLE": "南方中证港股通汽车产业主题交易型开放式指数证券投资基金基金产品资料概要",
+      "ShortTitle": "南方中证港股通汽车产业主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-02-24T00:00:00",
+      "PUBLISHDATEDesc": "2026-02-24",
+      "ATTACHTYPE": "0",
+      "ID": "AN202602231819983422",
+      "notice_date": "2026-02-24",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520680,AN202602231819983422.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202602231819983422_1.pdf"
+    }
+  ]
+}

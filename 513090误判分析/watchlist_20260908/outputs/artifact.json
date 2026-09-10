@@ -1,0 +1,4764 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "197只 ETF PCF 独立估值核验（2026-09-08）",
+    "description": "基于目标日 PCF、独立港股收盘价/分钟价和固定 HKD/CNY 中间价的 197 只 ETF 估值核验。",
+    "generatedAt": "2026-09-08T17:44:00.113416+00:00",
+    "cards": [
+      {
+        "id": "coverage_card",
+        "description": "目标日 NAV、PCF 和代码日期门禁均覆盖的基金数。",
+        "dataset": "headline",
+        "sourceId": "quality_json",
+        "metrics": [
+          {
+            "label": "目标日全量覆盖",
+            "field": "coverage",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "pass_card",
+        "description": "在公布净值舍入区间内仍满足严格 abs(error_bp) < 5 的基金数。",
+        "dataset": "headline",
+        "sourceId": "validation_csv",
+        "metrics": [
+          {
+            "label": "单日严格通过",
+            "field": "single_pass",
+            "format": "number"
+          },
+          {
+            "label": "通过率",
+            "field": "pass_rate",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "fail_card",
+        "description": "整个公布净值舍入区间都无法满足严格 5 bp 阈值的基金数。",
+        "dataset": "headline",
+        "sourceId": "validation_csv",
+        "metrics": [
+          {
+            "label": "明确超出 5 bp",
+            "field": "definite_fail",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "boundary_card",
+        "description": "公布净值四位舍入区间与 5 bp 阈值相交，或独立定价规则不适用的基金数。",
+        "dataset": "headline",
+        "sourceId": "validation_csv",
+        "metrics": [
+          {
+            "label": "边界 + 不适用",
+            "field": "boundary_or_na",
+            "format": "number"
+          }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "status_chart",
+        "title": "单日核验状态分布",
+        "subtitle": "197 只目标日 PCF；严格通过占 86.8%",
+        "intent": "status",
+        "type": "bar",
+        "dataset": "status_distribution",
+        "sourceId": "validation_csv",
+        "valueFormat": "number",
+        "encodings": {
+          "x": {
+            "field": "status",
+            "type": "nominal",
+            "label": "状态"
+          },
+          "y": {
+            "field": "count",
+            "type": "quantitative",
+            "label": "基金数"
+          },
+          "tooltip": [
+            {
+              "field": "share",
+              "type": "quantitative",
+              "label": "占比",
+              "format": "percent"
+            },
+            {
+              "field": "scope",
+              "type": "text",
+              "label": "范围"
+            }
+          ]
+        },
+        "palette": {
+          "kind": "semantic",
+          "name": "status"
+        }
+      },
+      {
+        "id": "history_chart",
+        "title": "通过标的的复验结果",
+        "subtitle": "深市复验五个共同交易日；沪市按要求仅保留 9/8 单日",
+        "intent": "comparison",
+        "type": "bar",
+        "dataset": "multi_distribution",
+        "sourceId": "validation_csv",
+        "valueFormat": "number",
+        "encodings": {
+          "x": {
+            "field": "outcome",
+            "type": "nominal",
+            "label": "复验结果"
+          },
+          "y": {
+            "field": "count",
+            "type": "quantitative",
+            "label": "基金数"
+          },
+          "tooltip": [
+            {
+              "field": "share",
+              "type": "quantitative",
+              "label": "占全量比例",
+              "format": "percent"
+            },
+            {
+              "field": "scope",
+              "type": "text",
+              "label": "范围"
+            }
+          ]
+        },
+        "palette": {
+          "kind": "categorical",
+          "name": "comparison"
+        }
+      },
+      {
+        "id": "intraday_chart",
+        "title": "513090 港股分钟代理 IOPV",
+        "subtitle": "9月8日香港时间；蓝线为独立估值，灰色虚线为公布单位净值 1.8433",
+        "intent": "trend",
+        "type": "line",
+        "dataset": "control_intraday",
+        "sourceId": "intraday_csv",
+        "valueFormat": "number",
+        "encodings": {
+          "x": {
+            "field": "timestamp",
+            "type": "temporal",
+            "label": "香港时间"
+          },
+          "y": {
+            "field": "estimated_nav",
+            "type": "quantitative",
+            "label": "代理 IOPV"
+          },
+          "tooltip": [
+            {
+              "field": "published_nav",
+              "type": "quantitative",
+              "label": "公布单位净值"
+            },
+            {
+              "field": "error_bp_vs_published",
+              "type": "quantitative",
+              "label": "误差（bp）",
+              "format": "number"
+            }
+          ]
+        },
+        "referenceLines": [
+          {
+            "value": 1.8433,
+            "axis": "y",
+            "color": "neutral",
+            "lineStyle": "dashed",
+            "label": "公布单位净值"
+          }
+        ],
+        "palette": {
+          "kind": "semantic",
+          "name": "actual-vs-baseline"
+        }
+      }
+    ],
+    "tables": [
+      {
+        "id": "worst_table",
+        "title": "单日绝对偏差最大的 10 只基金",
+        "subtitle": "按 9 月 8 日独立估值与公布单位净值的绝对误差降序；误差单位为 bp",
+        "dataset": "top_errors",
+        "sourceId": "validation_csv",
+        "defaultSort": {
+          "field": "abs_error_bp",
+          "direction": "desc"
+        },
+        "columns": [
+          {
+            "field": "code",
+            "label": "代码",
+            "type": "text"
+          },
+          {
+            "field": "market",
+            "label": "市场",
+            "type": "text"
+          },
+          {
+            "field": "fund_name",
+            "label": "基金",
+            "type": "text"
+          },
+          {
+            "field": "single_day_status",
+            "label": "状态",
+            "type": "text"
+          },
+          {
+            "field": "error_bp",
+            "label": "误差（bp）",
+            "format": "number"
+          },
+          {
+            "field": "abs_error_bp",
+            "label": "绝对误差（bp）",
+            "format": "number"
+          },
+          {
+            "field": "published_nav",
+            "label": "公布净值",
+            "format": "number"
+          },
+          {
+            "field": "estimated_nav",
+            "label": "独立估值",
+            "format": "number"
+          },
+          {
+            "field": "stale_component_count",
+            "label": "沿用旧收盘成分数",
+            "format": "number"
+          },
+          {
+            "field": "fixed_cash_cny",
+            "label": "必选现金替代（CNY）",
+            "format": "number"
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "validation_csv",
+        "label": "197 只目标日核验明细",
+        "path": "outputs/report_data.sqlite",
+        "description": "每只基金一行，证据库由 outputs/watchlist_validation.csv 物化，含 PCF/NAV 路径、成分覆盖、估值、bp 误差、舍入边界和复验状态。",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "sql": "SELECT code, market, fund_name, single_day_status, error_bp, abs_error_bp, published_nav, estimated_nav FROM validation_watchlist WHERE pcf_date = '2026-09-08'",
+          "description": "Loads one reviewed target-date row per fund.",
+          "tables_used": [
+            "validation_watchlist"
+          ],
+          "filters": [
+            "pcf_date = '2026-09-08'"
+          ],
+          "metric_definitions": [
+            "error_bp = (estimated_nav / published_nav - 1) × 10000"
+          ]
+        }
+      },
+      {
+        "id": "validation_summary",
+        "label": "核验汇总与公式",
+        "path": "outputs/report_data.sqlite",
+        "description": "日期、固定汇率、严格阈值、公式、汇总计数和分钟证据覆盖，原始汇总见 outputs/validation_summary.json。",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "sql": "SELECT metric, value FROM quality_gate ORDER BY metric",
+          "description": "Loads the reviewed validation gate values used for the report definitions.",
+          "tables_used": [
+            "quality_gate"
+          ],
+          "metric_definitions": [
+            "Fixed FX midpoint is 0.86482 HKD/CNY; strict threshold is abs(error_bp) < 5."
+          ]
+        }
+      },
+      {
+        "id": "quality_json",
+        "label": "数据质量门禁",
+        "path": "outputs/report_data.sqlite",
+        "description": "输入唯一性、目标日覆盖、PCF 解析、成分计数、行情覆盖与控制标的门禁，原始门禁见 outputs/quality_checks.json。",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "sql": "SELECT metric, value FROM quality_gate ORDER BY metric",
+          "description": "Loads the reviewed quality-gate results.",
+          "tables_used": [
+            "quality_gate"
+          ]
+        }
+      },
+      {
+        "id": "multi_day_csv",
+        "label": "历史复验明细",
+        "path": "outputs/report_data.sqlite",
+        "description": "证据库由 outputs/multi_day_validation.csv 物化；深市含目标日及 9/7、9/4、9/3、9/2，沪市仅保留目标日单日结果。",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "sql": "SELECT code, date, status, estimated_nav, published_nav, error_bp, abs_error_bp FROM multi_day_validation ORDER BY code, date DESC",
+          "description": "Loads daily revalidation rows without replacing missing PCFs.",
+          "tables_used": [
+            "multi_day_validation"
+          ],
+          "filters": [
+            "date IN ('2026-09-08', '2026-09-07', '2026-09-04', '2026-09-03', '2026-09-02')"
+          ]
+        }
+      },
+      {
+        "id": "intraday_csv",
+        "label": "港股分钟代理 IOPV",
+        "path": "outputs/report_data.sqlite",
+        "description": "证据库由 outputs/intraday_iopv_20260908.csv 物化；9/8 港股分钟成分估值的共同时间戳序列，公布单位净值只作参考线。每行以 minute_source_ref 回溯到 outputs/intraday/chart_manifest.json 的具体分钟文件列表。",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "sql": "SELECT timestamp, time, fund_code, estimated_nav, published_nav, error_bp_vs_published, minute_component_count, minute_source_ref FROM intraday_iopv WHERE fund_code = '513090' ORDER BY timestamp",
+          "description": "Loads the 513090 minute proxy IOPV sequence and its fund-level source reference.",
+          "tables_used": [
+            "intraday_iopv"
+          ],
+          "filters": [
+            "fund_code = '513090'",
+            "date = '2026-09-08'"
+          ]
+        }
+      },
+      {
+        "id": "contribution_csv",
+        "label": "成分贡献明细",
+        "path": "outputs/report_data.sqlite",
+        "description": "证据库由 outputs/component_contributions_20260908.csv 物化；含每个 PCF 成分的估值方法、数量、价格日期、金额和源文件。",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "sql": "SELECT fund_code, date, component_code, quantity, flag, valuation_method, amount_cny, price_hkd, price_date, source_path FROM component_contributions WHERE date = '2026-09-08' ORDER BY fund_code, component_code",
+          "description": "Loads component-level valuation contributions for the target date.",
+          "tables_used": [
+            "component_contributions"
+          ],
+          "filters": [
+            "date = '2026-09-08'"
+          ]
+        }
+      }
+    ],
+    "blocks": [
+      {
+        "id": "title",
+        "type": "markdown",
+        "body": "# 197只 ETF PCF 独立估值核验（2026-09-08）"
+      },
+      {
+        "id": "executive_summary",
+        "type": "markdown",
+        "sourceId": "validation_csv",
+        "body": "## Executive Summary\n\n- **单日全量结论：171/197 只严格通过（86.8%）。** 20 只明确超出 5 bp，5 只落在四位小数公布净值的舍入边界，1 只为不适用。\n- **上海按用户指定降级为单日。** 102 只沪市 PCF 均取上交所 2026-09-08 当日接口；其中 89 只单日通过，不把上海结果包装成历史 5 日结论。\n- **深市通过标的再做历史复验。** 31 只在 9/8、9/7、9/4、9/3、9/2 五个共同交易日均严格通过；34 只五日不稳定，17 只因历史 PCF CDN 返回 403 只能部分复验。\n- **513090 控制标的通过。** 独立估值 1.8432886185282、公布单位净值 1.8433，误差 -0.0617 bp；分时估值使用成分分钟价共同时间戳。"
+      },
+      {
+        "id": "headline_metrics",
+        "type": "metric-strip",
+        "cardIds": [
+          "coverage_card",
+          "pass_card",
+          "fail_card",
+          "boundary_card"
+        ]
+      },
+      {
+        "id": "definitions",
+        "type": "markdown",
+        "sourceId": "validation_summary",
+        "body": "## 口径与判定边界\n\n估值口径是：允许现金替代数量 × 港股不复权收盘价 × HKD/CNY 0.86482，加必选现金替代金额和 PCF 当日估计现金，再除以申赎单位。深市 159900 申赎现金占位行从成分估值中排除，避免与当日估计现金重复计算。\n\n公布单位净值按四位小数处理：只有在整个 ±0.00005 舍入区间内仍满足 `abs(error_bp) < 5` 才记为严格通过；区间与阈值相交的标的单列为 `BOUNDARY_ROUNDING`。T+1 最终现金不用于主估值。"
+      },
+      {
+        "id": "status_reading",
+        "type": "markdown",
+        "sourceId": "validation_csv",
+        "body": "## 单日结果：大多数标的与独立收盘估值一致\n\n下图按 197 只全量目标日 PCF 展示状态。严格通过是可直接用于首轮筛选的集合；明确超差和舍入边界需进入复核清单。"
+      },
+      {
+        "id": "status_chart",
+        "type": "chart",
+        "chartId": "status_chart",
+        "layout": "full"
+      },
+      {
+        "id": "worst_cases",
+        "type": "markdown",
+        "sourceId": "validation_csv",
+        "body": "## 偏差集中在少数标的，最大单日偏差为 -21.30 bp\n\n按绝对误差排序的前 10 只如下。表中保留估值、公布净值、方向和停牌沿用数量，便于直接回到逐成分明细复核。"
+      },
+      {
+        "id": "worst_table",
+        "type": "table",
+        "tableId": "worst_table",
+        "layout": "full"
+      },
+      {
+        "id": "history_reading",
+        "type": "markdown",
+        "sourceId": "validation_csv",
+        "body": "## 历史复验：深市有 5 日证据，沪市只做 9/8 单日\n\n历史结论只对 9/8 单日严格通过的标的展开。深市的 82 只单日通过标的中，31 只五日均在 5 bp 内，34 只跨日不稳定，17 只因历史 PCF 只部分可得；沪市的 89 只通过标的统一标为“仅 9/8 单日”。"
+      },
+      {
+        "id": "history_chart",
+        "type": "chart",
+        "chartId": "history_chart",
+        "layout": "full"
+      },
+      {
+        "id": "history_caveat",
+        "type": "markdown",
+        "sourceId": "quality_json",
+        "body": "## 如何解读历史缺口\n\n上海接口只提供目标日 PCF，本报告按要求不追补或推断上海历史 PCF。深市历史复验没有把被 CDN 拦截的 88/380 次请求当作成功，也没有用 T+1 最终现金替代 T 日独立估值；因此“部分可得”是证据边界，而不是通过或失败。"
+      },
+      {
+        "id": "intraday_reading",
+        "type": "markdown",
+        "sourceId": "intraday_csv",
+        "body": "## 分钟证据：513090 的独立代理 IOPV 在收盘附近贴合公布净值\n\n下图使用 513090 的 9/8 港股分钟成分价，在共同时间戳上重算代理 IOPV；灰色虚线是公布单位净值，只作外部参考。15:00 代理值为 1.8517277223，16:08 最后分钟为 1.8432886185282，与公布单位净值 1.8433 的收盘误差为 -0.0617 bp。它用于检查日内路径和收盘时点，不替代目标日收盘估值。"
+      },
+      {
+        "id": "intraday_chart",
+        "type": "chart",
+        "chartId": "intraday_chart",
+        "layout": "full"
+      },
+      {
+        "id": "next_steps",
+        "type": "markdown",
+        "sourceId": "quality_json",
+        "body": "## 风险与下一步\n\n- **优先复核 20 只明确超差标的。** 先看 159699（-21.30 bp）、159303（+13.68 bp）和 513950（-11.55 bp）等偏差较大的行，再下钻 `component_contributions_20260908.csv`。\n- **边界标的不要直接二元化。** 513060、159268、159245、159152、159285 受公布净值四舍五入影响，报告单列为边界；需要更高精度净值或基金侧 IOPV 才能消除不确定性。\n- **继续监控数据缺口。** 3 只港股（00853、02172、02252）9/8 无日线成交，估值明确沿用 8/31 最后收盘价；分钟数据对 646 只成分只取到 455 只目标日序列，170 只基金具备完整共同时间戳证据。\n- **全量审计入口**是随报告交付的 `watchlist_validation.csv`、`multi_day_validation.csv`、`component_contributions_20260908.csv` 与 `quality_checks.json`。"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-08T17:44:00.113585+00:00",
+    "status": "ready",
+    "datasets": {
+      "headline": [
+        {
+          "coverage": 197,
+          "single_pass": 171,
+          "pass_rate": 0.868020304568528,
+          "definite_fail": 20,
+          "boundary_or_na": 6
+        }
+      ],
+      "status_distribution": [
+        {
+          "status": "严格通过",
+          "status_code": "PASS_SINGLE_DAY",
+          "count": 171,
+          "share": 0.868020304568528,
+          "scope": "197 只全量目标日 PCF"
+        },
+        {
+          "status": "明确超出 5 bp",
+          "status_code": "FAIL_5BP",
+          "count": 20,
+          "share": 0.10152284263959391,
+          "scope": "197 只全量目标日 PCF"
+        },
+        {
+          "status": "四位净值舍入边界",
+          "status_code": "BOUNDARY_ROUNDING",
+          "count": 5,
+          "share": 0.025380710659898477,
+          "scope": "197 只全量目标日 PCF"
+        },
+        {
+          "status": "不适用",
+          "status_code": "NOT_APPLICABLE",
+          "count": 1,
+          "share": 0.005076142131979695,
+          "scope": "197 只全量目标日 PCF"
+        }
+      ],
+      "multi_distribution": [
+        {
+          "outcome": "深市 5日通过",
+          "outcome_code": "MULTI_DAY_5D_PASS",
+          "count": 31,
+          "share": 0.15736040609137056,
+          "scope": "197 只；只有单日严格通过标的进入复验"
+        },
+        {
+          "outcome": "深市 5日不稳",
+          "outcome_code": "MULTI_DAY_5D_NOT_STABLE",
+          "count": 34,
+          "share": 0.17258883248730963,
+          "scope": "197 只；只有单日严格通过标的进入复验"
+        },
+        {
+          "outcome": "深市 历史部分",
+          "outcome_code": "MULTI_DAY_PARTIAL",
+          "count": 17,
+          "share": 0.08629441624365482,
+          "scope": "197 只；只有单日严格通过标的进入复验"
+        },
+        {
+          "outcome": "沪市 9/8单日",
+          "outcome_code": "SH_SINGLE_DAY_ONLY",
+          "count": 89,
+          "share": 0.4517766497461929,
+          "scope": "197 只；只有单日严格通过标的进入复验"
+        },
+        {
+          "outcome": "单日未通过",
+          "outcome_code": "NOT_RUN",
+          "count": 26,
+          "share": 0.1319796954314721,
+          "scope": "197 只；只有单日严格通过标的进入复验"
+        }
+      ],
+      "top_errors": [
+        {
+          "code": "159699",
+          "market": "SZ",
+          "fund_name": "恒生消费ETF广发",
+          "single_day_status": "明确超出 5 bp",
+          "error_bp": -21.304769364253392,
+          "abs_error_bp": 21.304769364253392,
+          "published_nav": 0.884,
+          "estimated_nav": 0.8821166583882,
+          "stale_component_count": 0,
+          "fixed_cash_cny": 0
+        },
+        {
+          "code": "159303",
+          "market": "SZ",
+          "fund_name": "恒生医疗ETF大成",
+          "single_day_status": "明确超出 5 bp",
+          "error_bp": 13.675972763707893,
+          "abs_error_bp": 13.675972763707893,
+          "published_nav": 1.6268,
+          "estimated_nav": 1.6290248072492,
+          "stale_component_count": 3,
+          "fixed_cash_cny": 0
+        },
+        {
+          "code": "513950",
+          "market": "SH",
+          "fund_name": "恒生红利ETF富国",
+          "single_day_status": "明确超出 5 bp",
+          "error_bp": -11.54703598406748,
+          "abs_error_bp": 11.54703598406748,
+          "published_nav": 1.2804,
+          "estimated_nav": 1.2789215175126,
+          "stale_component_count": 0,
+          "fixed_cash_cny": 0
+        },
+        {
+          "code": "159726",
+          "market": "SZ",
+          "fund_name": "港股通高股息ETF华夏",
+          "single_day_status": "明确超出 5 bp",
+          "error_bp": 10.780373854964564,
+          "abs_error_bp": 10.780373854964564,
+          "published_nav": 1.3969,
+          "estimated_nav": 1.3984059104238,
+          "stale_component_count": 0,
+          "fixed_cash_cny": 0
+        },
+        {
+          "code": "159262",
+          "market": "SZ",
+          "fund_name": "港股通科技ETF广发",
+          "single_day_status": "明确超出 5 bp",
+          "error_bp": 8.430091887405268,
+          "abs_error_bp": 8.430091887405268,
+          "published_nav": 0.8313,
+          "estimated_nav": 0.8320007935386,
+          "stale_component_count": 0,
+          "fixed_cash_cny": 0
+        },
+        {
+          "code": "513590",
+          "market": "SH",
+          "fund_name": "港股通消费ETF鹏华",
+          "single_day_status": "明确超出 5 bp",
+          "error_bp": 8.129751089735256,
+          "abs_error_bp": 8.129751089735256,
+          "published_nav": 0.7693,
+          "estimated_nav": 0.7699254217513334,
+          "stale_component_count": 0,
+          "fixed_cash_cny": 0
+        },
+        {
+          "code": "159735",
+          "market": "SZ",
+          "fund_name": "港股消费ETF银华",
+          "single_day_status": "明确超出 5 bp",
+          "error_bp": 7.7781094653048966,
+          "abs_error_bp": 7.7781094653048966,
+          "published_nav": 0.6658,
+          "estimated_nav": 0.6663178665282,
+          "stale_component_count": 0,
+          "fixed_cash_cny": 0
+        },
+        {
+          "code": "526010",
+          "market": "SH",
+          "fund_name": "港股通医疗ETF汇添富",
+          "single_day_status": "明确超出 5 bp",
+          "error_bp": 6.680941980066446,
+          "abs_error_bp": 6.680941980066446,
+          "published_nav": 1.0535,
+          "estimated_nav": 1.0542038372376,
+          "stale_component_count": 3,
+          "fixed_cash_cny": 2086.19
+        },
+        {
+          "code": "513230",
+          "market": "SH",
+          "fund_name": "港股通消费ETF华夏",
+          "single_day_status": "明确超出 5 bp",
+          "error_bp": 6.622525888413011,
+          "abs_error_bp": 6.622525888413011,
+          "published_nav": 0.8639,
+          "estimated_nav": 0.8644721200115,
+          "stale_component_count": 0,
+          "fixed_cash_cny": 0
+        },
+        {
+          "code": "159143",
+          "market": "SZ",
+          "fund_name": "港股通央企红利ETF平安",
+          "single_day_status": "明确超出 5 bp",
+          "error_bp": 6.614730389426957,
+          "abs_error_bp": 6.614730389426957,
+          "published_nav": 0.9912,
+          "estimated_nav": 0.9918556520762,
+          "stale_component_count": 0,
+          "fixed_cash_cny": 30776.56
+        }
+      ],
+      "control_intraday": [
+        {
+          "timestamp": "2026-09-08T09:30:00+08:00",
+          "time": "09:30",
+          "fund_code": "513090",
+          "estimated_nav": 1.8943564297886,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 276.9838321955187,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:31:00+08:00",
+          "time": "09:31",
+          "fund_code": "513090",
+          "estimated_nav": 1.8839402350216,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 220.47542462757087,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:32:00+08:00",
+          "time": "09:32",
+          "fund_code": "513090",
+          "estimated_nav": 1.8842331063146,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 222.0642668833084,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:33:00+08:00",
+          "time": "09:33",
+          "fund_code": "513090",
+          "estimated_nav": 1.8891859218064,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 248.93355290186213,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:34:00+08:00",
+          "time": "09:34",
+          "fund_code": "513090",
+          "estimated_nav": 1.8944287806298,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 277.37633933597294,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:35:00+08:00",
+          "time": "09:35",
+          "fund_code": "513090",
+          "estimated_nav": 1.8894073157264,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 250.13462662832887,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:36:00+08:00",
+          "time": "09:36",
+          "fund_code": "513090",
+          "estimated_nav": 1.8886707139396,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 246.1385229729296,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:37:00+08:00",
+          "time": "09:37",
+          "fund_code": "513090",
+          "estimated_nav": 1.8897545150118,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 252.01820111647731,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:38:00+08:00",
+          "time": "09:38",
+          "fund_code": "513090",
+          "estimated_nav": 1.8906822679632,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 257.0513099506333,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:39:00+08:00",
+          "time": "09:39",
+          "fund_code": "513090",
+          "estimated_nav": 1.886399757157,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 233.81846230673187,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:40:00+08:00",
+          "time": "09:40",
+          "fund_code": "513090",
+          "estimated_nav": 1.8846908814852,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 224.54772139749446,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:41:00+08:00",
+          "time": "09:41",
+          "fund_code": "513090",
+          "estimated_nav": 1.8857535463566,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 230.31273453371747,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:42:00+08:00",
+          "time": "09:42",
+          "fund_code": "513090",
+          "estimated_nav": 1.8863475133808,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 233.53503705745294,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:43:00+08:00",
+          "time": "09:43",
+          "fund_code": "513090",
+          "estimated_nav": 1.8871799631682,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 238.05112118591597,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:44:00+08:00",
+          "time": "09:44",
+          "fund_code": "513090",
+          "estimated_nav": 1.8852015836398,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 227.3183075994134,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:45:00+08:00",
+          "time": "09:45",
+          "fund_code": "513090",
+          "estimated_nav": 1.885982567989,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 231.55518900341843,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:46:00+08:00",
+          "time": "09:46",
+          "fund_code": "513090",
+          "estimated_nav": 1.8855988560032,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 229.47353118428993,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:47:00+08:00",
+          "time": "09:47",
+          "fund_code": "513090",
+          "estimated_nav": 1.8851885421542,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 227.24755685021415,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:48:00+08:00",
+          "time": "09:48",
+          "fund_code": "513090",
+          "estimated_nav": 1.8896032752902,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 251.19771762708075,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:49:00+08:00",
+          "time": "09:49",
+          "fund_code": "513090",
+          "estimated_nav": 1.889319346236,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 249.65738748982778,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:50:00+08:00",
+          "time": "09:50",
+          "fund_code": "513090",
+          "estimated_nav": 1.8910387900082,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 258.98546090272976,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:51:00+08:00",
+          "time": "09:51",
+          "fund_code": "513090",
+          "estimated_nav": 1.8890171608316,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 248.0180156870837,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:52:00+08:00",
+          "time": "09:52",
+          "fund_code": "513090",
+          "estimated_nav": 1.8878442832994,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 241.65509303640366,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:53:00+08:00",
+          "time": "09:53",
+          "fund_code": "513090",
+          "estimated_nav": 1.8892217858918,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 249.12811746216067,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:54:00+08:00",
+          "time": "09:54",
+          "fund_code": "513090",
+          "estimated_nav": 1.8899667418398,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 253.16954288395976,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:55:00+08:00",
+          "time": "09:55",
+          "fund_code": "513090",
+          "estimated_nav": 1.890735705191,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 257.34120973797127,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:56:00+08:00",
+          "time": "09:56",
+          "fund_code": "513090",
+          "estimated_nav": 1.8894383368198,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 250.302917700862,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:57:00+08:00",
+          "time": "09:57",
+          "fund_code": "513090",
+          "estimated_nav": 1.88969874277,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 251.71563375467886,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:58:00+08:00",
+          "time": "09:58",
+          "fund_code": "513090",
+          "estimated_nav": 1.8887587439674,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 246.6160905300274,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T09:59:00+08:00",
+          "time": "09:59",
+          "fund_code": "513090",
+          "estimated_nav": 1.8894277773676,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 250.2456321141433,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:00:00+08:00",
+          "time": "10:00",
+          "fund_code": "513090",
+          "estimated_nav": 1.8908995366918,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 258.2300042955565,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:01:00+08:00",
+          "time": "10:01",
+          "fund_code": "513090",
+          "estimated_nav": 1.8897372618528,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 251.92460181630904,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:02:00+08:00",
+          "time": "10:02",
+          "fund_code": "513090",
+          "estimated_nav": 1.892175198081,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 265.15053480713925,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:03:00+08:00",
+          "time": "10:03",
+          "fund_code": "513090",
+          "estimated_nav": 1.8925166895544,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 267.0031441132759,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:04:00+08:00",
+          "time": "10:04",
+          "fund_code": "513090",
+          "estimated_nav": 1.8912005805338,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 259.8631830618991,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:05:00+08:00",
+          "time": "10:05",
+          "fund_code": "513090",
+          "estimated_nav": 1.890196230475,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 254.41453086855194,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:06:00+08:00",
+          "time": "10:06",
+          "fund_code": "513090",
+          "estimated_nav": 1.891404556979,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 260.96976606629465,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:07:00+08:00",
+          "time": "10:07",
+          "fund_code": "513090",
+          "estimated_nav": 1.8895457042228,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 250.8853915412579,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:08:00+08:00",
+          "time": "10:08",
+          "fund_code": "513090",
+          "estimated_nav": 1.8874446845702,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 239.4872487940103,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:09:00+08:00",
+          "time": "10:09",
+          "fund_code": "513090",
+          "estimated_nav": 1.887497170496,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 239.7719877176807,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:10:00+08:00",
+          "time": "10:10",
+          "fund_code": "513090",
+          "estimated_nav": 1.887398797221,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 239.23830749742248,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:11:00+08:00",
+          "time": "10:11",
+          "fund_code": "513090",
+          "estimated_nav": 1.8871630559372,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 237.9593985634454,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:12:00+08:00",
+          "time": "10:12",
+          "fund_code": "513090",
+          "estimated_nav": 1.8877342263062,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 241.05802802690812,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:13:00+08:00",
+          "time": "10:13",
+          "fund_code": "513090",
+          "estimated_nav": 1.8874340299878,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 239.42944712092464,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:14:00+08:00",
+          "time": "10:14",
+          "fund_code": "513090",
+          "estimated_nav": 1.8874658986048,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 239.60233605381686,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:15:00+08:00",
+          "time": "10:15",
+          "fund_code": "513090",
+          "estimated_nav": 1.8864337359348,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 234.00279897358044,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:16:00+08:00",
+          "time": "10:16",
+          "fund_code": "513090",
+          "estimated_nav": 1.886657776204,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 235.21822928443515,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:17:00+08:00",
+          "time": "10:17",
+          "fund_code": "513090",
+          "estimated_nav": 1.8871683832284,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 237.98829939998933,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:18:00+08:00",
+          "time": "10:18",
+          "fund_code": "513090",
+          "estimated_nav": 1.8877567116262,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 241.18001207725337,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:19:00+08:00",
+          "time": "10:19",
+          "fund_code": "513090",
+          "estimated_nav": 1.88548923142,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 228.8788120219176,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:20:00+08:00",
+          "time": "10:20",
+          "fund_code": "513090",
+          "estimated_nav": 1.8870912758772,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 237.569987941193,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:21:00+08:00",
+          "time": "10:21",
+          "fund_code": "513090",
+          "estimated_nav": 1.8878404348504,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 241.63421499701744,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:22:00+08:00",
+          "time": "10:22",
+          "fund_code": "513090",
+          "estimated_nav": 1.8881513895296,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 243.32116057939723,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:23:00+08:00",
+          "time": "10:23",
+          "fund_code": "513090",
+          "estimated_nav": 1.8895284251192,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 250.79165149026306,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:24:00+08:00",
+          "time": "10:24",
+          "fund_code": "513090",
+          "estimated_nav": 1.8877873435506,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 241.34619188737716,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:25:00+08:00",
+          "time": "10:25",
+          "fund_code": "513090",
+          "estimated_nav": 1.8874411647528,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 239.46815359843887,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:26:00+08:00",
+          "time": "10:26",
+          "fund_code": "513090",
+          "estimated_nav": 1.8867841350542,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 235.9037327304292,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:27:00+08:00",
+          "time": "10:27",
+          "fund_code": "513090",
+          "estimated_nav": 1.88688202403,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 236.43478560190889,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:28:00+08:00",
+          "time": "10:28",
+          "fund_code": "513090",
+          "estimated_nav": 1.887009066088,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 237.12399548635688,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:29:00+08:00",
+          "time": "10:29",
+          "fund_code": "513090",
+          "estimated_nav": 1.8879631182156,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 242.2997787424741,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:30:00+08:00",
+          "time": "10:30",
+          "fund_code": "513090",
+          "estimated_nav": 1.8856553719902,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 229.78013340313686,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:31:00+08:00",
+          "time": "10:31",
+          "fund_code": "513090",
+          "estimated_nav": 1.8872750760718,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 238.56711371887496,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:32:00+08:00",
+          "time": "10:32",
+          "fund_code": "513090",
+          "estimated_nav": 1.8875380937784,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 239.99399868930738,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:33:00+08:00",
+          "time": "10:33",
+          "fund_code": "513090",
+          "estimated_nav": 1.8892501433396,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 249.28195811642294,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:34:00+08:00",
+          "time": "10:34",
+          "fund_code": "513090",
+          "estimated_nav": 1.8884965737844,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 245.19380341995412,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:35:00+08:00",
+          "time": "10:35",
+          "fund_code": "513090",
+          "estimated_nav": 1.887057452767,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 237.38649577931037,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:36:00+08:00",
+          "time": "10:36",
+          "fund_code": "513090",
+          "estimated_nav": 1.885885016293,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 231.02596589269274,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:37:00+08:00",
+          "time": "10:37",
+          "fund_code": "513090",
+          "estimated_nav": 1.8858642000756,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 230.91303681223917,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:38:00+08:00",
+          "time": "10:38",
+          "fund_code": "513090",
+          "estimated_nav": 1.8853984945056,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 228.38655946183505,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:39:00+08:00",
+          "time": "10:39",
+          "fund_code": "513090",
+          "estimated_nav": 1.8864504961464,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 234.09372400802874,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:40:00+08:00",
+          "time": "10:40",
+          "fund_code": "513090",
+          "estimated_nav": 1.887659281005,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 240.65144580372123,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:41:00+08:00",
+          "time": "10:41",
+          "fund_code": "513090",
+          "estimated_nav": 1.887317114972,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 238.79517697607656,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:42:00+08:00",
+          "time": "10:42",
+          "fund_code": "513090",
+          "estimated_nav": 1.886151510576,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 232.47171147398714,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:43:00+08:00",
+          "time": "10:43",
+          "fund_code": "513090",
+          "estimated_nav": 1.8851905571848,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 227.2584884978035,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:44:00+08:00",
+          "time": "10:44",
+          "fund_code": "513090",
+          "estimated_nav": 1.8848022530048,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 225.1519177822381,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:45:00+08:00",
+          "time": "10:45",
+          "fund_code": "513090",
+          "estimated_nav": 1.8858316828436,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 230.7366291086632,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:46:00+08:00",
+          "time": "10:46",
+          "fund_code": "513090",
+          "estimated_nav": 1.8855485753684,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 229.20075608094282,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:47:00+08:00",
+          "time": "10:47",
+          "fund_code": "513090",
+          "estimated_nav": 1.8857581558472,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 230.33774126403728,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:48:00+08:00",
+          "time": "10:48",
+          "fund_code": "513090",
+          "estimated_nav": 1.8866504079376,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 235.1782560494775,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:49:00+08:00",
+          "time": "10:49",
+          "fund_code": "513090",
+          "estimated_nav": 1.8863207644982,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 233.38992295448557,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:50:00+08:00",
+          "time": "10:50",
+          "fund_code": "513090",
+          "estimated_nav": 1.8871087192966,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 237.66461941409523,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:51:00+08:00",
+          "time": "10:51",
+          "fund_code": "513090",
+          "estimated_nav": 1.8882115637052,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 243.64760866489422,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:52:00+08:00",
+          "time": "10:52",
+          "fund_code": "513090",
+          "estimated_nav": 1.8887081519974,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 246.34162641675283,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:53:00+08:00",
+          "time": "10:53",
+          "fund_code": "513090",
+          "estimated_nav": 1.8884040380444,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 244.6917921358449,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:54:00+08:00",
+          "time": "10:54",
+          "fund_code": "513090",
+          "estimated_nav": 1.8872745052906,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 238.5640172006731,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:55:00+08:00",
+          "time": "10:55",
+          "fund_code": "513090",
+          "estimated_nav": 1.8875056803248,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 239.81815398904206,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:56:00+08:00",
+          "time": "10:56",
+          "fund_code": "513090",
+          "estimated_nav": 1.887218828179,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 238.26196592524386,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:57:00+08:00",
+          "time": "10:57",
+          "fund_code": "513090",
+          "estimated_nav": 1.8853593268078,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 228.17407262952338,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:58:00+08:00",
+          "time": "10:58",
+          "fund_code": "513090",
+          "estimated_nav": 1.886388168569,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 233.7555936038638,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T10:59:00+08:00",
+          "time": "10:59",
+          "fund_code": "513090",
+          "estimated_nav": 1.8877722437934,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 241.26427490587466,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:00:00+08:00",
+          "time": "11:00",
+          "fund_code": "513090",
+          "estimated_nav": 1.8869667072044,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 236.89419630228414,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:01:00+08:00",
+          "time": "11:01",
+          "fund_code": "513090",
+          "estimated_nav": 1.8854858067328,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 228.86023291271096,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:02:00+08:00",
+          "time": "11:02",
+          "fund_code": "513090",
+          "estimated_nav": 1.8851269756184,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 226.91355513698275,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:03:00+08:00",
+          "time": "11:03",
+          "fund_code": "513090",
+          "estimated_nav": 1.8859151812146,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 231.1896121879231,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:04:00+08:00",
+          "time": "11:04",
+          "fund_code": "513090",
+          "estimated_nav": 1.886008858517,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 231.697816508436,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:05:00+08:00",
+          "time": "11:05",
+          "fund_code": "513090",
+          "estimated_nav": 1.8858367247442,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 230.76398168610623,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:06:00+08:00",
+          "time": "11:06",
+          "fund_code": "513090",
+          "estimated_nav": 1.8840938270536,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 221.30866952530857,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:07:00+08:00",
+          "time": "11:07",
+          "fund_code": "513090",
+          "estimated_nav": 1.8840948215966,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 221.31406497369,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:08:00+08:00",
+          "time": "11:08",
+          "fund_code": "513090",
+          "estimated_nav": 1.8847146813316,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 224.67683682309004,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:09:00+08:00",
+          "time": "11:09",
+          "fund_code": "513090",
+          "estimated_nav": 1.8851880059658,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 227.2446479997825,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:10:00+08:00",
+          "time": "11:10",
+          "fund_code": "513090",
+          "estimated_nav": 1.8856705755258,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 229.86261338794554,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:11:00+08:00",
+          "time": "11:11",
+          "fund_code": "513090",
+          "estimated_nav": 1.8876125547804,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 240.39795356371795,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:12:00+08:00",
+          "time": "11:12",
+          "fund_code": "513090",
+          "estimated_nav": 1.8867000918466,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 235.4477938837962,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:13:00+08:00",
+          "time": "11:13",
+          "fund_code": "513090",
+          "estimated_nav": 1.886752646958,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 235.73290814300486,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:14:00+08:00",
+          "time": "11:14",
+          "fund_code": "513090",
+          "estimated_nav": 1.8858016995342,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 230.57396806922316,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:15:00+08:00",
+          "time": "11:15",
+          "fund_code": "513090",
+          "estimated_nav": 1.8850246241714,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 226.35829312320334,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:16:00+08:00",
+          "time": "11:16",
+          "fund_code": "513090",
+          "estimated_nav": 1.8851446611874,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 227.00950028427425,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:17:00+08:00",
+          "time": "11:17",
+          "fund_code": "513090",
+          "estimated_nav": 1.885067328983,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 226.58996898497375,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:18:00+08:00",
+          "time": "11:18",
+          "fund_code": "513090",
+          "estimated_nav": 1.8846297819522,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 224.21625319915427,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:19:00+08:00",
+          "time": "11:19",
+          "fund_code": "513090",
+          "estimated_nav": 1.8841733126598,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 221.73988314327485,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:20:00+08:00",
+          "time": "11:20",
+          "fund_code": "513090",
+          "estimated_nav": 1.8843917143026,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 222.92472360766035,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:21:00+08:00",
+          "time": "11:21",
+          "fund_code": "513090",
+          "estimated_nav": 1.8851168572244,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 226.8586623143265,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:22:00+08:00",
+          "time": "11:22",
+          "fund_code": "513090",
+          "estimated_nav": 1.8867600152244,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 235.77288137796248,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:23:00+08:00",
+          "time": "11:23",
+          "fund_code": "513090",
+          "estimated_nav": 1.8872703628028,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 238.54154398524452,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:24:00+08:00",
+          "time": "11:24",
+          "fund_code": "513090",
+          "estimated_nav": 1.8876185739276,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 240.43060775565505,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:25:00+08:00",
+          "time": "11:25",
+          "fund_code": "513090",
+          "estimated_nav": 1.8864307436576,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 233.986565711497,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:26:00+08:00",
+          "time": "11:26",
+          "fund_code": "513090",
+          "estimated_nav": 1.886291006042,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 233.22848175554745,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:27:00+08:00",
+          "time": "11:27",
+          "fund_code": "513090",
+          "estimated_nav": 1.885732159358,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 230.19670893506205,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:28:00+08:00",
+          "time": "11:28",
+          "fund_code": "513090",
+          "estimated_nav": 1.885577572783,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 229.35806858894293,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:29:00+08:00",
+          "time": "11:29",
+          "fund_code": "513090",
+          "estimated_nav": 1.8848909575922,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 225.6331448608484,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:30:00+08:00",
+          "time": "11:30",
+          "fund_code": "513090",
+          "estimated_nav": 1.8846585891064,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 224.37253353442264,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:31:00+08:00",
+          "time": "11:31",
+          "fund_code": "513090",
+          "estimated_nav": 1.884350004034,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 222.69844319427133,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:32:00+08:00",
+          "time": "11:32",
+          "fund_code": "513090",
+          "estimated_nav": 1.8846623078324,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 224.3927078196717,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:33:00+08:00",
+          "time": "11:33",
+          "fund_code": "513090",
+          "estimated_nav": 1.8836055064406,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 218.65950437042426,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:34:00+08:00",
+          "time": "11:34",
+          "fund_code": "513090",
+          "estimated_nav": 1.8821251508056,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 210.62849674822414,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:35:00+08:00",
+          "time": "11:35",
+          "fund_code": "513090",
+          "estimated_nav": 1.8823983128508,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 212.11041529213935,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:36:00+08:00",
+          "time": "11:36",
+          "fund_code": "513090",
+          "estimated_nav": 1.8831121698716,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 215.98312738892344,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:37:00+08:00",
+          "time": "11:37",
+          "fund_code": "513090",
+          "estimated_nav": 1.8829191247512,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 214.9358473997731,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:38:00+08:00",
+          "time": "11:38",
+          "fund_code": "513090",
+          "estimated_nav": 1.8829393269464,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 215.04544537731317,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:39:00+08:00",
+          "time": "11:39",
+          "fund_code": "513090",
+          "estimated_nav": 1.8835171650776,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 218.18024780339672,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:40:00+08:00",
+          "time": "11:40",
+          "fund_code": "513090",
+          "estimated_nav": 1.883569676948,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 218.4651274778937,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:41:00+08:00",
+          "time": "11:41",
+          "fund_code": "513090",
+          "estimated_nav": 1.8819915447638,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 209.90367690446598,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:42:00+08:00",
+          "time": "11:42",
+          "fund_code": "513090",
+          "estimated_nav": 1.8818032129124,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 208.8819666489461,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:43:00+08:00",
+          "time": "11:43",
+          "fund_code": "513090",
+          "estimated_nav": 1.8814454368784,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 206.94101274019383,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:44:00+08:00",
+          "time": "11:44",
+          "fund_code": "513090",
+          "estimated_nav": 1.878668223116,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 191.87448118049178,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:45:00+08:00",
+          "time": "11:45",
+          "fund_code": "513090",
+          "estimated_nav": 1.8776559340096,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 186.38275923398285,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:46:00+08:00",
+          "time": "11:46",
+          "fund_code": "513090",
+          "estimated_nav": 1.8769913284878,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 182.7772391243965,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:47:00+08:00",
+          "time": "11:47",
+          "fund_code": "513090",
+          "estimated_nav": 1.877769891341,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 187.00098378451767,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:48:00+08:00",
+          "time": "11:48",
+          "fund_code": "513090",
+          "estimated_nav": 1.8770765824434,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 183.23974634297136,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:49:00+08:00",
+          "time": "11:49",
+          "fund_code": "513090",
+          "estimated_nav": 1.878816496505,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 192.67887215862922,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:50:00+08:00",
+          "time": "11:50",
+          "fund_code": "513090",
+          "estimated_nav": 1.8789733921494,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 193.5300393283801,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:51:00+08:00",
+          "time": "11:51",
+          "fund_code": "513090",
+          "estimated_nav": 1.8772251585194,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 184.04577941409482,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:52:00+08:00",
+          "time": "11:52",
+          "fund_code": "513090",
+          "estimated_nav": 1.876611075782,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 180.71434808224484,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:53:00+08:00",
+          "time": "11:53",
+          "fund_code": "513090",
+          "estimated_nav": 1.8763796326536,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 179.4587568686601,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:54:00+08:00",
+          "time": "11:54",
+          "fund_code": "513090",
+          "estimated_nav": 1.8771659269976,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 183.72444527532173,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:55:00+08:00",
+          "time": "11:55",
+          "fund_code": "513090",
+          "estimated_nav": 1.8774897501984,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 185.48120326805196,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:56:00+08:00",
+          "time": "11:56",
+          "fund_code": "513090",
+          "estimated_nav": 1.8770149294256,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 182.90527546031666,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:57:00+08:00",
+          "time": "11:57",
+          "fund_code": "513090",
+          "estimated_nav": 1.877748141118,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 186.88298767427946,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:58:00+08:00",
+          "time": "11:58",
+          "fund_code": "513090",
+          "estimated_nav": 1.8774534450548,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 185.28424594368875,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T11:59:00+08:00",
+          "time": "11:59",
+          "fund_code": "513090",
+          "estimated_nav": 1.8784452811682,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 190.66500932132692,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T12:00:00+08:00",
+          "time": "12:00",
+          "fund_code": "513090",
+          "estimated_nav": 1.8779450346874,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 187.951145702816,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:00:00+08:00",
+          "time": "13:00",
+          "fund_code": "513090",
+          "estimated_nav": 1.8779450346874,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 187.951145702816,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:01:00+08:00",
+          "time": "13:01",
+          "fund_code": "513090",
+          "estimated_nav": 1.874362241095,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 168.51430095480958,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:02:00+08:00",
+          "time": "13:02",
+          "fund_code": "513090",
+          "estimated_nav": 1.8728016820532,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 160.04818560842128,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:03:00+08:00",
+          "time": "13:03",
+          "fund_code": "513090",
+          "estimated_nav": 1.873262363019,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 162.54740421526526,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:04:00+08:00",
+          "time": "13:04",
+          "fund_code": "513090",
+          "estimated_nav": 1.8729746460532,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 160.98652445722283,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:05:00+08:00",
+          "time": "13:05",
+          "fund_code": "513090",
+          "estimated_nav": 1.8713890418242,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 152.38453764552685,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:06:00+08:00",
+          "time": "13:06",
+          "fund_code": "513090",
+          "estimated_nav": 1.8708970197816,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 149.71529203927636,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:07:00+08:00",
+          "time": "13:07",
+          "fund_code": "513090",
+          "estimated_nav": 1.8678984380438,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 133.44782750393415,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:08:00+08:00",
+          "time": "13:08",
+          "fund_code": "513090",
+          "estimated_nav": 1.8676486780278,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 132.09286620626148,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:09:00+08:00",
+          "time": "13:09",
+          "fund_code": "513090",
+          "estimated_nav": 1.86668890944,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 126.88607085119096,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:10:00+08:00",
+          "time": "13:10",
+          "fund_code": "513090",
+          "estimated_nav": 1.8669769982784,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 128.44896803775762,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:11:00+08:00",
+          "time": "13:11",
+          "fund_code": "513090",
+          "estimated_nav": 1.8648670882762,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 117.002594673683,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:12:00+08:00",
+          "time": "13:12",
+          "fund_code": "513090",
+          "estimated_nav": 1.8643443218826,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 114.16655933705889,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:13:00+08:00",
+          "time": "13:13",
+          "fund_code": "513090",
+          "estimated_nav": 1.8638490913578,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 111.47990754516445,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:14:00+08:00",
+          "time": "13:14",
+          "fund_code": "513090",
+          "estimated_nav": 1.8643099106948,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 113.9798768230893,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:15:00+08:00",
+          "time": "13:15",
+          "fund_code": "513090",
+          "estimated_nav": 1.8655993919076,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 120.97538060868996,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:16:00+08:00",
+          "time": "13:16",
+          "fund_code": "513090",
+          "estimated_nav": 1.862364722958,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 103.42713046167296,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:17:00+08:00",
+          "time": "13:17",
+          "fund_code": "513090",
+          "estimated_nav": 1.8619008940474,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 100.91083408777735,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:18:00+08:00",
+          "time": "13:18",
+          "fund_code": "513090",
+          "estimated_nav": 1.865465102658,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 120.24685432648008,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:19:00+08:00",
+          "time": "13:19",
+          "fund_code": "513090",
+          "estimated_nav": 1.8643948619634,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 114.44074194868037,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:20:00+08:00",
+          "time": "13:20",
+          "fund_code": "513090",
+          "estimated_nav": 1.8636046326884,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 110.15370633320698,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:21:00+08:00",
+          "time": "13:21",
+          "fund_code": "513090",
+          "estimated_nav": 1.8601253926428,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 91.27864505398043,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:22:00+08:00",
+          "time": "13:22",
+          "fund_code": "513090",
+          "estimated_nav": 1.8612951395266,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 97.62458377149619,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:23:00+08:00",
+          "time": "13:23",
+          "fund_code": "513090",
+          "estimated_nav": 1.861830869572,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 100.53094760483994,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:24:00+08:00",
+          "time": "13:24",
+          "fund_code": "513090",
+          "estimated_nav": 1.860689566618,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 94.33931871100754,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:25:00+08:00",
+          "time": "13:25",
+          "fund_code": "513090",
+          "estimated_nav": 1.8606372190634,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 94.05533045841796,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:26:00+08:00",
+          "time": "13:26",
+          "fund_code": "513090",
+          "estimated_nav": 1.8617205012436,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 99.93219358541694,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:27:00+08:00",
+          "time": "13:27",
+          "fund_code": "513090",
+          "estimated_nav": 1.8591579098606,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 86.02999978625236,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:28:00+08:00",
+          "time": "13:28",
+          "fund_code": "513090",
+          "estimated_nav": 1.8587053322582,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 83.57474235447305,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:29:00+08:00",
+          "time": "13:29",
+          "fund_code": "513090",
+          "estimated_nav": 1.858705928984,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 83.57797962350145,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:30:00+08:00",
+          "time": "13:30",
+          "fund_code": "513090",
+          "estimated_nav": 1.8587213487246,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 83.66163253187287,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:31:00+08:00",
+          "time": "13:31",
+          "fund_code": "513090",
+          "estimated_nav": 1.8576333878682,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 77.75938733901144,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:32:00+08:00",
+          "time": "13:32",
+          "fund_code": "513090",
+          "estimated_nav": 1.8575368912526,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 77.23588809526393,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:33:00+08:00",
+          "time": "13:33",
+          "fund_code": "513090",
+          "estimated_nav": 1.8577137815354,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 78.19552723593581,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:34:00+08:00",
+          "time": "13:34",
+          "fund_code": "513090",
+          "estimated_nav": 1.8555134632504,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 66.25868415559123,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:35:00+08:00",
+          "time": "13:35",
+          "fund_code": "513090",
+          "estimated_nav": 1.8555704894812,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 66.56805447404102,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:36:00+08:00",
+          "time": "13:36",
+          "fund_code": "513090",
+          "estimated_nav": 1.8556762137262,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 67.14161409537178,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:37:00+08:00",
+          "time": "13:37",
+          "fund_code": "513090",
+          "estimated_nav": 1.8569964306418,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 74.30386069440686,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:38:00+08:00",
+          "time": "13:38",
+          "fund_code": "513090",
+          "estimated_nav": 1.8580690409432,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 80.12282831443507,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:39:00+08:00",
+          "time": "13:39",
+          "fund_code": "513090",
+          "estimated_nav": 1.858512684955,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 82.52962054467572,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:40:00+08:00",
+          "time": "13:40",
+          "fund_code": "513090",
+          "estimated_nav": 1.8576800708518,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 78.01264499430305,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:41:00+08:00",
+          "time": "13:41",
+          "fund_code": "513090",
+          "estimated_nav": 1.8573811371706,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 76.39091396191677,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:42:00+08:00",
+          "time": "13:42",
+          "fund_code": "513090",
+          "estimated_nav": 1.8577353501462,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 78.31253809038152,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:43:00+08:00",
+          "time": "13:43",
+          "fund_code": "513090",
+          "estimated_nav": 1.8572283753658,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 75.56217309065305,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:44:00+08:00",
+          "time": "13:44",
+          "fund_code": "513090",
+          "estimated_nav": 1.8584740620938,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 82.32008947973712,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:45:00+08:00",
+          "time": "13:45",
+          "fund_code": "513090",
+          "estimated_nav": 1.8590008844932,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 85.17812886236653,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:46:00+08:00",
+          "time": "13:46",
+          "fund_code": "513090",
+          "estimated_nav": 1.8577935957732,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 78.62852369771689,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:47:00+08:00",
+          "time": "13:47",
+          "fund_code": "513090",
+          "estimated_nav": 1.8589062385924,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 84.66466984430099,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:48:00+08:00",
+          "time": "13:48",
+          "fund_code": "513090",
+          "estimated_nav": 1.8595309845604,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 88.05394976618031,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:49:00+08:00",
+          "time": "13:49",
+          "fund_code": "513090",
+          "estimated_nav": 1.8601604870384,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 91.46903400640171,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:50:00+08:00",
+          "time": "13:50",
+          "fund_code": "513090",
+          "estimated_nav": 1.860514051399,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 93.38713936418274,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:51:00+08:00",
+          "time": "13:51",
+          "fund_code": "513090",
+          "estimated_nav": 1.862704208049,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 105.26885503716166,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:52:00+08:00",
+          "time": "13:52",
+          "fund_code": "513090",
+          "estimated_nav": 1.8622228319406,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 102.6573641870554,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:53:00+08:00",
+          "time": "13:53",
+          "fund_code": "513090",
+          "estimated_nav": 1.862885128393,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 106.25035747301004,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:54:00+08:00",
+          "time": "13:54",
+          "fund_code": "513090",
+          "estimated_nav": 1.8624210746292,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 103.73284125861248,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:55:00+08:00",
+          "time": "13:55",
+          "fund_code": "513090",
+          "estimated_nav": 1.8626054283086,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 104.73296972060896,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:56:00+08:00",
+          "time": "13:56",
+          "fund_code": "513090",
+          "estimated_nav": 1.8621810957274,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 102.43094302283984,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:57:00+08:00",
+          "time": "13:57",
+          "fund_code": "513090",
+          "estimated_nav": 1.8627904997886,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 105.7369922888296,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:58:00+08:00",
+          "time": "13:58",
+          "fund_code": "513090",
+          "estimated_nav": 1.8634494926286,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 109.31206330277332,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T13:59:00+08:00",
+          "time": "13:59",
+          "fund_code": "513090",
+          "estimated_nav": 1.8629944762338,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 106.84357529322509,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:00:00+08:00",
+          "time": "14:00",
+          "fund_code": "513090",
+          "estimated_nav": 1.8639211222156,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 111.87067875874757,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:01:00+08:00",
+          "time": "14:01",
+          "fund_code": "513090",
+          "estimated_nav": 1.8626294270636,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 104.86316423588215,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:02:00+08:00",
+          "time": "14:02",
+          "fund_code": "513090",
+          "estimated_nav": 1.8622031053964,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 102.55034664135022,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:03:00+08:00",
+          "time": "14:03",
+          "fund_code": "513090",
+          "estimated_nav": 1.8622099893636,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 102.58769252753153,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:04:00+08:00",
+          "time": "14:04",
+          "fund_code": "513090",
+          "estimated_nav": 1.862113363025,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 102.06348952964905,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:05:00+08:00",
+          "time": "14:05",
+          "fund_code": "513090",
+          "estimated_nav": 1.8615032671078,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 98.7536869082617,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:06:00+08:00",
+          "time": "14:06",
+          "fund_code": "513090",
+          "estimated_nav": 1.860712354625,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 94.4629448543366,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:07:00+08:00",
+          "time": "14:07",
+          "fund_code": "513090",
+          "estimated_nav": 1.8600949769234,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 91.11363816741714,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:08:00+08:00",
+          "time": "14:08",
+          "fund_code": "513090",
+          "estimated_nav": 1.8599857588056,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 90.52112410133928,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:09:00+08:00",
+          "time": "14:09",
+          "fund_code": "513090",
+          "estimated_nav": 1.859536329148,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 88.08294443660935,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:10:00+08:00",
+          "time": "14:10",
+          "fund_code": "513090",
+          "estimated_nav": 1.8592467701156,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 86.51207136982642,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:11:00+08:00",
+          "time": "14:11",
+          "fund_code": "513090",
+          "estimated_nav": 1.8600611105722,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 90.92991142082285,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:12:00+08:00",
+          "time": "14:12",
+          "fund_code": "513090",
+          "estimated_nav": 1.8611135619194,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 96.63951564802264,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:13:00+08:00",
+          "time": "14:13",
+          "fund_code": "513090",
+          "estimated_nav": 1.8609095595296,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 95.53279189280062,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:14:00+08:00",
+          "time": "14:14",
+          "fund_code": "513090",
+          "estimated_nav": 1.8603635813672,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 92.57083148266787,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:15:00+08:00",
+          "time": "14:15",
+          "fund_code": "513090",
+          "estimated_nav": 1.8593659077188,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 87.15839916888291,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:16:00+08:00",
+          "time": "14:16",
+          "fund_code": "513090",
+          "estimated_nav": 1.8596709989184,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 88.81353506428712,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:17:00+08:00",
+          "time": "14:17",
+          "fund_code": "513090",
+          "estimated_nav": 1.8575403851254,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 77.25484254001103,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:18:00+08:00",
+          "time": "14:18",
+          "fund_code": "513090",
+          "estimated_nav": 1.8573426180878,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 76.18194590028881,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:19:00+08:00",
+          "time": "14:19",
+          "fund_code": "513090",
+          "estimated_nav": 1.8564079119836,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 71.11111584440889,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:20:00+08:00",
+          "time": "14:20",
+          "fund_code": "513090",
+          "estimated_nav": 1.8543044621868,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 59.699789436336026,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:21:00+08:00",
+          "time": "14:21",
+          "fund_code": "513090",
+          "estimated_nav": 1.8534225879364,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 54.915574981826424,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:22:00+08:00",
+          "time": "14:22",
+          "fund_code": "513090",
+          "estimated_nav": 1.8541185518314,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 58.69121592469995,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:23:00+08:00",
+          "time": "14:23",
+          "fund_code": "513090",
+          "estimated_nav": 1.8545332935588,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 60.941211733305245,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:24:00+08:00",
+          "time": "14:24",
+          "fund_code": "513090",
+          "estimated_nav": 1.8545741476556,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 61.162847369391486,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:25:00+08:00",
+          "time": "14:25",
+          "fund_code": "513090",
+          "estimated_nav": 1.8551820988192,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 64.4610145890523,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:26:00+08:00",
+          "time": "14:26",
+          "fund_code": "513090",
+          "estimated_nav": 1.8553618948972,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 65.4364178223843,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:27:00+08:00",
+          "time": "14:27",
+          "fund_code": "513090",
+          "estimated_nav": 1.8554755322452,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 66.052906446048,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:28:00+08:00",
+          "time": "14:28",
+          "fund_code": "513090",
+          "estimated_nav": 1.8559657208694,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 68.71220566050162,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:29:00+08:00",
+          "time": "14:29",
+          "fund_code": "513090",
+          "estimated_nav": 1.8556780990338,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 67.15184198882396,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:30:00+08:00",
+          "time": "14:30",
+          "fund_code": "513090",
+          "estimated_nav": 1.855968989889,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 68.72994026474232,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:31:00+08:00",
+          "time": "14:31",
+          "fund_code": "513090",
+          "estimated_nav": 1.8571794438502,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 75.29671703032648,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:32:00+08:00",
+          "time": "14:32",
+          "fund_code": "513090",
+          "estimated_nav": 1.8556861678044,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 67.19561549612285,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:33:00+08:00",
+          "time": "14:33",
+          "fund_code": "513090",
+          "estimated_nav": 1.8558388431272,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 68.02388719796105,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:34:00+08:00",
+          "time": "14:34",
+          "fund_code": "513090",
+          "estimated_nav": 1.8541764169376,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 59.00513718656741,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:35:00+08:00",
+          "time": "14:35",
+          "fund_code": "513090",
+          "estimated_nav": 1.8550128276006,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 63.54270927467098,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:36:00+08:00",
+          "time": "14:36",
+          "fund_code": "513090",
+          "estimated_nav": 1.855391463093,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 65.59682684858626,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:37:00+08:00",
+          "time": "14:37",
+          "fund_code": "513090",
+          "estimated_nav": 1.8554749874086,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 66.04995067867492,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:38:00+08:00",
+          "time": "14:38",
+          "fund_code": "513090",
+          "estimated_nav": 1.8541912313042,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 59.08550590896677,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:39:00+08:00",
+          "time": "14:39",
+          "fund_code": "513090",
+          "estimated_nav": 1.8555667015696,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 66.54750485325378,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:40:00+08:00",
+          "time": "14:40",
+          "fund_code": "513090",
+          "estimated_nav": 1.8563279161336,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 70.67713412683752,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:41:00+08:00",
+          "time": "14:41",
+          "fund_code": "513090",
+          "estimated_nav": 1.8553238687618,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 65.2301240264741,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:42:00+08:00",
+          "time": "14:42",
+          "fund_code": "513090",
+          "estimated_nav": 1.8545718991236,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 61.15064896435874,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:43:00+08:00",
+          "time": "14:43",
+          "fund_code": "513090",
+          "estimated_nav": 1.854867857824,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 62.75624056854667,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:44:00+08:00",
+          "time": "14:44",
+          "fund_code": "513090",
+          "estimated_nav": 1.8547372094666,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 62.047466319101744,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:45:00+08:00",
+          "time": "14:45",
+          "fund_code": "513090",
+          "estimated_nav": 1.8543095213838,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 59.72723584766415,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:46:00+08:00",
+          "time": "14:46",
+          "fund_code": "513090",
+          "estimated_nav": 1.854757895961,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 62.15969164541812,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:47:00+08:00",
+          "time": "14:47",
+          "fund_code": "513090",
+          "estimated_nav": 1.8546253882406,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 61.44083025334979,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:48:00+08:00",
+          "time": "14:48",
+          "fund_code": "513090",
+          "estimated_nav": 1.8538503625012,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 57.23627462268732,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:49:00+08:00",
+          "time": "14:49",
+          "fund_code": "513090",
+          "estimated_nav": 1.8533269301962,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 54.396626681496585,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:50:00+08:00",
+          "time": "14:50",
+          "fund_code": "513090",
+          "estimated_nav": 1.8537526810822,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 56.70634775782668,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:51:00+08:00",
+          "time": "14:51",
+          "fund_code": "513090",
+          "estimated_nav": 1.852881366284,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 51.97941889003354,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:52:00+08:00",
+          "time": "14:52",
+          "fund_code": "513090",
+          "estimated_nav": 1.8528959903902,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 52.05875543970117,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:53:00+08:00",
+          "time": "14:53",
+          "fund_code": "513090",
+          "estimated_nav": 1.8529477239226,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 52.33941258937725,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:54:00+08:00",
+          "time": "14:54",
+          "fund_code": "513090",
+          "estimated_nav": 1.8539794022934,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 57.93632232083734,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:55:00+08:00",
+          "time": "14:55",
+          "fund_code": "513090",
+          "estimated_nav": 1.8534435944142,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 55.02953623501394,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:56:00+08:00",
+          "time": "14:56",
+          "fund_code": "513090",
+          "estimated_nav": 1.8520321908778,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 47.37259739489019,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:57:00+08:00",
+          "time": "14:57",
+          "fund_code": "513090",
+          "estimated_nav": 1.8524306480446,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 49.53424860087985,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:58:00+08:00",
+          "time": "14:58",
+          "fund_code": "513090",
+          "estimated_nav": 1.8525423481958,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 50.140227829438274,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T14:59:00+08:00",
+          "time": "14:59",
+          "fund_code": "513090",
+          "estimated_nav": 1.8517774840914,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 45.99079960614149,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:00:00+08:00",
+          "time": "15:00",
+          "fund_code": "513090",
+          "estimated_nav": 1.8517277223486,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 45.72083951934091,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:01:00+08:00",
+          "time": "15:01",
+          "fund_code": "513090",
+          "estimated_nav": 1.850990567077,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 41.72173317962269,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:02:00+08:00",
+          "time": "15:02",
+          "fund_code": "513090",
+          "estimated_nav": 1.8493787847466,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 32.97772878316118,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:03:00+08:00",
+          "time": "15:03",
+          "fund_code": "513090",
+          "estimated_nav": 1.8486841267298,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 29.20917229859432,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:04:00+08:00",
+          "time": "15:04",
+          "fund_code": "513090",
+          "estimated_nav": 1.8485998413726,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 28.751919777572077,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:05:00+08:00",
+          "time": "15:05",
+          "fund_code": "513090",
+          "estimated_nav": 1.8489360920368,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 30.576097416590287,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:06:00+08:00",
+          "time": "15:06",
+          "fund_code": "513090",
+          "estimated_nav": 1.8491205754392,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 31.57692963272396,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:07:00+08:00",
+          "time": "15:07",
+          "fund_code": "513090",
+          "estimated_nav": 1.8491887837926,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 31.94696355774962,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:08:00+08:00",
+          "time": "15:08",
+          "fund_code": "513090",
+          "estimated_nav": 1.8490163300364,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 31.01139280855092,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:09:00+08:00",
+          "time": "15:09",
+          "fund_code": "513090",
+          "estimated_nav": 1.848968488194,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 30.751848282970506,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:10:00+08:00",
+          "time": "15:10",
+          "fund_code": "513090",
+          "estimated_nav": 1.8496257686904,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 34.3176297423109,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:11:00+08:00",
+          "time": "15:11",
+          "fund_code": "513090",
+          "estimated_nav": 1.8494621793392,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 33.43014885911266,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:12:00+08:00",
+          "time": "15:12",
+          "fund_code": "513090",
+          "estimated_nav": 1.8485333626592,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 28.391269241034855,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:13:00+08:00",
+          "time": "15:13",
+          "fund_code": "513090",
+          "estimated_nav": 1.848309798041,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 27.178419362012818,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:14:00+08:00",
+          "time": "15:14",
+          "fund_code": "513090",
+          "estimated_nav": 1.8480851005086,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 25.959423363532963,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:15:00+08:00",
+          "time": "15:15",
+          "fund_code": "513090",
+          "estimated_nav": 1.848156292491,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 26.34564363370062,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:16:00+08:00",
+          "time": "15:16",
+          "fund_code": "513090",
+          "estimated_nav": 1.8485546977686,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 28.50701333803496,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:17:00+08:00",
+          "time": "15:17",
+          "fund_code": "513090",
+          "estimated_nav": 1.8485079628958,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 28.253474181090255,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:18:00+08:00",
+          "time": "15:18",
+          "fund_code": "513090",
+          "estimated_nav": 1.848539926643,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 28.426879200347255,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:19:00+08:00",
+          "time": "15:19",
+          "fund_code": "513090",
+          "estimated_nav": 1.8486155292074,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 28.83702711115932,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:20:00+08:00",
+          "time": "15:20",
+          "fund_code": "513090",
+          "estimated_nav": 1.8474662439648,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 22.602093879455776,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:21:00+08:00",
+          "time": "15:21",
+          "fund_code": "513090",
+          "estimated_nav": 1.8471372231958,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 20.81713880431879,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:22:00+08:00",
+          "time": "15:22",
+          "fund_code": "513090",
+          "estimated_nav": 1.847121405638,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 20.73132771659658,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:23:00+08:00",
+          "time": "15:23",
+          "fund_code": "513090",
+          "estimated_nav": 1.8468184937848,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 19.08801489068468,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:24:00+08:00",
+          "time": "15:24",
+          "fund_code": "513090",
+          "estimated_nav": 1.8456879145988,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 12.95456300548059,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:25:00+08:00",
+          "time": "15:25",
+          "fund_code": "513090",
+          "estimated_nav": 1.8453212741598,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 10.96551923072786,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:26:00+08:00",
+          "time": "15:26",
+          "fund_code": "513090",
+          "estimated_nav": 1.8451424553284,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 9.995417611892154,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:27:00+08:00",
+          "time": "15:27",
+          "fund_code": "513090",
+          "estimated_nav": 1.845368631703,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 11.222436407529734,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:28:00+08:00",
+          "time": "15:28",
+          "fund_code": "513090",
+          "estimated_nav": 1.8465035868782,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 17.379628265610236,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:29:00+08:00",
+          "time": "15:29",
+          "fund_code": "513090",
+          "estimated_nav": 1.846902735901,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 19.545032826995268,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:30:00+08:00",
+          "time": "15:30",
+          "fund_code": "513090",
+          "estimated_nav": 1.847140777606,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 20.83642166766264,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:31:00+08:00",
+          "time": "15:31",
+          "fund_code": "513090",
+          "estimated_nav": 1.8476171550548,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 23.420794525037536,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:32:00+08:00",
+          "time": "15:32",
+          "fund_code": "513090",
+          "estimated_nav": 1.8475618757604,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 23.120901428959062,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:33:00+08:00",
+          "time": "15:33",
+          "fund_code": "513090",
+          "estimated_nav": 1.8462108539564,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 15.791536680953566,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:34:00+08:00",
+          "time": "15:34",
+          "fund_code": "513090",
+          "estimated_nav": 1.8455480732048,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 12.19591604622261,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:35:00+08:00",
+          "time": "15:35",
+          "fund_code": "513090",
+          "estimated_nav": 1.8453955016604,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 11.368207347692838,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:36:00+08:00",
+          "time": "15:36",
+          "fund_code": "513090",
+          "estimated_nav": 1.8452044196814,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 10.331577504476552,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:37:00+08:00",
+          "time": "15:37",
+          "fund_code": "513090",
+          "estimated_nav": 1.8450540793726,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 9.515973377096643,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:38:00+08:00",
+          "time": "15:38",
+          "fund_code": "513090",
+          "estimated_nav": 1.8455828303206,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 12.38447523788988,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:39:00+08:00",
+          "time": "15:39",
+          "fund_code": "513090",
+          "estimated_nav": 1.8450015934468,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 9.231234453426218,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:40:00+08:00",
+          "time": "15:40",
+          "fund_code": "513090",
+          "estimated_nav": 1.8442083286536,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 4.9277309911577305,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:41:00+08:00",
+          "time": "15:41",
+          "fund_code": "513090",
+          "estimated_nav": 1.8419320791726,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -7.42104284381262,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:42:00+08:00",
+          "time": "15:42",
+          "fund_code": "513090",
+          "estimated_nav": 1.8416925672736,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -8.720407564694055,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:43:00+08:00",
+          "time": "15:43",
+          "fund_code": "513090",
+          "estimated_nav": 1.841634511907,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -9.035360999295472,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:44:00+08:00",
+          "time": "15:44",
+          "fund_code": "513090",
+          "estimated_nav": 1.8429212948814,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -2.054495299733672,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:45:00+08:00",
+          "time": "15:45",
+          "fund_code": "513090",
+          "estimated_nav": 1.8428699332216,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -2.3331350208855017,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:46:00+08:00",
+          "time": "15:46",
+          "fund_code": "513090",
+          "estimated_nav": 1.8422282454298,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -5.814325233005624,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:47:00+08:00",
+          "time": "15:47",
+          "fund_code": "513090",
+          "estimated_nav": 1.8416007925752,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -9.21829015786857,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:48:00+08:00",
+          "time": "15:48",
+          "fund_code": "513090",
+          "estimated_nav": 1.8421774372548,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -6.08996226984071,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:49:00+08:00",
+          "time": "15:49",
+          "fund_code": "513090",
+          "estimated_nav": 1.8429792551178,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -1.74005795150034,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:50:00+08:00",
+          "time": "15:50",
+          "fund_code": "513090",
+          "estimated_nav": 1.8441213623544,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 4.455934217979518,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:51:00+08:00",
+          "time": "15:51",
+          "fund_code": "513090",
+          "estimated_nav": 1.8431195721628,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -0.9788305604074843,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:52:00+08:00",
+          "time": "15:52",
+          "fund_code": "513090",
+          "estimated_nav": 1.8428097936388,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -2.659395438615597,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:53:00+08:00",
+          "time": "15:53",
+          "fund_code": "513090",
+          "estimated_nav": 1.8421875470006,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -6.035116364129234,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:54:00+08:00",
+          "time": "15:54",
+          "fund_code": "513090",
+          "estimated_nav": 1.8428451388322,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -2.46764589486248,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:55:00+08:00",
+          "time": "15:55",
+          "fund_code": "513090",
+          "estimated_nav": 1.84332277027,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 0.12352991916708689,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:56:00+08:00",
+          "time": "15:56",
+          "fund_code": "513090",
+          "estimated_nav": 1.843542088622,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 1.3133435794498993,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:57:00+08:00",
+          "time": "15:57",
+          "fund_code": "513090",
+          "estimated_nav": 1.8444974898688,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 6.496445878587664,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:58:00+08:00",
+          "time": "15:58",
+          "fund_code": "513090",
+          "estimated_nav": 1.844009523832,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 3.8492043183424585,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T15:59:00+08:00",
+          "time": "15:59",
+          "fund_code": "513090",
+          "estimated_nav": 1.844525864613,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": 6.6503803667350425,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        },
+        {
+          "timestamp": "2026-09-08T16:08:00+08:00",
+          "time": "16:08",
+          "fund_code": "513090",
+          "estimated_nav": 1.8432886185282,
+          "published_nav": 1.8433,
+          "error_bp_vs_published": -0.061745086529230164,
+          "date": "2026-09-08",
+          "minute_component_count": 17,
+          "minute_source_ref": "minute:513090",
+          "minute_source": "Tencent minute; exact common timestamp intersection"
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "validation_csv",
+      "label": "197 只目标日核验明细",
+      "path": "outputs/report_data.sqlite",
+      "description": "每只基金一行，证据库由 outputs/watchlist_validation.csv 物化，含 PCF/NAV 路径、成分覆盖、估值、bp 误差、舍入边界和复验状态。",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "sql": "SELECT code, market, fund_name, single_day_status, error_bp, abs_error_bp, published_nav, estimated_nav FROM validation_watchlist WHERE pcf_date = '2026-09-08'",
+        "description": "Loads one reviewed target-date row per fund.",
+        "tables_used": [
+          "validation_watchlist"
+        ],
+        "filters": [
+          "pcf_date = '2026-09-08'"
+        ],
+        "metric_definitions": [
+          "error_bp = (estimated_nav / published_nav - 1) × 10000"
+        ]
+      }
+    },
+    {
+      "id": "validation_summary",
+      "label": "核验汇总与公式",
+      "path": "outputs/report_data.sqlite",
+      "description": "日期、固定汇率、严格阈值、公式、汇总计数和分钟证据覆盖，原始汇总见 outputs/validation_summary.json。",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "sql": "SELECT metric, value FROM quality_gate ORDER BY metric",
+        "description": "Loads the reviewed validation gate values used for the report definitions.",
+        "tables_used": [
+          "quality_gate"
+        ],
+        "metric_definitions": [
+          "Fixed FX midpoint is 0.86482 HKD/CNY; strict threshold is abs(error_bp) < 5."
+        ]
+      }
+    },
+    {
+      "id": "quality_json",
+      "label": "数据质量门禁",
+      "path": "outputs/report_data.sqlite",
+      "description": "输入唯一性、目标日覆盖、PCF 解析、成分计数、行情覆盖与控制标的门禁，原始门禁见 outputs/quality_checks.json。",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "sql": "SELECT metric, value FROM quality_gate ORDER BY metric",
+        "description": "Loads the reviewed quality-gate results.",
+        "tables_used": [
+          "quality_gate"
+        ]
+      }
+    },
+    {
+      "id": "multi_day_csv",
+      "label": "历史复验明细",
+      "path": "outputs/report_data.sqlite",
+      "description": "证据库由 outputs/multi_day_validation.csv 物化；深市含目标日及 9/7、9/4、9/3、9/2，沪市仅保留目标日单日结果。",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "sql": "SELECT code, date, status, estimated_nav, published_nav, error_bp, abs_error_bp FROM multi_day_validation ORDER BY code, date DESC",
+        "description": "Loads daily revalidation rows without replacing missing PCFs.",
+        "tables_used": [
+          "multi_day_validation"
+        ],
+        "filters": [
+          "date IN ('2026-09-08', '2026-09-07', '2026-09-04', '2026-09-03', '2026-09-02')"
+        ]
+      }
+    },
+    {
+      "id": "intraday_csv",
+      "label": "港股分钟代理 IOPV",
+      "path": "outputs/report_data.sqlite",
+      "description": "证据库由 outputs/intraday_iopv_20260908.csv 物化；9/8 港股分钟成分估值的共同时间戳序列，公布单位净值只作参考线。每行以 minute_source_ref 回溯到 outputs/intraday/chart_manifest.json 的具体分钟文件列表。",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "sql": "SELECT timestamp, time, fund_code, estimated_nav, published_nav, error_bp_vs_published, minute_component_count, minute_source_ref FROM intraday_iopv WHERE fund_code = '513090' ORDER BY timestamp",
+        "description": "Loads the 513090 minute proxy IOPV sequence and its fund-level source reference.",
+        "tables_used": [
+          "intraday_iopv"
+        ],
+        "filters": [
+          "fund_code = '513090'",
+          "date = '2026-09-08'"
+        ]
+      }
+    },
+    {
+      "id": "contribution_csv",
+      "label": "成分贡献明细",
+      "path": "outputs/report_data.sqlite",
+      "description": "证据库由 outputs/component_contributions_20260908.csv 物化；含每个 PCF 成分的估值方法、数量、价格日期、金额和源文件。",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "sql": "SELECT fund_code, date, component_code, quantity, flag, valuation_method, amount_cny, price_hkd, price_date, source_path FROM component_contributions WHERE date = '2026-09-08' ORDER BY fund_code, component_code",
+        "description": "Loads component-level valuation contributions for the target date.",
+        "tables_used": [
+          "component_contributions"
+        ],
+        "filters": [
+          "date = '2026-09-08'"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "disabled_legacy_labels": [
+    "com.ellis.webull-lv2-gateway",
+    "com.newnavnav.ibkr-anchor-backfill",
+    "com.newnavnav.private-159605-valuation-uploader",
+    "com.newnavnav.private-161226-silver-uploader",
+    "com.newnavnav.private-162411-valuation-uploader",
+    "com.newnavnav.private-164824-final-nav-backfill",
+    "com.newnavnav.private-164824-valuation-uploader",
+    "com.newnavnav.private-513350-valuation-uploader",
+    "com.newnavnav.private-china-internet-history-backfill",
+    "com.newnavnav.private-china-internet-valuation-uploader",
+    "com.newnavnav.private-germany-valuation-uploader",
+    "com.newnavnav.private-intraday-rebuild-agent",
+    "com.newnavnav.private-nasdaq-valuation-uploader",
+    "com.newnavnav.private-nikkei225-valuation-uploader",
+    "com.newnavnav.private-sp500-valuation-uploader",
+    "com.newnavnav.private-valuation-uploader",
+    "com.newnavnav.private-xop-family-uploader",
+    "com.newnavnav.sina-quote-uploader",
+    "com.newnavnav.upload-health-monitor",
+    "com.newnavnav.web"
+  ],
+  "health_monitor_stays_disabled": true
+}

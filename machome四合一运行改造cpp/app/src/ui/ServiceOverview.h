@@ -8,6 +8,7 @@ class QFrame;
 class QTableWidget;
 class QTreeWidget;
 class QVBoxLayout;
+class QToolButton;
 
 namespace hub {
 // A read-only projection of snapshots. This widget has no transport or control hooks.
@@ -19,6 +20,9 @@ public:
 private:
     void metric(int index, const QString &caption, const QString &value, const QString &hint);
     QString adapter_;
+    QJsonObject lastPayload_;
+    bool showAll_ = false;
+    QToolButton *more_ = nullptr;
     std::array<QLabel *, 4> captions_{};
     std::array<QLabel *, 4> values_{};
     std::array<QLabel *, 4> hints_{};

@@ -41,6 +41,11 @@ from ._protocol import (
 # source of truth so the public API and the login envelope cannot drift.
 DEFAULT_TGW_CLIENT_VERSION = "V4.3.0.260626-rc2.0-YHZQ"
 
+# Internet-mode servers listen on 8600.  The public Cfg examples and several
+# vendor docs leave ``server_port`` at 0, which cannot be dialed as-is; treat
+# 0 as "use the documented internet default" so those examples work unchanged.
+DEFAULT_TGW_INTERNET_PORT = 8600
+
 
 def get_client_version() -> str:
     """Return the effective vendor client version without initializing I/O."""
@@ -165,13 +170,16 @@ class LiveBackend(BaseBackend):
             self.last_error = "native macOS backend currently supports internet mode only"
             return -1
         self.cfg = cfg_dict.copy()
+        # Normalize the stored value as well so the one-shot query connections
+        # (run_query/_query_code_table) use the same effective port.
+        self.cfg["server_port"] = self._effective_port()
         self.api_mode = int(api_mode)
         self.ca_file = _find_ca_file(path)
         self.server_name = os.environ.get("TGW_TLS_SERVER_NAME") or None
         try:
             self.client.connect(
                 _as_text(cfg_dict["server_vip"]),
-                int(cfg_dict["server_port"]),
+                int(self.cfg["server_port"]),
                 ca_file=self.ca_file,
                 server_name=self.server_name,
             )
@@ -183,6 +191,12 @@ class LiveBackend(BaseBackend):
         self.state = BackendState.CONNECTED
         self.log("INFO", "TLS/WebSocket transport established")
         return 0
+
+    def _effective_port(self) -> int:
+        """Resolve the configured server port, treating 0 as the documented
+        internet-mode default (8600) instead of attempting to dial port 0."""
+        raw = int(self.cfg.get("server_port", 0) or 0)
+        return raw if raw > 0 else DEFAULT_TGW_INTERNET_PORT
 
     def login(self) -> int:
         if self.state != BackendState.CONNECTED or self.cfg is None:

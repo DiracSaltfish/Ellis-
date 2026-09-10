@@ -1,0 +1,9 @@
+{
+  "before": 0,
+  "after": 18120,
+  "inserted": 18120,
+  "existing_kept": 0,
+  "backup": "/Users/ellis/Library/Application Support/MachomeHub/data/premium/local-iopv/data/before-history-backfill-20260909-124129.sqlite",
+  "artifact_sha256": "b236a81e93ffe351f8e3876b4cf7a9d30b0d543d6f5a4ff1ac728175fc4cc022",
+  "integrity": "ok"
+}

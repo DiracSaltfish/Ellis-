@@ -1,0 +1,17 @@
+Agent: {'version': '1.1.0', 'pid': 77947, 'control_ready': True, 'audit_ready': True, 'unresolved_modules': [], 'artifact_sha256': '1c2e724cbad6fb58634aea5ff3b7ca9de23b8788da59b2f9bb253189271f1676'}
+webull {'lifecycle': 'running', 'work_state': 'scheduled_idle', 'headline': 'API 在线 · 登录 已登录 · 数据 行情已过期', 'last_error': 'non-authoritative shallow or invalid type-109 depth'}
+webull schedule_mode auto
+webull scheduled_idle True
+upload {'lifecycle': 'running', 'work_state': 'scheduled_idle', 'headline': '原生 UploadEngine 状态已更新', 'last_error': ''}
+monitor_sync {'lifecycle': 'running', 'work_state': 'active', 'headline': '文件同步 · 在线设备 0 · 队列 0', 'last_error': ''}
+redemption {'lifecycle': 'running', 'work_state': 'scheduled_idle', 'headline': '原生实时申赎已驻留，当前计划空闲', 'last_error': ''}
+redemption monitoring_desired False
+redemption monitoring_desired False
+premium {'lifecycle': 'running', 'work_state': 'scheduled_idle', 'headline': '盘外驻留', 'last_error': ''}
+premium cn_quotes_desired False
+premium hk_quotes_desired False
+premium cn_quotes_desired False
+premium hk_quotes_desired False
+L1 hello hello
+L1 ping pong
+IOPV {'http': 200, 'data': {'active_date': '2026-09-09', 'active_subscriptions': 0, 'candidates': 121, 'errors': {}, 'feed_at': '0001-01-01T00:00:00Z', 'feed_state': 'scheduled_idle', 'frames': 0, 'fx_polling': False, 'group_loads': [1980, 1971, 1971], 'last_write_at': '0001-01-01T00:00:00Z', 'mode': 'live', 'now': '2026-09-09T22:20:00.980846+08:00', 'paused': False, 'pcf_complete_date': '', 'pcf_last_attempt': '0001-01-01T00:00:00Z', 'pcf_next_attempt': '2026-09-10T08:40:00+08:00', 'pcf_ready': 121, 'pcf_schedule': '08:40 Asia/Shanghai weekdays; retry missing every 5m until 16:08', 'quote_count': 0, 'quote_window_open': False, 'rejected_frames': 0, 'run_id': '1788963506327437000', 'schema_version': 'intranet-iopv.v1', 'sequence': 0, 'session': 0, 'shared_l1': True, 'signal_basis': 'midpoint', 'started_at': '2026-09-09T22:18:26.327438+08:00', 'subscription_schedule': '09:15–15:01 CN (close buffer); 09:15–16:10 HK', 'subscriptions': 751, 'written_rows': 0}}

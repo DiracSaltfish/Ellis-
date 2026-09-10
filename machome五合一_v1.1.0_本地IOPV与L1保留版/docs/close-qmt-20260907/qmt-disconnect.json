@@ -1,0 +1,60 @@
+{
+  "at": "2026-09-07T08:14:19Z",
+  "instance_id": "36c1105a-3ced-4f13-9209-806dab7f9c2b",
+  "results": [
+    {
+      "type": "command_result",
+      "command_id": "81b68b74-a732-439f-a6f0-20499133bc38",
+      "state": "accepted",
+      "message": "命令已持久化，正等待模块串行门校验",
+      "action": "redemption_qmt_disconnect"
+    },
+    {
+      "type": "command_result",
+      "command_id": "81b68b74-a732-439f-a6f0-20499133bc38",
+      "state": "running",
+      "message": "命令正在异步执行",
+      "action": "redemption_qmt_disconnect"
+    },
+    {
+      "type": "command_result",
+      "command_id": "81b68b74-a732-439f-a6f0-20499133bc38",
+      "state": "succeeded",
+      "message": "QMT1 已断开",
+      "action": "redemption_qmt_disconnect"
+    },
+    {
+      "type": "command_result",
+      "command_id": "81bfd977-1ea5-482d-ad85-9efd6eb94c17",
+      "state": "accepted",
+      "message": "命令已持久化，正等待模块串行门校验",
+      "action": "redemption_qmt_disconnect"
+    },
+    {
+      "type": "command_result",
+      "command_id": "81bfd977-1ea5-482d-ad85-9efd6eb94c17",
+      "state": "running",
+      "message": "命令正在异步执行",
+      "action": "redemption_qmt_disconnect"
+    },
+    {
+      "type": "command_result",
+      "command_id": "81bfd977-1ea5-482d-ad85-9efd6eb94c17",
+      "state": "succeeded",
+      "message": "QMT2 已断开",
+      "action": "redemption_qmt_disconnect"
+    }
+  ],
+  "qmt": {
+    "QMT1": {
+      "connection_state": "disconnected",
+      "want_connection": false,
+      "ready": false
+    },
+    "QMT2": {
+      "connection_state": "disconnected",
+      "want_connection": false,
+      "ready": false
+    }
+  }
+}

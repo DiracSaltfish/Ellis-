@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "mode": "live",
+  "website": {
+    "enabled": true
+  },
+  "environment": {
+    "NNN_SERVER_URL": "",
+    "NNN_UPLOAD_TOKEN": "",
+    "NNN_DATA_VIEW_TOKEN": "",
+    "UPLOAD_TOKEN": "",
+    "DATA_VIEW_TOKEN": "",
+    "NAV_SETTINGS_TOKEN": "",
+    "MYSQL_DSN": "",
+    "HTTP_ADDR": "127.0.0.1:8080",
+    "ENABLE_UPLOAD_QUOTES": "true",
+    "NNN_UPLOAD_SOURCE": "home-mac",
+    "NNN_UPLOAD_INTERVAL": "5s",
+    "NNN_UPLOAD_MONITOR_EXPECTED_LABELS": "com.newnavnav.sina-quote-uploader,com.newnavnav.private-xop-family-uploader,com.newnavnav.private-161226-silver-uploader,com.newnavnav.private-china-internet-valuation-uploader,com.newnavnav.private-164824-valuation-uploader,com.newnavnav.private-nasdaq-valuation-uploader,com.newnavnav.private-sp500-valuation-uploader,com.newnavnav.private-nikkei225-valuation-uploader,com.newnavnav.private-germany-valuation-uploader",
+    "NNN_UPLOAD_MONITOR_IGNORED_LABELS": "",
+    "NNN_ENABLE_IB_US_HOLDINGS": "1",
+    "NNN_PRIVATE_INDEX_PREOPEN_FX_FALLBACK": "true",
+    "NNN_IB_HOST": "127.0.0.1",
+    "NNN_IB_PORT": "7496"
+  },
+  "workers": [
+    {
+      "id": "website",
+      "enabled": true
+    },
+    {
+      "id": "sina",
+      "enabled": true,
+      "label": "com.newnavnav.sina-quote-uploader"
+    },
+    {
+      "id": "xop-family",
+      "enabled": true,
+      "label": "com.newnavnav.private-xop-family-uploader",
+      "environment": {
+        "NNN_XOP_FAMILY_MODE": "smart",
+        "NNN_XOP_FAMILY_SOURCE": "mac-home-private-xop-family-uploader",
+        "NNN_XOP_FAMILY_RUNTIME_DIR": "{run_root}/scripts/.runtime/private_xop_family",
+        "NNN_XOP_FAMILY_IB_HOST": "192.168.1.111",
+        "NNN_XOP_FAMILY_IB_PORT": "7496",
+        "NNN_XOP_FAMILY_IB_CLIENT_ID": "159519",
+        "NNN_XOP_FAMILY_IB_HISTORY_CLIENT_ID": "159521",
+        "NNN_XOP_FAMILY_IB_TIMEOUT": "40",
+        "NNN_XOP_FAMILY_UPLOAD_INTERVAL": "3",
+        "NNN_XOP_FAMILY_SHADOW_INTERVAL": "1",
+        "NNN_XOP_FAMILY_FX_INTERVAL": "60",
+        "NNN_XOP_FAMILY_SEED_INTERVAL": "900",
+        "NNN_XOP_FAMILY_PCF_INTERVAL": "10m",
+        "NNN_PRIVATE_PCF_SYMBOL_INTERVAL": "10s",
+        "NNN_PRIVATE_162411_PUBLIC_SERVER": "https://1navs.com",
+        "NNN_ORIGIN_IP": "69.63.209.166",
+        "NNN_ORIGIN_TLS_INSECURE": "1"
+      }
+    },
+    {
+      "id": "basket-159605",
+      "enabled": true,
+      "label": "com.newnavnav.private-159605-valuation-uploader",
+      "environment": {
+        "NNN_PRIVATE_159605_UPLOAD_SOURCE": "mac-home-private-159605-uploader",
+        "NNN_PRIVATE_159605_RUNTIME_DIR": "{run_root}/scripts/.runtime/private_159605",
+        "NNN_PRIVATE_159605_UPLOAD_INTERVAL": "3s",
+        "NNN_PRIVATE_159605_CFETS_INTERVAL": "60s",
+        "NNN_PRIVATE_159605_PCF_INTERVAL": "10m",
+        "NNN_PRIVATE_159605_PCF_START_AT": "08:30",
+        "NNN_PRIVATE_PCF_SYMBOL_INTERVAL": "10s",
+        "NNN_PRIVATE_PCF_PACER_STATE": "{data_root}/pcf-pacer.json",
+        "NNN_PRIVATE_159605_IB_HOST": "127.0.0.1",
+        "NNN_PRIVATE_159605_IB_PORT": "7496",
+        "NNN_PRIVATE_159605_IB_CLIENT_ID": "159605"
+      }
+    },
+    {
+      "id": "silver",
+      "enabled": true,
+      "label": "com.newnavnav.private-161226-silver-uploader",
+      "environment": {
+        "NNN_PRIVATE_161226_UPLOAD_INTERVAL": "10",
+        "NNN_PRIVATE_161226_SOURCE": "mac-home-private-161226-silver-uploader"
+      }
+    },
+    {
+      "id": "china-internet",
+      "enabled": true,
+      "label": "com.newnavnav.private-china-internet-valuation-uploader",
+      "environment": {
+        "NNN_PRIVATE_CHINA_INTERNET_UPLOAD_SOURCE": "mac-home-private-china-internet-uploader",
+        "NNN_PRIVATE_CHINA_INTERNET_RUNTIME_DIR": "{run_root}/scripts/.runtime/private_china_internet",
+        "NNN_PRIVATE_CHINA_INTERNET_UPLOAD_INTERVAL": "3s",
+        "NNN_PRIVATE_CHINA_INTERNET_CFETS_INTERVAL": "60s",
+        "NNN_PRIVATE_CHINA_INTERNET_PCF_INTERVAL": "60s",
+        "NNN_PRIVATE_CHINA_INTERNET_PCF_START_AT": "08:30",
+        "NNN_PRIVATE_PCF_SYMBOL_INTERVAL": "10s",
+        "NNN_PRIVATE_PCF_PACER_STATE": "{data_root}/pcf-pacer.json",
+        "NNN_PRIVATE_CHINA_INTERNET_IB_HOST": "192.168.1.111",
+        "NNN_PRIVATE_CHINA_INTERNET_IB_PORT": "7496",
+        "NNN_PRIVATE_CHINA_INTERNET_IB_CLIENT_ID": "159607"
+      }
+    },
+    {
+      "id": "india",
+      "enabled": true,
+      "label": "com.newnavnav.private-164824-valuation-uploader",
+      "environment": {
+        "NNN_PRIVATE_164824_RUNTIME_DIR": "{run_root}/scripts/.runtime/private_164824",
+        "NNN_PRIVATE_164824_UPLOAD_INTERVAL": "3",
+        "NNN_PRIVATE_164824_TWS_OPEN_TIME": "09:00",
+        "NNN_PRIVATE_164824_IB_HOST": "192.168.1.111",
+        "NNN_PRIVATE_164824_IB_PORT": "7496",
+        "NNN_PRIVATE_164824_IB_CLIENT_ID": "164824",
+        "NNN_PRIVATE_164824_IB_TIMEOUT": "40"
+      }
+    },
+    {
+      "id": "nasdaq",
+      "enabled": true,
+      "label": "com.newnavnav.private-nasdaq-valuation-uploader",
+      "environment": {
+        "NNN_PRIVATE_NASDAQ_RUNTIME_DIR": "{run_root}/scripts/.runtime/private_nasdaq",
+        "NNN_PRIVATE_NASDAQ_UPLOAD_INTERVAL": "3",
+        "NNN_PRIVATE_NASDAQ_IB_HOST": "127.0.0.1",
+        "NNN_PRIVATE_NASDAQ_IB_PORT": "7496",
+        "NNN_PRIVATE_NASDAQ_IB_CLIENT_ID": "159659",
+        "NNN_PRIVATE_PCF_PACER_STATE": "{data_root}/pcf-pacer.json"
+      }
+    },
+    {
+      "id": "sp500",
+      "enabled": true,
+      "label": "com.newnavnav.private-sp500-valuation-uploader",
+      "environment": {
+        "NNN_PRIVATE_SP500_RUNTIME_DIR": "{run_root}/scripts/.runtime/private_sp500",
+        "NNN_PRIVATE_SP500_UPLOAD_INTERVAL": "3",
+        "NNN_PRIVATE_SP500_IB_HOST": "127.0.0.1",
+        "NNN_PRIVATE_SP500_IB_PORT": "7496",
+        "NNN_PRIVATE_SP500_IB_CLIENT_ID": "159655",
+        "NNN_PRIVATE_PCF_PACER_STATE": "{data_root}/pcf-pacer.json"
+      }
+    },
+    {
+      "id": "nikkei225",
+      "enabled": true,
+      "label": "com.newnavnav.private-nikkei225-valuation-uploader",
+      "environment": {
+        "NNN_PRIVATE_NIKKEI225_RUNTIME_DIR": "{run_root}/scripts/.runtime/private_nikkei225",
+        "NNN_PRIVATE_NIKKEI225_UPLOAD_INTERVAL": "3",
+        "NNN_PRIVATE_NIKKEI225_IB_HOST": "127.0.0.1",
+        "NNN_PRIVATE_NIKKEI225_IB_PORT": "7496",
+        "NNN_PRIVATE_NIKKEI225_IB_CLIENT_ID": "159866",
+        "NNN_PRIVATE_PCF_PACER_STATE": "{data_root}/pcf-pacer.json"
+      }
+    },
+    {
+      "id": "germany",
+      "enabled": true,
+      "label": "com.newnavnav.private-germany-valuation-uploader",
+      "environment": {
+        "NNN_PRIVATE_GERMANY_RUNTIME_DIR": "{run_root}/scripts/.runtime/private_germany",
+        "NNN_PRIVATE_GERMANY_UPLOAD_INTERVAL": "3",
+        "NNN_PRIVATE_GERMANY_IB_HOST": "192.168.1.111",
+        "NNN_PRIVATE_GERMANY_IB_PORT": "7496",
+        "NNN_PRIVATE_GERMANY_IB_CLIENT_ID": "159561",
+        "NNN_PRIVATE_PCF_PACER_STATE": "{data_root}/pcf-pacer.json"
+      }
+    },
+    {
+      "id": "rebuild",
+      "enabled": true,
+      "label": "com.newnavnav.private-intraday-rebuild-agent",
+      "environment": {
+        "NNN_INTRADAY_REBUILD_AGENT_ID": "mac-home",
+        "NNN_INTRADAY_REBUILD_IB_HOST": "192.168.1.111",
+        "NNN_INTRADAY_REBUILD_IB_PORT": "7496",
+        "NNN_INTRADAY_REBUILD_IB_CLIENT_ID": "159523",
+        "NNN_ORIGIN_IP": "69.63.209.166",
+        "NNN_ORIGIN_TLS_INSECURE": "1"
+      }
+    },
+    {
+      "id": "health-monitor",
+      "enabled": true,
+      "label": "com.newnavnav.upload-health-monitor"
+    },
+    {
+      "id": "anchor-backfill",
+      "enabled": true,
+      "label": "com.newnavnav.ibkr-anchor-backfill",
+      "environment": {
+        "NNN_ANCHOR_BACKFILL_FUNDS": "all",
+        "NNN_ANCHOR_BACKFILL_SOURCE": "home-mac-anchor-backfill",
+        "IBKR_ANCHOR_BACKFILL_CLIENT_ID": "22962"
+      },
+      "daily_at": [
+        "09:10",
+        "14:50"
+      ]
+    },
+    {
+      "id": "india-final-nav",
+      "enabled": true,
+      "label": "com.newnavnav.private-164824-final-nav-backfill",
+      "daily_at": [
+        "09:20"
+      ]
+    },
+    {
+      "id": "china-history",
+      "enabled": false,
+      "once": true,
+      "args": [
+        "--symbols",
+        "SZ159605,SZ159607,SH513050"
+      ],
+      "note": "Restore the exact unfinished range and checkpoint from the approved export before enabling."
+    },
+    {
+      "id": "month-history",
+      "enabled": false,
+      "once": true,
+      "args": [],
+      "note": "Historical date range must be copied from the baseline export, never inferred."
+    }
+  ],
+  "instructions": "Private deployment values and active worker selection must come from the baseline export; never place credentials in the app bundle."
+}

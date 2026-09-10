@@ -1188,5 +1188,50 @@ class PublicContractTests(unittest.TestCase):
             interface.ReceiveRawEvent(timeout=0.01)
 
 
+class LoginRobustnessTests(unittest.TestCase):
+    def test_internet_port_defaults_when_config_port_is_zero(self):
+        backend = _backend.LiveBackend()
+        backend.cfg = {"server_port": 0}
+        self.assertEqual(backend._effective_port(), 8600)
+        backend.cfg = {"server_port": 8600}
+        self.assertEqual(backend._effective_port(), 8600)
+        backend.cfg = {"server_port": 14001}
+        self.assertEqual(backend._effective_port(), 14001)
+
+    def test_live_init_normalizes_stored_port_before_connect(self):
+        created = {}
+
+        def fake_connect(host, port, ca_file=None, server_name=None):
+            created["host"] = host
+            created["port"] = port
+            created["ca_file"] = ca_file
+
+        backend = _backend.LiveBackend()
+        backend.client.connect = fake_connect  # type: ignore[method-assign]
+        code = backend.init(
+            {"server_vip": "127.0.0.1", "server_port": 0,
+             "username": "u", "password": "p"}, 2
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(created["port"], 8600)
+        self.assertEqual(backend.cfg["server_port"], 8600)
+        backend.close()
+
+    def test_logon_rejection_message_keeps_status_and_actionable_hint(self):
+        message = _protocol._logon_rejection_message(
+            -98, "OnRspLogon", {"act_instanceid": "DGW1"}
+        )
+        self.assertIn("status=-98", message)
+        self.assertIn("tag='OnRspLogon'", message)
+        self.assertIn("instance='DGW1'", message)
+        self.assertIn("configured VIP does not host this account", message)
+        self.assertIn("force_logout=True", message)
+
+    def test_logon_rejection_message_unknown_status_no_hint(self):
+        message = _protocol._logon_rejection_message(-12345, None, {})
+        self.assertIn("status=-12345", message)
+        self.assertNotIn("force_logout=True", message)
+
+
 if __name__ == "__main__":
     unittest.main()

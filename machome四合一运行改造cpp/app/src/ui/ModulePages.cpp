@@ -5,6 +5,10 @@
 #include "ui/PremiumHistory.h"
 #include "ui/ServiceOverview.h"
 #include "ui/UiText.h"
+#include "ui/UiWidgets.h"
+#include <QScrollBar>
+#include <QTreeWidgetItemIterator>
+#include <QToolButton>
 #include <QGridLayout>
 
 #include <QComboBox>
@@ -137,13 +141,20 @@ void addTreeValue(QTreeWidgetItem *parent, const QString &key, const QJsonValue 
 }
 
 void fillTree(QTreeWidget *tree, const QJsonObject &object) {
-    tree->setUpdatesEnabled(false);
-    tree->clear();
-    auto *root = tree->invisibleRootItem();
-    for (auto it = object.begin(); it != object.end(); ++it) addTreeValue(root, it.key(), it.value());
-    tree->expandToDepth(1);
-    tree->resizeColumnToContents(0);
-    tree->setUpdatesEnabled(true);
+    const auto encoded=QJsonDocument(object).toJson(QJsonDocument::Compact);
+    if(tree->property("lastJson").toByteArray()==encoded)return;
+    auto path=[](QTreeWidgetItem *item){QStringList p;for(;item;item=item->parent())p.prepend(item->toolTip(0).isEmpty()?item->text(0):item->toolTip(0));return p.join('/');};
+    QSet<QString> expanded;QString selected;
+    const bool initial=!tree->property("initialized").toBool();
+    for(QTreeWidgetItemIterator i(tree);*i;++i)if((*i)->isExpanded())expanded.insert(path(*i));
+    if(tree->currentItem())selected=path(tree->currentItem());
+    const int v=tree->verticalScrollBar()->value(),h=tree->horizontalScrollBar()->value();
+    tree->setUpdatesEnabled(false);tree->clear();
+    for(auto it=object.begin();it!=object.end();++it)addTreeValue(tree->invisibleRootItem(),it.key(),it.value());
+    if(initial){tree->expandToDepth(1);tree->resizeColumnToContents(0);}
+    else for(QTreeWidgetItemIterator i(tree);*i;++i){(*i)->setExpanded(expanded.contains(path(*i)));if(path(*i)==selected)tree->setCurrentItem(*i);}
+    tree->verticalScrollBar()->setValue(v);tree->horizontalScrollBar()->setValue(h);
+    tree->setProperty("initialized",true);tree->setProperty("lastJson",encoded);tree->setUpdatesEnabled(true);
 }
 
 QTreeWidget *makeTree() {
@@ -351,15 +362,7 @@ bool belongsToSymbol(const QJsonObject &object, const QString &symbol) {
 }
 
 void showJsonDetail(QWidget *parent, const QString &title, const QJsonObject &object) {
-    auto *window = new QWidget(parent, Qt::Window);
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowTitle(title);
-    window->resize(760, 620);
-    auto *layout = new QVBoxLayout(window);
-    auto *editor = new QPlainTextEdit(pretty(object));
-    editor->setReadOnly(true);
-    layout->addWidget(editor);
-    window->show();
+    ui::showObject(parent,title,object);
 }
 
 } // namespace
@@ -562,7 +565,10 @@ void ModulePage::appendLog(const QString &text) {
     if (eventLog_->document()->maximumBlockCount() == 0) {
         eventLog_->document()->setMaximumBlockCount(500);
     }
+    const int scroll=eventLog_->verticalScrollBar()->value();
+    const auto cursor=eventLog_->textCursor();
     eventLog_->appendPlainText(text);
+    if(!eventLog_->property("followLatest").toBool()){eventLog_->setTextCursor(cursor);eventLog_->verticalScrollBar()->setValue(scroll);}
 }
 
 void ModulePage::send(const QString &action, const QJsonObject &arguments, int deadlineMs) {
@@ -585,6 +591,9 @@ void ModulePage::updateBusyControls() {
 
 UploadPage::UploadPage(ModuleConfig config, QWidget *parent)
     : ModulePage(std::move(config), parent) {
+    const bool bundledBusiness=config_.settings.value("sink_mode").toString()=="bundled_business";
+    auto websiteButton=[this]{auto *b=new QPushButton(QStringLiteral("打开业务网站"));
+        connect(b,&QPushButton::clicked,this,[this]{QDesktopServices::openUrl(QUrl(config_.settings.value("web_base_url").toString("http://127.0.0.1:8080")));});return b;};
     auto *tabs = new QTabWidget;
     auto *overview = new QWidget;
     auto *overviewLayout = new QVBoxLayout(overview);
@@ -618,7 +627,7 @@ UploadPage::UploadPage(ModuleConfig config, QWidget *parent)
                                QStringLiteral("上次成功"), QStringLiteral("模型"),
                                QStringLiteral("手工重跑")});
     workersTable_->setObjectName(QStringLiteral("uploadJobsTable"));
-    tabs->addTab(workersTable_, QStringLiteral("上传任务"));
+    tabs->addTab(ui::tablePanel(workersTable_,"uploadJobs",{}, {1,3,4,7},false), QStringLiteral("上传任务"));
 
     fundsTable_ = makeTable({QStringLiteral("基金"), QStringLiteral("名称"),
                              QStringLiteral("分支"), QStringLiteral("现价"),
@@ -626,12 +635,14 @@ UploadPage::UploadPage(ModuleConfig config, QWidget *parent)
                              QStringLiteral("篮子卖一净值"), QStringLiteral("仓位"),
                              QStringLiteral("更新时间")});
     fundsTable_->setObjectName(QStringLiteral("uploadFundsTable"));
-    const auto dataPage = [](QTableWidget *table, QLabel **status) {
+    const auto dataPage = [websiteButton](QTableWidget *table, QLabel **status) {
         auto *page = new QWidget;
         auto *layout = new QVBoxLayout(page);
         *status = textLabel(QStringLiteral("等待服务返回数据"), table->objectName() + QStringLiteral("Status"));
         layout->addWidget(*status);
-        layout->addWidget(table);
+        layout->addWidget(websiteButton(),0,Qt::AlignLeft);
+        layout->addWidget(ui::tablePanel(table,table->objectName()),1);
+        layout->addStretch();
         return page;
     };
     tabs->addTab(dataPage(fundsTable_, &fundsStatus_), QStringLiteral("基金与详情"));
@@ -647,7 +658,7 @@ UploadPage::UploadPage(ModuleConfig config, QWidget *parent)
                                QStringLiteral("输出模式"), QStringLiteral("记录时间"),
                                QStringLiteral("接收确认")});
     recordsTable_->setObjectName(QStringLiteral("uploadRecordsTable"));
-    tabs->addTab(dataPage(recordsTable_, &recordsStatus_), QStringLiteral("诊断与统计"));
+    tabs->addTab(dataPage(recordsTable_, &recordsStatus_), QStringLiteral("上传确认与诊断"));
 
     auto *settings = new QWidget;
     auto *settingsLayout = new QFormLayout(settings);
@@ -670,14 +681,22 @@ UploadPage::UploadPage(ModuleConfig config, QWidget *parent)
         QJsonObject arguments{{QStringLiteral("symbol"), navSymbolEdit_->text().trimmed()}};
         bool ok = false;
         const double nav = navValueEdit_->text().toDouble(&ok);
+        if(!navValueEdit_->text().trimmed().isEmpty() && (!ok || !std::isfinite(nav) || nav<=0)){QMessageBox::warning(this,QStringLiteral("净值无效"),QStringLiteral("单位净值必须是大于 0 的数字。"));return;}
         if (ok) arguments.insert(QStringLiteral("nav"), nav);
         const double shares = sharesValueEdit_->text().toDouble(&ok);
+        if(!sharesValueEdit_->text().trimmed().isEmpty() && (!ok || !std::isfinite(shares) || shares<0)){QMessageBox::warning(this,QStringLiteral("份额无效"),QStringLiteral("份额必须是非负数字。"));return;}
         if (ok) arguments.insert(QStringLiteral("shares"), shares);
         const double position = positionValueEdit_->text().toDouble(&ok);
+        if(!positionValueEdit_->text().trimmed().isEmpty() && (!ok || !std::isfinite(position) || position<0 || position>1)){QMessageBox::warning(this,QStringLiteral("仓位无效"),QStringLiteral("有效仓位必须介于 0 和 1。"));return;}
         if (ok) arguments.insert(QStringLiteral("position_ratio"), position);
         send(QStringLiteral("upload_set_fund"), arguments);
     });
     settingsLayout->addRow(saveNav);
+    if(bundledBusiness){
+        for(auto *w:settings->findChildren<QWidget *>())w->hide();
+        settingsLayout->addRow(textLabel(QStringLiteral("净值、份额与仓位由业务网站统一管理。请打开网站查看当前值并修改。")));
+        settingsLayout->addRow(websiteButton());
+    }
     tabs->addTab(settings, QStringLiteral("净值设置"));
 
     auto *guide = new QWidget;
@@ -695,9 +714,8 @@ UploadPage::UploadPage(ModuleConfig config, QWidget *parent)
     });
     guideLayout->addWidget(saveMessage);
     guideLayout->addStretch();
-    const bool bundledBusiness=config_.settings.value(QStringLiteral("sink_mode")).toString()==QStringLiteral("bundled_business");
     if(bundledBusiness){
-        saveNav->setEnabled(false);saveMessage->setEnabled(false);
+        saveNav->setEnabled(false);saveMessage->setEnabled(false);messageEdit_->hide();saveMessage->hide();
         auto *website=new QPushButton(QStringLiteral("打开业务网站（净值、历史、仓位设置与留言）"));
         guideLayout->insertWidget(0,website);
         guideLayout->insertWidget(1,textLabel(QStringLiteral("当前使用原网站业务和数据库。上传任务页显示包内进程及实际接收确认时间；业务编辑请在网站完成。")));
@@ -709,7 +727,7 @@ UploadPage::UploadPage(ModuleConfig config, QWidget *parent)
     eventLog_ = new QPlainTextEdit;
     eventLog_->setObjectName(QStringLiteral("moduleEventLog"));
     eventLog_->setReadOnly(true);
-    tabs->addTab(eventLog_, QStringLiteral("事件与日志"));
+    tabs->addTab(ui::textPanel(eventLog_,true), QStringLiteral("事件与日志"));
     setContent(tabs);
 }
 
@@ -765,10 +783,11 @@ void UploadPage::applySnapshot(const QJsonObject &message) {
         || telemetry.value("engine").toObject().value("business_engine").toString() == "bundled_business"
         || config_.settings.value("sink_mode").toString() == "bundled_business";
     const QString unavailable = bundled
-        ? QStringLiteral("本页尚未接入网站明细，不代表没有业务数据。请在“指南与留言”打开业务网站查看。")
+        ? QStringLiteral("本页尚未接入网站明细，不代表没有业务数据。请使用本页按钮打开业务网站查看。")
         : QStringLiteral("服务尚未返回本页数据。");
     fundsStatus_->setText(!telemetry.value("funds").isArray() ? unavailable
         : funds.isEmpty() ? QStringLiteral("服务已返回：暂无基金记录") : QStringLiteral("共 %1 个基金").arg(funds.size()));
+    fundsTable_->parentWidget()->setVisible(!bundled || telemetry.value("funds").isArray());
     fundsTable_->setRowCount(funds.size());
     row = 0;
     for (const auto &value : funds) {
@@ -850,6 +869,7 @@ void UploadPage::applySnapshot(const QJsonObject &message) {
             historyRows.prepend(rank);
         }
     }
+    historyTable_->parentWidget()->setVisible(!bundled || telemetry.value("history").isObject());
     historyTable_->setRowCount(historyRows.size());
     historyStatus_->setText(!telemetry.value("history").isObject() ? unavailable
         : historyRows.isEmpty() ? QStringLiteral("服务已返回：暂无历史记录") : QStringLiteral("共 %1 条记录；份额减少按每个基金最近两个日期计算").arg(historyRows.size()));
@@ -969,14 +989,14 @@ PremiumDetailWindow::PremiumDetailWindow(QString symbol, QString name,
                             QStringLiteral("数量"), QStringLiteral("原始定点值")});
     bookTable_->setObjectName(QStringLiteral("premiumDetailBook"));
     bookTable_->setRowCount(20);
-    tabs->addTab(bookTable_, QStringLiteral("十档盘口"));
+    tabs->addTab(ui::depthPanel(bookTable_,"premiumDetail",true), QStringLiteral("十档盘口"));
     fieldsTree_ = makeTree();
     fieldsTree_->setObjectName(QStringLiteral("premiumDetailFields"));
     tabs->addTab(fieldsTree_, QStringLiteral("全部行情字段"));
     rawView_ = new QPlainTextEdit;
     rawView_->setObjectName(QStringLiteral("premiumDetailRaw"));
     rawView_->setReadOnly(true);
-    tabs->addTab(rawView_, QStringLiteral("原始 JSON"));
+    tabs->addTab(ui::textPanel(rawView_), QStringLiteral("原始 JSON"));
     layout->addWidget(tabs, 1);
 }
 
@@ -1007,7 +1027,7 @@ void PremiumDetailWindow::applyDetail(const QJsonObject &detail) {
                  price(QStringLiteral("iopv_e6"), 4),
                  ppm(QStringLiteral("sell_premium_ppm"))));
     marketLabel_->setText(
-        QStringLiteral("阶段 %1 · 交易所时间 %2 · %3 · level_count=%4")
+        QStringLiteral("阶段 %1 · 交易所时间 %2 · %3 · 盘口档数 %4")
             .arg(detail.value(QStringLiteral("trading_phase")).toString(
                      QStringLiteral("—")),
                  displayValue(detail.value(QStringLiteral("orig_time"))),
@@ -1121,7 +1141,7 @@ PremiumPage::PremiumPage(ModuleConfig config, QWidget *parent)
                                QStringLiteral("模型/事件"), QStringLiteral("溢价率"), QStringLiteral("30秒拉升"),
                                QStringLiteral("提醒类型")});
     signalsTable_->setObjectName(QStringLiteral("premiumSignalsTable"));
-    liveLayout->addWidget(signalsTable_);
+    liveLayout->addWidget(ui::tablePanel(signalsTable_,"premiumSignals",QStringLiteral("查看行情")),1);
     connect(signalsTable_, &QTableWidget::cellDoubleClicked, this, [this](int row, int) {
         if (auto *item = signalsTable_->item(row, 0)) {
             const QByteArray data = item->data(Qt::UserRole).toString().toUtf8();
@@ -1139,7 +1159,7 @@ PremiumPage::PremiumPage(ModuleConfig config, QWidget *parent)
             openDetail(QJsonDocument::fromJson(data).object());
         }
     });
-    tabs->addTab(summariesTable_, QStringLiteral("实时全景"));
+    tabs->addTab(ui::tablePanel(summariesTable_,"premiumSummaries",QStringLiteral("查看盘口")), QStringLiteral("实时全景"));
 
     auto *history = new QWidget;
     auto *historyLayout = new QVBoxLayout(history);
@@ -1151,14 +1171,14 @@ PremiumPage::PremiumPage(ModuleConfig config, QWidget *parent)
     historyTo_->setCalendarPopup(true);
     historyTo_->setDisplayFormat(QStringLiteral("yyyy-MM-dd"));
     historySymbol_ = new QLineEdit;
-    historySymbol_->setPlaceholderText(QStringLiteral("标的筛选，例如 159866"));
+    historySymbol_->setPlaceholderText(QStringLiteral("标的，例如 159866"));historySymbol_->setMinimumWidth(150);
     historyModel_ = new QComboBox;
     historyModel_->addItem(QStringLiteral("全部模型"), QString());
     historyModel_->addItem(QStringLiteral("溢价率"), QStringLiteral("premium"));
     historyModel_->addItem(QStringLiteral("盘口拉涨"), QStringLiteral("pull"));
     historyModel_->addItem(QStringLiteral("溢价率 + 盘口拉涨"), QStringLiteral("premium+pull"));
     historyModel_->addItem(QStringLiteral("含快速拉涨雷达"), QStringLiteral("contains:radar"));
-    auto *loadHistory = new QPushButton(QStringLiteral("后台读取"));
+    auto *loadHistory = new QPushButton(QStringLiteral("查询历史"));
     auto *exportHistory = new QPushButton(QStringLiteral("导出 CSV"));
     auto *openDirectory = new QPushButton(QStringLiteral("打开审计目录"));
     historyPreviousButton_ = new QPushButton(QStringLiteral("上一页"));
@@ -1172,12 +1192,9 @@ PremiumPage::PremiumPage(ModuleConfig config, QWidget *parent)
     historyControls->addWidget(historySymbol_);
     historyControls->addWidget(historyModel_);
     historyControls->addWidget(loadHistory);
-    historyControls->addWidget(exportHistory);
-    historyControls->addWidget(openDirectory);
-    historyControls->addWidget(historyPreviousButton_);
-    historyControls->addWidget(historyNextButton_);
+    auto *historyActions=new QHBoxLayout;historyActions->addWidget(exportHistory);historyActions->addWidget(openDirectory);historyActions->addStretch();historyActions->addWidget(historyPreviousButton_);historyActions->addWidget(historyNextButton_);
     historyLayout->addLayout(historyControls);
-    historyStatus_ = textLabel(QStringLiteral("只读 data/signals-YYYYMMDD.jsonl；解析与导出均在后台线程执行。"),
+    historyStatus_ = textLabel(QStringLiteral("选择日期与标的后查询，导出范围为本次已读取记录。"),
                                QStringLiteral("secondaryText"));
     historyLayout->addWidget(historyStatus_);
     historyTable_ = makeTable({QStringLiteral("触发时间"), QStringLiteral("标的"), QStringLiteral("名称"),
@@ -1185,7 +1202,8 @@ PremiumPage::PremiumPage(ModuleConfig config, QWidget *parent)
                                QStringLiteral("拉升5分钟"), QStringLiteral("买一150秒"), QStringLiteral("买一300秒"),
                                QStringLiteral("提醒类型"), QStringLiteral("来源"), QStringLiteral("触发原因")});
     historyTable_->setObjectName(QStringLiteral("premiumHistoryTable"));
-    historyLayout->addWidget(historyTable_, 1);
+    historyLayout->addWidget(ui::tablePanel(historyTable_,"premiumHistory",QStringLiteral("查看信号"),{6,7,8,10}), 1);
+    historyLayout->addLayout(historyActions);
     historyLoader_ = new PremiumHistoryLoader(this);
     connect(loadHistory, &QPushButton::clicked, this, [this] {
         historyLoader_->load(
@@ -1242,12 +1260,13 @@ PremiumPage::PremiumPage(ModuleConfig config, QWidget *parent)
         auto *page = new QWidget;
         auto *layout = new QVBoxLayout(page);
         layout->addWidget(textLabel(hot ? QStringLiteral("每行一个额外 L1 维护标的；服务端拒绝时保留原值。")
-                                        : QStringLiteral("每行一个观察标的；保存通过 8421 loopback 合同执行。"),
+                                        : QStringLiteral("添加或移除观察标的后保存；也可使用批量文本编辑。"),
                                     QStringLiteral("secondaryText")));
         auto *edit = new QPlainTextEdit;
+        edit->setObjectName(hot?"premiumHotlist":"premiumWatchlist");
         edit->setPlaceholderText(hot ? QStringLiteral("510300.SH\n02800.HK")
                                      : QStringLiteral("510300.SH\n159915.SZ"));
-        layout->addWidget(edit, 1);
+        layout->addWidget(ui::symbolListPanel(edit), 1);
         auto *save = new QPushButton(QStringLiteral("保存并等待服务端确认"));
         mutationButtons_.append(save);
         connect(save, &QPushButton::clicked, this, [this, edit, hot] {
@@ -1279,7 +1298,7 @@ PremiumPage::PremiumPage(ModuleConfig config, QWidget *parent)
     eventLog_ = new QPlainTextEdit;
     eventLog_->setObjectName(QStringLiteral("moduleEventLog"));
     eventLog_->setReadOnly(true);
-    tabs->addTab(eventLog_, QStringLiteral("运行日志"));
+    tabs->addTab(ui::textPanel(eventLog_,true), QStringLiteral("运行日志"));
     for (auto *button : std::as_const(mutationButtons_)) {
         button->setEnabled(config_.controlEnabled && config_.ownership != QStringLiteral("shadow"));
     }
@@ -1638,12 +1657,12 @@ WebullPage::WebullPage(ModuleConfig config, QWidget *parent)
     bookTable_ = makeTable({QStringLiteral("方向"), QStringLiteral("档位"), QStringLiteral("价格"),
                             QStringLiteral("数量"), QStringLiteral("订单数")});
     bookTable_->setObjectName(QStringLiteral("webullBookTable"));
-    bookLayout->addWidget(bookTable_);
+    bookLayout->addWidget(ui::depthPanel(bookTable_,"webull",false),1);
     tabs->addTab(book, QStringLiteral("实时盘口"));
     clientsTable_ = makeTable({QStringLiteral("客户端标识"), QStringLiteral("远端地址"), QStringLiteral("连接时间"),
                                QStringLiteral("最后发送"), QStringLiteral("消息数")});
     clientsTable_->setObjectName(QStringLiteral("webullClientsTable"));
-    tabs->addTab(clientsTable_, QStringLiteral("客户端"));
+    tabs->addTab(ui::tablePanel(clientsTable_,"webullClients"), QStringLiteral("客户端"));
 
     auto *runtime = new QWidget;
     auto *runtimeLayout = new QVBoxLayout(runtime);
@@ -1656,6 +1675,7 @@ WebullPage::WebullPage(ModuleConfig config, QWidget *parent)
                              qMakePair(QStringLiteral("暂停采集"), QStringLiteral("force_stopped"))}) {
         auto *button = new QPushButton(pair.first);
         mutationButtons_.append(button);
+        button->setCheckable(true);button->setProperty("scheduleMode",pair.second);
         connect(button, &QPushButton::clicked, this, [this, pair] {
             send(QStringLiteral("webull_set_mode"), QJsonObject{{QStringLiteral("mode"), pair.second}});
         });
@@ -1689,7 +1709,7 @@ WebullPage::WebullPage(ModuleConfig config, QWidget *parent)
     eventLog_ = new QPlainTextEdit;
     eventLog_->setObjectName(QStringLiteral("moduleEventLog"));
     eventLog_->setReadOnly(true);
-    tabs->addTab(eventLog_, QStringLiteral("日志"));
+    tabs->addTab(ui::textPanel(eventLog_,true), QStringLiteral("日志"));
     const bool initiallyEnabled = config_.controlEnabled && config_.ownership != QStringLiteral("shadow")
         && (config_.engine == QStringLiteral("native")
             || !config_.settings.value(QStringLiteral("control_base_url")).toString().isEmpty());
@@ -1702,6 +1722,7 @@ void WebullPage::applySnapshot(const QJsonObject &message) {
     const auto payload = message.value(QStringLiteral("payload")).toObject();
     fillTree(runtimeTree_, payload);
     const auto telemetry = payload.value(QStringLiteral("telemetry")).toObject();
+    for(auto *b:mutationButtons_)if(b->property("scheduleMode").isValid())b->setChecked(b->property("scheduleMode").toString()==telemetry.value("status").toObject().value("schedule_mode").toString());
     const bool nativeEngine = config_.engine == QStringLiteral("native");
     const bool canMutate = logicalControlAllowed(message)
         && (nativeEngine || !config_.settings.value(QStringLiteral("control_base_url")).toString().isEmpty());
@@ -1782,8 +1803,8 @@ void WebullPage::updateClients(const QJsonValue &clients) {
         const auto object = value.toObject();
         setCell(clientsTable_, row, 0, firstValue(object, {QStringLiteral("client_id"), QStringLiteral("id")}), object);
         setCell(clientsTable_, row, 1, firstValue(object, {QStringLiteral("remote"), QStringLiteral("remote_addr")}));
-        setCell(clientsTable_, row, 2, firstValue(object, {QStringLiteral("connected_at"), QStringLiteral("created_at")}));
-        setCell(clientsTable_, row, 3, firstValue(object, {QStringLiteral("last_sent_at"), QStringLiteral("last_send")}));
+        setCell(clientsTable_, row, 2, ui::localTimeText(firstValue(object, {QStringLiteral("connected_at"), QStringLiteral("created_at")})));
+        setCell(clientsTable_, row, 3, ui::localTimeText(firstValue(object, {QStringLiteral("last_sent_at"), QStringLiteral("last_send")})));
         setCell(clientsTable_, row, 4, firstValue(object, {QStringLiteral("message_count"), QStringLiteral("sent_count")}));
         ++row;
     }
@@ -1816,7 +1837,8 @@ RealtimePage::RealtimePage(ModuleConfig config, QWidget *parent)
         mutationButtons_.append(button);
         controls->addWidget(button);
     }
-    controls->addStretch();
+    mainLayout->addLayout(controls);
+    controls=new QHBoxLayout;controls->addStretch();
     controls->addWidget(soundEnabled_);
     controls->addWidget(popupEnabled_);
     auto *alertSettingsButton=new QPushButton(QStringLiteral("提醒设置"));
@@ -1829,7 +1851,7 @@ RealtimePage::RealtimePage(ModuleConfig config, QWidget *parent)
                                 QStringLiteral("可申购篮子"), QStringLiteral("机会"), QStringLiteral("时间"),
                                 QStringLiteral("最近变化")});
     snapshotTable_->setObjectName(QStringLiteral("realtimeSnapshotTable"));
-    mainLayout->addWidget(snapshotTable_);
+    mainLayout->addWidget(ui::tablePanel(snapshotTable_,"redemptionSnapshot",QStringLiteral("查看 PCF"),{3,4,6,7,9,10}),1);
     connect(snapshotTable_, &QTableWidget::cellDoubleClicked, this, [this](int row, int) { openPcfForRow(row); });
     tabs->addTab(main, QStringLiteral("实时监控"));
 
@@ -1841,8 +1863,7 @@ RealtimePage::RealtimePage(ModuleConfig config, QWidget *parent)
     watchlistEdit_ = new QPlainTextEdit;
     watchlistEdit_->setObjectName(QStringLiteral("realtimeWatchlistEdit"));
     watchlistEdit_->setPlaceholderText(QStringLiteral("159518\n159393"));
-    watchlistEdit_->setMaximumHeight(150);
-    watchlistLayout->addWidget(watchlistEdit_);
+    watchlistLayout->addWidget(ui::symbolListPanel(watchlistEdit_),1);
     auto *saveWatchlist = new QPushButton(QStringLiteral("保存观察列表"));
     saveWatchlist->setObjectName(QStringLiteral("realtimeSaveWatchlist"));
     connect(saveWatchlist, &QPushButton::clicked, this, [this] {
@@ -1871,6 +1892,9 @@ RealtimePage::RealtimePage(ModuleConfig config, QWidget *parent)
     nameForm->addRow(QStringLiteral("标的代码"), nameSymbolEdit_);
     nameForm->addRow(QStringLiteral("自定义名称"), symbolNameEdit_);
     watchlistLayout->addLayout(nameForm);
+    if(auto *list=watchlist->findChild<QTableWidget *>("realtimeWatchlistEditList")){
+        connect(list,&QTableWidget::currentCellChanged,this,[this,list](int r,int,int,int){if(r<0||!list->item(r,0))return;nameSymbolEdit_->setText(list->item(r,0)->text());if(list->item(r,1)&&list->item(r,1)->text()!=QStringLiteral("—"))symbolNameEdit_->setText(list->item(r,1)->text());});
+    }
     auto *saveName = new QPushButton(QStringLiteral("保存标的名称"));
     saveName->setObjectName(QStringLiteral("realtimeSaveSymbolName"));
     connect(saveName, &QPushButton::clicked, this, [this] {
@@ -1895,13 +1919,14 @@ RealtimePage::RealtimePage(ModuleConfig config, QWidget *parent)
     auto *history = new QWidget;
     auto *historyLayout = new QVBoxLayout(history);
     auto *filters = new QHBoxLayout;
-    historyDateEdit_ = new QLineEdit(QDate::currentDate().toString(Qt::ISODate));
+    historyDateEdit_ = new QDateEdit(QDate::currentDate());
+    historyDateEdit_->setCalendarPopup(true);historyDateEdit_->setDisplayFormat("yyyy-MM-dd");
     historySymbolEdit_ = new QLineEdit;
     historySymbolEdit_->setPlaceholderText(QStringLiteral("可选标的"));
     auto *query = new QPushButton(QStringLiteral("查询历史"));
     connect(query, &QPushButton::clicked, this, [this] {
         send(QStringLiteral("redemption_get_history"),
-             QJsonObject{{QStringLiteral("date"), historyDateEdit_->text().trimmed()},
+             QJsonObject{{QStringLiteral("date"), historyDateEdit_->date().toString(Qt::ISODate)},
                          {QStringLiteral("symbol"), historySymbolEdit_->text().trimmed()}});
     });
     filters->addWidget(textLabel(QStringLiteral("日期")));
@@ -1913,7 +1938,7 @@ RealtimePage::RealtimePage(ModuleConfig config, QWidget *parent)
     historyTable_ = makeTable({QStringLiteral("时间"), QStringLiteral("标的"), QStringLiteral("方向"),
                                QStringLiteral("原值"), QStringLiteral("新值"), QStringLiteral("变化"),
                                QStringLiteral("篮子"), QStringLiteral("状态")});
-    historyLayout->addWidget(historyTable_);
+    historyLayout->addWidget(ui::tablePanel(historyTable_,"redemptionHistory"),1);
     tabs->addTab(history, QStringLiteral("变化历史"));
     runtimeTree_ = makeTree();
     overview_ = new ServiceOverview(config_.adapter);
@@ -1939,7 +1964,7 @@ RealtimePage::RealtimePage(ModuleConfig config, QWidget *parent)
     eventLog_ = new QPlainTextEdit;
     eventLog_->setObjectName(QStringLiteral("moduleEventLog"));
     eventLog_->setReadOnly(true);
-    tabs->addTab(eventLog_, QStringLiteral("服务日志"));
+    tabs->addTab(ui::textPanel(eventLog_,true), QStringLiteral("服务日志"));
     setContent(tabs);
     updateMutationControlState({});
 }
@@ -1963,6 +1988,7 @@ void RealtimePage::applySnapshot(const QJsonObject &message) {
         watchlistEdit_->document()->setModified(false);
     }
     updateRows(telemetry.value(QStringLiteral("snapshot")), true);
+    if(auto *list=findChild<QTableWidget *>("realtimeWatchlistEditList"))for(int r=0;r<list->rowCount();++r){auto *code=list->item(r,0);if(!code)continue;const auto name=realtimeItems_.value(code->text()).value("name").toString();if(!name.isEmpty())list->item(r,1)->setText(name);}
     for (const auto &window : std::as_const(pcfWindows_)) {
         if (window) {
             window->setLiveOrdersEnabled(
@@ -2154,14 +2180,23 @@ PcfDetailWindow::PcfDetailWindow(QString symbol, QWidget *parent)
     auto add = [tabs](const QString &title) {
         auto *editor = new QPlainTextEdit;
         editor->setReadOnly(true);
-        tabs->addTab(editor, title);
+        tabs->addTab(ui::textPanel(editor), title);
         return editor;
     };
-    summary_ = add(QStringLiteral("清单摘要"));
-    components_ = add(QStringLiteral("成分证券"));
+    summaryTable_=ui::jsonTable({QStringLiteral("清单字段"),QStringLiteral("内容")});
+    summaryTable_->setObjectName("pcfSummaryTable");
+    tabs->addTab(ui::tablePanel(summaryTable_,"pcfSummary"),QStringLiteral("清单摘要"));
+    componentsTable_=ui::jsonTable({QStringLiteral("代码"),QStringLiteral("名称"),QStringLiteral("数量")});
+    componentsTable_->setObjectName("pcfComponentsTable");
+    tabs->addTab(ui::tablePanel(componentsTable_,"pcfComponents"),QStringLiteral("成分证券"));
+    summary_ = add(QStringLiteral("摘要原文"));
+    components_ = add(QStringLiteral("成分原文"));
     components_->setObjectName(QStringLiteral("pcfComponents"));
-    tabs->addTab(buildQmtTab(QStringLiteral("QMT1")), QStringLiteral("QMT1"));
-    tabs->addTab(buildQmtTab(QStringLiteral("QMT2")), QStringLiteral("QMT2"));
+    auto *qmt1=buildQmtTab(QStringLiteral("QMT1"));auto *qmt2=buildQmtTab(QStringLiteral("QMT2"));
+    tabs->addTab(qmt1,QStringLiteral("QMT1 诊断"));tabs->addTab(qmt2,QStringLiteral("QMT2 诊断"));
+    tabs->setTabVisible(4,false);tabs->setTabVisible(5,false);
+    auto *advanced=new QCheckBox(QStringLiteral("显示 QMT 高级诊断（按需连接）"));layout->insertWidget(1,advanced);
+    connect(advanced,&QCheckBox::toggled,tabs,[tabs](bool on){tabs->setTabVisible(4,on);tabs->setTabVisible(5,on);});
     layout->addWidget(tabs, 1);
 }
 
@@ -2214,7 +2249,7 @@ QWidget *PcfDetailWindow::buildQmtTab(const QString &backend) {
     widgets.redeemButton->setProperty("qmt_side", QStringLiteral("REDEEM"));
     trade->addWidget(widgets.purchaseButton);
     trade->addWidget(widgets.redeemButton);
-    layout->addLayout(trade);
+    auto *tradeBox=new QWidget;tradeBox->setLayout(trade);tradeBox->hide();layout->addWidget(tradeBox);
 
     auto *details = new QTabWidget;
     widgets.runtime = makeTree();
@@ -2223,16 +2258,16 @@ QWidget *PcfDetailWindow::buildQmtTab(const QString &backend) {
     widgets.positions = makeTable({QStringLiteral("代码"), QStringLiteral("名称"), QStringLiteral("持仓"),
                                    QStringLiteral("可用"), QStringLiteral("市值")});
     widgets.positions->setObjectName(QStringLiteral("qmtPositions_%1").arg(backend));
-    details->addTab(widgets.positions, QStringLiteral("持仓"));
+    details->addTab(ui::tablePanel(widgets.positions,backend+"Positions"), QStringLiteral("持仓"));
     widgets.orders = makeTable({QStringLiteral("时间"), QStringLiteral("代码"), QStringLiteral("方向"),
                                 QStringLiteral("状态"), QStringLiteral("数量"), QStringLiteral("成交"),
                                 QStringLiteral("委托号")});
     widgets.orders->setObjectName(QStringLiteral("qmtOrders_%1").arg(backend));
-    details->addTab(widgets.orders, QStringLiteral("当日委托"));
+    details->addTab(ui::tablePanel(widgets.orders,backend+"Orders"), QStringLiteral("当日委托"));
     widgets.lastResult = new QPlainTextEdit;
     widgets.lastResult->setReadOnly(true);
     widgets.lastResult->setObjectName(QStringLiteral("qmtResult_%1").arg(backend));
-    details->addTab(widgets.lastResult, QStringLiteral("最后指令结果"));
+    details->addTab(ui::textPanel(widgets.lastResult), QStringLiteral("最后指令结果"));
     layout->addWidget(details, 1);
 
     qmtWidgets_.insert(backend, widgets);
@@ -2362,6 +2397,9 @@ void PcfDetailWindow::applyData(const QJsonObject &object) {
         state.isEmpty() ? QStringLiteral("未报告") : ui::stateText(state),
         object.value("error").toString().isEmpty()
             ? ui::localTimeText(object.value("cached_at").toString()) : object.value("error").toString()));
+    const auto summary=object.value("summary").isObject()?object.value("summary").toObject():object;
+    ui::fillObjectTable(summaryTable_,summary);
+    ui::fillArrayTable(componentsTable_,object.value("components").toArray());
     summary_->setPlainText(pretty(object.value(QStringLiteral("summary")).isUndefined()
                                       ? QJsonValue(object) : object.value(QStringLiteral("summary"))));
     components_->setPlainText(object.value("components").isArray()

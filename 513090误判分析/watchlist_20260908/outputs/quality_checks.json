@@ -1,0 +1,121 @@
+{
+  "generated_for": "2026-09-08",
+  "input_count": 197,
+  "input_unique_count": 197,
+  "input_duplicate_count": 0,
+  "fx_hkd_cny": "0.86482",
+  "history_policy": {
+    "SZ": [
+      "2026-09-08",
+      "2026-09-07",
+      "2026-09-04",
+      "2026-09-03",
+      "2026-09-02"
+    ],
+    "SH": "target date only; historical PCF revalidation intentionally disabled"
+  },
+  "target_nav": {
+    "files": 197,
+    "covered": 197,
+    "missing_symbols": []
+  },
+  "target_pcf": {
+    "parsed": 197,
+    "expected": 197,
+    "parse_issues": [],
+    "component_stats": {
+      "total_components": 9671,
+      "mandatory_cash_substitute_rows": 121,
+      "cash_placeholder_159900_rows": 95,
+      "priced_rows": 9550
+    },
+    "bad_component_rows": []
+  },
+  "source_manifests": {
+    "SSE PCF": {
+      "rows": 102,
+      "status_counts": {
+        "TARGET_DATE": 102
+      },
+      "good_status": "TARGET_DATE"
+    },
+    "HK minute": {
+      "rows": 646,
+      "status_counts": {
+        "TARGET_DATE": 455,
+        "ERROR": 191
+      },
+      "good_status": "TARGET_DATE"
+    },
+    "HK daily": {
+      "rows": 646,
+      "status_counts": {
+        "TARGET_DATE": 643,
+        "TARGET_DATE_MISSING": 3
+      },
+      "good_status": "TARGET_DATE"
+    },
+    "SZ history": {
+      "rows": 380,
+      "status_counts": {
+        "TARGET_DATE": 292,
+        "ERROR": 88
+      },
+      "good_status": "TARGET_DATE"
+    },
+    "fund info": {
+      "rows": 197,
+      "status_counts": {
+        "PARSED": 197
+      },
+      "good_status": "PARSED"
+    }
+  },
+  "constituent_market_data": {
+    "hk_union_count": 646,
+    "daily_exact_target_count": 643,
+    "daily_stale_target_count": 3,
+    "daily_stale_codes": [
+      "00853",
+      "02172",
+      "02252"
+    ],
+    "minute_target_count": 455,
+    "minute_missing_or_error_count": 191,
+    "minute_target_row_counts": {
+      "332": 455
+    }
+  },
+  "outputs": {
+    "validation_rows": 197,
+    "validation_unique_codes": 197,
+    "single_day_status_counts": {
+      "PASS_SINGLE_DAY": 171,
+      "FAIL_5BP": 20,
+      "BOUNDARY_ROUNDING": 5,
+      "NOT_APPLICABLE": 1
+    },
+    "multi_day_status_counts": {
+      "MULTI_DAY_5D_PASS": 31,
+      "SH_SINGLE_DAY_ONLY": 89,
+      "MULTI_DAY_5D_NOT_STABLE": 34,
+      "NOT_RUN": 26,
+      "MULTI_DAY_PARTIAL": 17
+    },
+    "component_contribution_rows": 9671,
+    "multi_day_rows": 499,
+    "output_issues": []
+  },
+  "control_513090": {
+    "present": true,
+    "estimated_nav": "1.8432886185282",
+    "published_nav": "1.8433",
+    "error_bp": "-0.0617450865295936635382194976401019910000",
+    "status": "PASS_SINGLE_DAY",
+    "expected_estimated_nav": "1.8432886185282",
+    "expected_published_nav": "1.8433",
+    "expected_error_bp": "-0.06174508652959366"
+  },
+  "failures": [],
+  "status": "PASS"
+}

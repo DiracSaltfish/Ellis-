@@ -1,0 +1,14 @@
+{
+  "pid": 20247,
+  "active": true,
+  "hidden": false,
+  "on_screen_windows": 1,
+  "window_bounds": {
+    "x": 540,
+    "y": 200,
+    "width": 1480,
+    "height": 952
+  },
+  "method": "NSRunningApplication and CGWindowListCopyWindowInfo",
+  "remote_screenshot_available": false
+}

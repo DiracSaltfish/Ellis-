@@ -1,0 +1,13 @@
+{
+  "checked_at": "2026-09-09T23:43:32.085603",
+  "matched": 121,
+  "source_sha256": "d8ab8d4f191b0c38e4fd2b97b15f92009fa8c906276c8eaa77d1a7a65d5f2981",
+  "new_field": "nav_fx_normal_method",
+  "render_checks": 3025,
+  "assets": {
+    "index.html": "15464ac98925575c6d52e0c303a5f68fe975e2e48977f7d5a93de9f2f78ac744",
+    "app.js": "8472ac43d045edfcdffb90a88948805f569563273acc2bd5d03a3a3912560ff2",
+    "style.css": "aceba1c04dd0c82773d1f8ff15b08666a651a805eff13bed6ca5e24267a88d40",
+    "ledger.json": "f70755fc51ae2db8425b7584a0231a666d891d5723a1d6f2b77d3adb2fee32ef"
+  }
+}

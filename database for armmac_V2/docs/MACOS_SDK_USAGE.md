@@ -1,6 +1,6 @@
 # TGW macOS ARM64 使用文档
 
-适用实现：`tgw_macos 1.0.9.2.macos.re7`；更新时间：2026-08-30。
+适用实现：`tgw_macos 1.0.9.2.macos.re8`；更新时间：2026-09-09。
 
 ## 1. 先明确可用边界
 
@@ -14,6 +14,9 @@ Apple Silicon 上原生运行 Python 与系统 arm64 库，不加载官方 Linux
 - SZSE `159518` 的 L1 原始 full/delta 订阅；
 - HKT `02800` 的沪股通路由 L1 原始 full/delta 订阅；
 - SZSE `159691` 特定日/时间窗的 1 分钟 K 线，以及 SSE `510300` 的日/周/月/季/年 K 线同步查询；
+- HKEx/港股 `00001`/`00177`/`00187`/`00200`/`00300`/`00700`（market=103）与 A 股
+  `000001.SZ`/`600000.SH`（market=102/101）在 2026-09-07..09 的 1 分钟 K 线同步查询
+  （与 Linux 官方逐行摘要一致，见 `docs/evidence/query_kline_hk_hkex_minute_20260909.md`）；
 - SSE `510300` 与 SZSE `159919` 各单 ETF 基础信息与成分股同步查询；
 - SSE `510300`、SZSE `159919` 各单项证券基础信息，以及固定顺序的沪深双项同步查询；
 - `A010061003` 的交易日历 ThirdInfo 同步查询；
@@ -73,7 +76,7 @@ SHA-256: 7bd1b3586f108f0354b5605b370d2860ba61eff2bfe3f6ffc28bfddc5df9cdfd
 ```python
 import tgw_macos as tgw
 
-assert tgw.__version__ == "1.0.9.2.macos.re7"
+assert tgw.__version__ == "1.0.9.2.macos.re8"
 assert tgw.GetVersion() == "V4.3.0.260626-rc2.0-YHZQ"
 assert tgw.GetErrorMsg(0) == "成功"
 ```
@@ -104,6 +107,30 @@ api_mode = kInternetMode
 
 不要把账号或密码放在命令行、示例源码、日志、测试 fixture、抓包或 Git 中。配置文件已被
 `.gitignore` 排除。
+
+`server_port` 传 `0` 时使用文档化互联网默认端口 `8600`（不要直接拨 0 号端口）。
+
+**账号↔VIP 集群映射（2026-09-09 实测）。** 每个授权账号只在其**专属**的互联网 VIP 集群
+上有权限。若 `host` 指向原生/Linux SDK 使用的另一个集群，`ReqLogon` 会收到
+`OnRspLogon status=-98` 而登录失败（任何查询都不会发出）。请先确认账号应接入哪个 VIP，
+而不是修改其它参数。同账号若残留上一个会话（进程异常退出、未正常关闭），再次登录同样
+返回 `-98`；此时在确认没有其它进程在用该账号后，可用 `Cfg(force_logout=True)` 顶掉旧会话，
+或让批量工具做有界重试。登录响应中的 `act_instanceid` 显示实际命中的接入实例；同一 VIP
+背后的负载均衡会在实例间漂移，间歇 `-98` 属服务端会话/路由行为。
+
+批量拉取历史 K 线请用仓库内的 `tools/pull_history_batch.py`（host 序列登录 + 有界重试、
+逐标的间隔与查询通道退避、输出 gzip JSONL），示例：
+
+```bash
+python tools/pull_history_batch.py \
+  --config config/galaxy_account.ini \
+  --symbols "00177.HK,00700.HK,000001.SZ,510300.SH" \
+  --begin 20260907 --end 20260909 --cyc-type 10000 \
+  --out /absolute/path/outside-repo/history.jsonl.gz
+```
+
+输出行是协议原始整数；只有文档列明样本可做单位换算。原始行情文件不得写入仓库，
+工具会拒绝把输出写到仓库目录。
 
 CA 默认从安装包 `tgw_macos/cert/vendor-dgw-ca.crt` 读取，也可显式覆盖：
 

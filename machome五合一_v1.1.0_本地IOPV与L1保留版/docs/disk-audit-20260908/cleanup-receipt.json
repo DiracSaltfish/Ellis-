@@ -1,0 +1,118 @@
+{
+  "at": "2026-09-08T09:15:10+0800",
+  "root": "/Users/ellis/工具程序开发/machome四合一运行改造cpp",
+  "deleted": [
+    {
+      "path": "build-cpp-default",
+      "allocated_bytes": 154075136
+    },
+    {
+      "path": "build-cpp-native",
+      "allocated_bytes": 45584384
+    },
+    {
+      "path": "dist-cpp",
+      "allocated_bytes": 1974255616
+    },
+    {
+      "path": "build-release-native",
+      "allocated_bytes": 160636928
+    },
+    {
+      "path": "dist-native",
+      "allocated_bytes": 703610880
+    },
+    {
+      "path": "dist-monitor-sync",
+      "allocated_bytes": 216936448
+    },
+    {
+      "path": "build-cpp-native-334",
+      "allocated_bytes": 152412160
+    },
+    {
+      "path": "build-monitor-sync-release",
+      "allocated_bytes": 296833024
+    },
+    {
+      "path": "app/dist-live-readonly-20260907",
+      "allocated_bytes": 432889856
+    },
+    {
+      "path": "app/dist-live-readonly-20260907-r3",
+      "allocated_bytes": 432996352
+    },
+    {
+      "path": "app/dist-live-readonly-20260907-r4",
+      "allocated_bytes": 216502272
+    },
+    {
+      "path": "app/build-release",
+      "allocated_bytes": 157396992
+    },
+    {
+      "path": "app/dist",
+      "allocated_bytes": 665694208
+    },
+    {
+      "path": "app/dist-live-readonly-20260907-r2",
+      "allocated_bytes": 216473600
+    },
+    {
+      "path": "app/dist-candidate-20260907",
+      "allocated_bytes": 432877568
+    },
+    {
+      "path": "app/build-release-integration-root",
+      "allocated_bytes": 216477696
+    },
+    {
+      "path": "app/dist-integration-root",
+      "allocated_bytes": 1004728320
+    },
+    {
+      "path": "app/build-integration-root",
+      "allocated_bytes": 343695360
+    },
+    {
+      "path": "app/build-acceptance-20260905",
+      "allocated_bytes": 197464064
+    },
+    {
+      "path": "app/build-release.pre-schedule-audit-20260904T1705",
+      "allocated_bytes": 47853568
+    },
+    {
+      "path": "app/dist-ui-20260907",
+      "allocated_bytes": 155017216
+    },
+    {
+      "path": "app/build",
+      "allocated_bytes": 146624512
+    },
+    {
+      "path": "app/dist-candidate-20260905",
+      "allocated_bytes": 444915712
+    },
+    {
+      "path": "app/dist-pages-20260907-bebaa87",
+      "allocated_bytes": 156803072
+    },
+    {
+      "path": "prototype/build",
+      "allocated_bytes": 1105920
+    }
+  ],
+  "before_bytes_including_retained_copies": 9223376896,
+  "after_bytes": 249516032,
+  "directory_bytes_removed": 8973860864,
+  "retained_file_count": 2073,
+  "all_retained_files_hash_unchanged": true,
+  "deployed_source_manifest_files_verified": 470,
+  "retained_release_dirs": [
+    "releases/current",
+    "releases/previous"
+  ],
+  "remote_actions": "none",
+  "node_modules_removed": false
+}

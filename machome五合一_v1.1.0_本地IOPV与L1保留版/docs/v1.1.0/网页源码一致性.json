@@ -1,0 +1,30 @@
+[
+  {
+    "file": "index.html",
+    "bytes": 4491,
+    "local_sha256": "e80f7bf886c2a65ffe978b5cb86e4582516aacaf07177aa56324eb98741c70d3",
+    "deployed_sha256": "e80f7bf886c2a65ffe978b5cb86e4582516aacaf07177aa56324eb98741c70d3",
+    "equal": true
+  },
+  {
+    "file": "app.js",
+    "bytes": 20271,
+    "local_sha256": "13e9378bad52b2c75239e4e675afaf67ed0fdd55ad42c51f4bf2fbf1cc705180",
+    "deployed_sha256": "13e9378bad52b2c75239e4e675afaf67ed0fdd55ad42c51f4bf2fbf1cc705180",
+    "equal": true
+  },
+  {
+    "file": "style.css",
+    "bytes": 10358,
+    "local_sha256": "15c4649c49659595e775afcb8470959894d282fc1ea537246510a626cd9b7363",
+    "deployed_sha256": "15c4649c49659595e775afcb8470959894d282fc1ea537246510a626cd9b7363",
+    "equal": true
+  },
+  {
+    "file": "ledger.json",
+    "bytes": 371628,
+    "local_sha256": "8cd534d4a2e9817476b67ce0941a4b3484e4486ab68732f78565a30be34ac2fb",
+    "deployed_sha256": "8cd534d4a2e9817476b67ce0941a4b3484e4486ab68732f78565a30be34ac2fb",
+    "equal": true
+  }
+]

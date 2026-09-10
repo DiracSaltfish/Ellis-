@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "approved": true,
+  "wind_executable_sha256": "c272d3ec569473ed0d9b7f79942546b263f9301046219b818497daee7c79b419",
+  "probe_sha256": "aac0136589b57e1777a36824d5c66c7bf1890816c2a4dee01ca09d168a461b9d",
+  "approved_host": "EllisdeMac-mini.local",
+  "approved_at": "2026-09-04T22:43:57+08:00",
+  "scope": "read-only Wind TBAPI2 canary for MachomeHub native RedemptionEngine"
+}

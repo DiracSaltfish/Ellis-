@@ -1,0 +1,5 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const src=fs.readFileSync(__dirname+'/app.js','utf8');const start=src.indexOf('function isChartMinute'),end=src.indexOf('function minutes',start);assert(start>=0&&end>start);
+const context={history:[{minute:'11:59',midpoint_iopv:1},{minute:'12:20',midpoint_iopv:2}],selectedRow:()=>({trade_date:'2026-09-09',calculated_at:'2026-09-09T12:42:00+08:00',minute:'12:42',midpoint_iopv:3}),$:()=>({value:'2026-09-09'})};vm.createContext(context);vm.runInContext(src.slice(start,end),context);
+assert.equal(context.chartData().length,1);assert.equal(context.chartData()[0].minute,'11:59');for(const m of ['09:30','12:00','13:00','16:08'])assert(context.isChartMinute(m));for(const m of ['09:29','12:01','12:42','12:59','16:09'])assert(!context.isChartMinute(m));
+context.selectedRow=()=>({trade_date:'2026-09-09',calculated_at:'x',minute:'13:00'});assert.equal(context.chartData().at(-1).minute,'13:00');console.log('PASS chart session excludes lunch observations and preserves reopening');

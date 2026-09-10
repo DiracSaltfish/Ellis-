@@ -1,5 +1,7 @@
 #include "ui/ServiceOverview.h"
 #include "ui/UiText.h"
+#include "ui/UiWidgets.h"
+#include <QPushButton>
 #include "common/JsonUtil.h"
 #include <QFrame>
 #include <QGridLayout>
@@ -55,15 +57,15 @@ ServiceOverview::ServiceOverview(QString adapter, QWidget *parent)
     scroll->setWidgetResizable(true);
     auto *body = new QWidget;
     bodyLayout_ = new QVBoxLayout(body);
-    bodyLayout_->setContentsMargins(1, 18, 1, 12);
-    bodyLayout_->setSpacing(16);
+    bodyLayout_->setContentsMargins(1, 6, 1, 6);
+    bodyLayout_->setSpacing(10);
     auto *metrics = new QGridLayout;
     metrics->setHorizontalSpacing(12);
     for (int i = 0; i < 4; ++i) {
         auto *card = panel(QStringLiteral("metricCard"));
         auto *layout = new QVBoxLayout(card);
-        layout->setContentsMargins(18, 16, 18, 16);
-        layout->setSpacing(9);
+        layout->setContentsMargins(12, 10, 12, 10);
+        layout->setSpacing(5);
         captions_[i] = label({}, QStringLiteral("metricCaption"));
         values_[i] = label(QStringLiteral("—"), QStringLiteral("metricValue"));
         values_[i]->setProperty("metricIndex", i);
@@ -84,7 +86,7 @@ ServiceOverview::ServiceOverview(QString adapter, QWidget *parent)
     noticeLayout->addWidget(noticeText_);
     bodyLayout_->addWidget(notice_);
 
-    auto *columns = new QHBoxLayout;
+    auto *columns = new QVBoxLayout;
     columns->setSpacing(16);
     auto *list = panel(QStringLiteral("overviewPanel"));
     auto *listLayout = new QVBoxLayout(list);
@@ -101,14 +103,17 @@ ServiceOverview::ServiceOverview(QString adapter, QWidget *parent)
     table_->setEditTriggers(QAbstractItemView::NoEditTriggers);
     table_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    table_->setMinimumHeight(260);
+    table_->setMinimumHeight(80);
     listLayout->addWidget(table_);
-    columns->addWidget(list, 3);
+    table_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    more_=new QToolButton;more_->setText(QStringLiteral("显示全部项目"));more_->setCheckable(true);listLayout->addWidget(more_,0,Qt::AlignLeft);
+    connect(more_,&QToolButton::toggled,this,[this](bool on){showAll_=on;more_->setText(on?QStringLiteral("收起项目"):QStringLiteral("显示全部项目"));applySnapshot(lastPayload_);});
+    columns->addWidget(list);
     auto *facts = panel(QStringLiteral("overviewPanel"));
-    auto *factsLayout = new QVBoxLayout(facts);
+    auto *factsLayout = new QGridLayout(facts);
     factsLayout->setContentsMargins(20, 16, 20, 16);
     factsLayout->setSpacing(12);
-    factsLayout->addWidget(label(QStringLiteral("运行信息"), QStringLiteral("sectionTitle")));
+    factsLayout->addWidget(label(QStringLiteral("运行信息"), QStringLiteral("sectionTitle")),0,0,1,3);
     for (int i = 0; i < 6; ++i) {
         auto *pair = new QVBoxLayout;
         pair->setSpacing(4);
@@ -116,10 +121,9 @@ ServiceOverview::ServiceOverview(QString adapter, QWidget *parent)
         facts_[i] = label({}, QStringLiteral("factValue"));
         pair->addWidget(factNames_[i]);
         pair->addWidget(facts_[i]);
-        factsLayout->addLayout(pair);
+        factsLayout->addLayout(pair,1+i/3,i%3);
     }
-    factsLayout->addStretch();
-    columns->addWidget(facts, 1);
+    columns->addWidget(facts);
     bodyLayout_->addLayout(columns);
     bodyLayout_->addStretch();
     scroll->setWidget(body);
@@ -144,7 +148,7 @@ void ServiceOverview::setDiagnostics(QTreeWidget *tree) {
     toggle->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toggle->setArrowType(Qt::RightArrow);
     layout->addWidget(toggle, 0, Qt::AlignLeft);
-    tree->setMinimumHeight(280);
+    tree->setMinimumHeight(180);tree->setMaximumHeight(300);
     tree->hide();
     layout->addWidget(tree);
     connect(toggle, &QToolButton::toggled, tree, [tree, toggle](bool expanded) {
@@ -155,6 +159,7 @@ void ServiceOverview::setDiagnostics(QTreeWidget *tree) {
 }
 
 void ServiceOverview::applySnapshot(const QJsonObject &p) {
+    lastPayload_=p;
     const auto t = p.value("telemetry").toObject();
     const auto engine = t.value("engine").toObject();
     const auto status = t.value("status").toObject();
@@ -296,9 +301,12 @@ void ServiceOverview::applySnapshot(const QJsonObject &p) {
     noticeTitle_->setText(waiting ? QStringLiteral("等待服务状态") : warning ? QStringLiteral("需要关注") : QStringLiteral("当前运行说明"));
     if (waiting) note = QStringLiteral("尚未收到业务快照，暂不判断服务是否正常。");
     else if (warning && problems.isEmpty()) note.prepend(QStringLiteral("服务端报告部分异常，请结合下方状态核对。\n"));
-    noticeText_->setText(problems.isEmpty() ? note : problems.join(QStringLiteral("\n")));
-    table_->setRowCount(rows.size());
-    for (int row = 0; row < rows.size(); ++row) {
+    noticeText_->setText(problems.isEmpty() ? note : problems.mid(0,3).join(QStringLiteral("\n")) + (problems.size()>3 ? QStringLiteral("\n另有 %1 项，请查看诊断详情。").arg(problems.size()-3):QString()));
+    noticeText_->setToolTip(problems.join(QStringLiteral("\n")));
+    const int visibleRows=showAll_?rows.size():qMin(6,rows.size());
+    more_->setVisible(rows.size()>6);
+    table_->setRowCount(visibleRows);
+    for (int row = 0; row < visibleRows; ++row) {
         for (int column = 0; column < 3; ++column) {
             auto *item = table_->item(row, column);
             if (!item) { item = new QTableWidgetItem; table_->setItem(row, column, item); }
@@ -307,6 +315,6 @@ void ServiceOverview::applySnapshot(const QJsonObject &p) {
             item->setToolTip(text);
         }
     }
-    table_->setMinimumHeight(rows.isEmpty() ? 100 : 260);
+    table_->setFixedHeight(table_->horizontalHeader()->height()+qMax(1,visibleRows)*37+4);
 }
 }

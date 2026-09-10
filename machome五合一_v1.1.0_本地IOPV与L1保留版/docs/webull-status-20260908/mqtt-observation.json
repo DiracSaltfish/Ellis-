@@ -1,0 +1,281 @@
+{
+  "page": "https://app.webull.com/watch",
+  "counts": {
+    "type=109,ticker=913243629[{\"field\":1,\"asks\":0,\"bids\":0},{\"field\":14,\"asks\":1,\"bids\":1}]": 7,
+    "type=109,ticker=913243629[{\"field\":1,\"asks\":0,\"bids\":0},{\"field\":16,\"asks\":31,\"bids\":33}]": 2,
+    "type=104,ticker=913244660": 2,
+    "type=91,ticker=913244660": 2,
+    "type=109,ticker=913243629[{\"field\":1,\"asks\":0,\"bids\":0},{\"field\":16,\"asks\":28,\"bids\":33}]": 1,
+    "type=109,ticker=913243629[{\"field\":1,\"asks\":0,\"bids\":0},{\"field\":16,\"asks\":33,\"bids\":33}]": 1,
+    "type=109,ticker=913243629[{\"field\":1,\"asks\":0,\"bids\":0},{\"field\":16,\"asks\":27,\"bids\":33}]": 1,
+    "type=109,ticker=913243629[{\"field\":1,\"asks\":0,\"bids\":0},{\"field\":16,\"asks\":26,\"bids\":33}]": 1,
+    "control": 2
+  },
+  "frames": [
+    {
+      "topic": {
+        "type": 109,
+        "tickerId": 913243629,
+        "modules": [
+          ""
+        ],
+        "flag": "1"
+      },
+      "shape": [
+        {
+          "field": 1,
+          "asks": 0,
+          "bids": 0
+        },
+        {
+          "field": 14,
+          "asks": 1,
+          "bids": 1
+        }
+      ]
+    },
+    {
+      "topic": {
+        "type": 109,
+        "tickerId": 913243629,
+        "modules": [
+          ""
+        ],
+        "flag": "1,50"
+      },
+      "shape": [
+        {
+          "field": 1,
+          "asks": 0,
+          "bids": 0
+        },
+        {
+          "field": 16,
+          "asks": 31,
+          "bids": 33
+        }
+      ]
+    },
+    {
+      "topic": {
+        "type": 109,
+        "tickerId": 913243629,
+        "modules": [
+          ""
+        ],
+        "flag": "1,50"
+      },
+      "shape": [
+        {
+          "field": 1,
+          "asks": 0,
+          "bids": 0
+        },
+        {
+          "field": 16,
+          "asks": 28,
+          "bids": 33
+        }
+      ]
+    },
+    {
+      "topic": {
+        "type": 109,
+        "tickerId": 913243629,
+        "modules": [
+          ""
+        ],
+        "flag": "1"
+      },
+      "shape": [
+        {
+          "field": 1,
+          "asks": 0,
+          "bids": 0
+        },
+        {
+          "field": 14,
+          "asks": 1,
+          "bids": 1
+        }
+      ]
+    },
+    {
+      "topic": {
+        "type": 109,
+        "tickerId": 913243629,
+        "modules": [
+          ""
+        ],
+        "flag": "1"
+      },
+      "shape": [
+        {
+          "field": 1,
+          "asks": 0,
+          "bids": 0
+        },
+        {
+          "field": 14,
+          "asks": 1,
+          "bids": 1
+        }
+      ]
+    },
+    {
+      "topic": {
+        "type": 109,
+        "tickerId": 913243629,
+        "modules": [
+          ""
+        ],
+        "flag": "1,50"
+      },
+      "shape": [
+        {
+          "field": 1,
+          "asks": 0,
+          "bids": 0
+        },
+        {
+          "field": 16,
+          "asks": 33,
+          "bids": 33
+        }
+      ]
+    },
+    {
+      "topic": {
+        "type": 109,
+        "tickerId": 913243629,
+        "modules": [
+          ""
+        ],
+        "flag": "1"
+      },
+      "shape": [
+        {
+          "field": 1,
+          "asks": 0,
+          "bids": 0
+        },
+        {
+          "field": 14,
+          "asks": 1,
+          "bids": 1
+        }
+      ]
+    },
+    {
+      "topic": {
+        "type": 109,
+        "tickerId": 913243629,
+        "modules": [
+          ""
+        ],
+        "flag": "1,50"
+      },
+      "shape": [
+        {
+          "field": 1,
+          "asks": 0,
+          "bids": 0
+        },
+        {
+          "field": 16,
+          "asks": 27,
+          "bids": 33
+        }
+      ]
+    },
+    {
+      "topic": {
+        "type": 109,
+        "tickerId": 913243629,
+        "modules": [
+          ""
+        ],
+        "flag": "1"
+      },
+      "shape": [
+        {
+          "field": 1,
+          "asks": 0,
+          "bids": 0
+        },
+        {
+          "field": 14,
+          "asks": 1,
+          "bids": 1
+        }
+      ]
+    },
+    {
+      "topic": {
+        "type": 109,
+        "tickerId": 913243629,
+        "modules": [
+          ""
+        ],
+        "flag": "1,50"
+      },
+      "shape": [
+        {
+          "field": 1,
+          "asks": 0,
+          "bids": 0
+        },
+        {
+          "field": 16,
+          "asks": 31,
+          "bids": 33
+        }
+      ]
+    },
+    {
+      "topic": {
+        "type": 109,
+        "tickerId": 913243629,
+        "modules": [
+          ""
+        ],
+        "flag": "1"
+      },
+      "shape": [
+        {
+          "field": 1,
+          "asks": 0,
+          "bids": 0
+        },
+        {
+          "field": 14,
+          "asks": 1,
+          "bids": 1
+        }
+      ]
+    },
+    {
+      "topic": {
+        "type": 109,
+        "tickerId": 913243629,
+        "modules": [
+          ""
+        ],
+        "flag": "1"
+      },
+      "shape": [
+        {
+          "field": 1,
+          "asks": 0,
+          "bids": 0
+        },
+        {
+          "field": 14,
+          "asks": 1,
+          "bids": 1
+        }
+      ]
+    }
+  ],
+  "http": 12
+}

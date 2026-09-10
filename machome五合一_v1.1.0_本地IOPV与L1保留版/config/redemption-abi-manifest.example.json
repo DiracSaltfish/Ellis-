@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "approved": false,
+  "wind_executable_sha256": "REPLACE_AFTER_VALIDATING_THIS_WIND_BUILD",
+  "probe_sha256": "REPLACE_WITH_BUNDLED_PROBE_SHA256",
+  "warning": "Copy to MachomeHub/data/redemption/abi-manifest.json only after a separately approved read-only Wind canary. Keep approved=false otherwise."
+}

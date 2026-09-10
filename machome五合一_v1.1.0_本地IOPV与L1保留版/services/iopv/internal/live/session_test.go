@@ -1,0 +1,4 @@
+package live
+import("testing";"reflect")
+func TestSubscriptionBoundaries(t *testing.T){p:=[]string{"513090.SH","159125.SZ","00700.HK"};for _,c:=range []struct{at string;want []string}{{"2026-09-09T09:14:59+08:00",[]string{}},{"2026-09-09T09:15:00+08:00",p},{"2026-09-09T15:00:59+08:00",p},{"2026-09-09T15:01:00+08:00",p[2:]},{"2026-09-09T16:09:59+08:00",p[2:]},{"2026-09-09T16:10:00+08:00",[]string{}},{"2026-09-12T10:00:00+08:00",[]string{}}}{if got:=subscriptionSymbols(p,at(c.at));!reflect.DeepEqual(got,c.want){t.Errorf("%s: %v",c.at,got)}}}
+func TestOtherDataWindows(t *testing.T){if fxPolling(at("2026-09-09T08:39:59+08:00"))||!fxPolling(at("2026-09-09T08:40:00+08:00"))||fxPolling(at("2026-09-09T16:10:00+08:00")){t.Fatal("FX window")};if calculationWindow(at("2026-09-09T12:30:00+08:00"))||calculationWindow(at("2026-09-09T16:09:00+08:00"))||!calculationWindow(at("2026-09-09T16:08:59+08:00")){t.Fatal("calculation window")}}

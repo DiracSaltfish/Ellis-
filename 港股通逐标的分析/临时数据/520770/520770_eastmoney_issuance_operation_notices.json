@@ -1,0 +1,133 @@
+{
+  "retrieved_at_utc": "2026-09-09T04:13:11.571788+00:00",
+  "fund_code": "520770",
+  "source_page": "https://fundf10.eastmoney.com/jjgg_520770.html",
+  "source_api": "https://api.fund.eastmoney.com/f10/JJGG",
+  "api_meta": {
+    "total_count": 8,
+    "page_size": 50,
+    "pages": 1,
+    "type": 1
+  },
+  "latest_updated_prospectus": null,
+  "latest_prospectus_any": {
+    "FUNDCODE": "520770",
+    "TITLE": "建信恒指港股通交易型开放式指数证券投资基金招募说明书",
+    "ShortTitle": "建信恒指港股通ETF",
+    "NEWCATEGORY": "1",
+    "PUBLISHDATE": "2025-12-01T00:00:00",
+    "PUBLISHDATEDesc": "2025-12-01",
+    "ATTACHTYPE": "0",
+    "ID": "AN202512011791679107",
+    "notice_date": "2025-12-01",
+    "notice_url": "https://fund.eastmoney.com/gonggao/520770,AN202512011791679107.html",
+    "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202512011791679107_1.pdf"
+  },
+  "latest_product_summary_update": null,
+  "all_issuance_operation_notices": [
+    {
+      "FUNDCODE": "520770",
+      "TITLE": "建信恒指港股通交易型开放式指数证券投资基金上市交易公告",
+      "ShortTitle": "建信恒指港股通ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-01-26T00:00:00",
+      "PUBLISHDATEDesc": "2026-01-26",
+      "ATTACHTYPE": "0",
+      "ID": "AN202601261818414100",
+      "notice_date": "2026-01-26",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520770,AN202601261818414100.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202601261818414100_1.pdf"
+    },
+    {
+      "FUNDCODE": "520770",
+      "TITLE": "建信恒指港股通交易型开放式指数证券投资基金上市交易公告书",
+      "ShortTitle": "建信恒指港股通ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-01-21T00:00:00",
+      "PUBLISHDATEDesc": "2026-01-21",
+      "ATTACHTYPE": "0",
+      "ID": "AN202601201818162100",
+      "notice_date": "2026-01-21",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520770,AN202601201818162100.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202601201818162100_1.pdf"
+    },
+    {
+      "FUNDCODE": "520770",
+      "TITLE": "建信恒指港股通交易型开放式指数证券投资基金基金合同生效公告",
+      "ShortTitle": "建信恒指港股通ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-12-25T00:00:00",
+      "PUBLISHDATEDesc": "2025-12-25",
+      "ATTACHTYPE": "0",
+      "ID": "AN202512241807316401",
+      "notice_date": "2025-12-25",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520770,AN202512241807316401.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202512241807316401_1.pdf"
+    },
+    {
+      "FUNDCODE": "520770",
+      "TITLE": "建信恒指港股通交易型开放式指数证券投资基金基金合同",
+      "ShortTitle": "建信恒指港股通ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-12-01T00:00:00",
+      "PUBLISHDATEDesc": "2025-12-01",
+      "ATTACHTYPE": "0",
+      "ID": "AN202512011791679111",
+      "notice_date": "2025-12-01",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520770,AN202512011791679111.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202512011791679111_1.pdf"
+    },
+    {
+      "FUNDCODE": "520770",
+      "TITLE": "建信恒指港股通交易型开放式指数证券投资基金招募说明书",
+      "ShortTitle": "建信恒指港股通ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-12-01T00:00:00",
+      "PUBLISHDATEDesc": "2025-12-01",
+      "ATTACHTYPE": "0",
+      "ID": "AN202512011791679107",
+      "notice_date": "2025-12-01",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520770,AN202512011791679107.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202512011791679107_1.pdf"
+    },
+    {
+      "FUNDCODE": "520770",
+      "TITLE": "建信恒指港股通交易型开放式指数证券投资基金托管协议",
+      "ShortTitle": "建信恒指港股通ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-12-01T00:00:00",
+      "PUBLISHDATEDesc": "2025-12-01",
+      "ATTACHTYPE": "0",
+      "ID": "AN202512011791679100",
+      "notice_date": "2025-12-01",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520770,AN202512011791679100.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202512011791679100_1.pdf"
+    },
+    {
+      "FUNDCODE": "520770",
+      "TITLE": "建信恒指港股通交易型开放式指数证券投资基金基金产品资料概要",
+      "ShortTitle": "建信恒指港股通ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-12-01T00:00:00",
+      "PUBLISHDATEDesc": "2025-12-01",
+      "ATTACHTYPE": "0",
+      "ID": "AN202512011791679097",
+      "notice_date": "2025-12-01",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520770,AN202512011791679097.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202512011791679097_1.pdf"
+    },
+    {
+      "FUNDCODE": "520770",
+      "TITLE": "建信恒指港股通交易型开放式指数证券投资基金基金份额发售公告",
+      "ShortTitle": "建信恒指港股通ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-12-01T00:00:00",
+      "PUBLISHDATEDesc": "2025-12-01",
+      "ATTACHTYPE": "0",
+      "ID": "AN202512011791627396",
+      "notice_date": "2025-12-01",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520770,AN202512011791627396.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202512011791627396_1.pdf"
+    }
+  ]
+}

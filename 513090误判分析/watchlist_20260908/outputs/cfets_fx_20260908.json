@@ -1,0 +1,67 @@
+{
+  "target_date": "2026-09-08",
+  "currency": "HKD/CNY",
+  "rate": "0.86482",
+  "endpoint": "https://www.chinamoney.com.cn/ags/ms/cm-u-bk-ccpr/CcprHisNew?startDate=2026-09-08&endDate=2026-09-08&currency=HKD%2FCNY&pageNum=1&pageSize=10",
+  "retrieved_at": "2026-09-09T16:06:10.902194+00:00",
+  "response": {
+    "head": {
+      "version": "2.0",
+      "provider": "CWAP",
+      "req_code": "",
+      "rep_code": "200",
+      "rep_message": "",
+      "ts": 1788969969259,
+      "producer": "",
+      "tstext": "2026-09-10 00:06:09"
+    },
+    "data": {
+      "head": [
+        "USD/CNY",
+        "EUR/CNY",
+        "100JPY/CNY",
+        "HKD/CNY",
+        "GBP/CNY",
+        "AUD/CNY",
+        "NZD/CNY",
+        "SGD/CNY",
+        "CHF/CNY",
+        "CAD/CNY",
+        "CNY/MOP",
+        "CNY/MYR",
+        "CNY/RUB",
+        "CNY/ZAR",
+        "CNY/KRW",
+        "CNY/AED",
+        "CNY/SAR",
+        "CNY/HUF",
+        "CNY/PLN",
+        "CNY/DKK",
+        "CNY/SEK",
+        "CNY/NOK",
+        "CNY/TRY",
+        "CNY/MXN",
+        "CNY/THB"
+      ],
+      "total": 1,
+      "pageTotal": 1,
+      "searchlist": [
+        "HKD/CNY"
+      ],
+      "endDate": "2026-09-08",
+      "pageSize": 10,
+      "currency": "HKD/CNY",
+      "pageNum": 1,
+      "flagMessage": "",
+      "startDate": "2026-09-08"
+    },
+    "records": [
+      {
+        "date": "2026-09-08",
+        "values": [
+          "0.86482"
+        ]
+      }
+    ]
+  }
+}

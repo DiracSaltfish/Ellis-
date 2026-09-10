@@ -1,0 +1,97 @@
+{
+  "observed_at": 1788763188.743413,
+  "build": "1.0.0-bebaa87809ac-20260907T061331Z",
+  "commit": "bebaa87809ac",
+  "agent_instance": "5ed73ef4-f9a4-409e-8b9b-7490760a679e",
+  "config_unchanged": true,
+  "signature_verified": true,
+  "backup": "/Users/ellis/Library/Application Support/MachomeHub/pages-update-20260907-bebaa87/before.app",
+  "changed_files": [
+    "Contents/_CodeSignature/CodeResources",
+    "Contents/MacOS/machome-hub-agent",
+    "Contents/MacOS/Machome 四合一运行中心",
+    "Contents/Resources/ui_release.json",
+    "Contents/Resources/source_manifest.json",
+    "Contents/Resources/build_manifest.json",
+    "Contents/Resources/runtime_baseline_manifest.json",
+    "Contents/Resources/ui_source_manifest.json"
+  ],
+  "premium": {
+    "ready_symbols": 197,
+    "watchlist_symbols": 197,
+    "upstream_healthy": true
+  },
+  "premium_detail_check": {
+    "detail_messages": 6,
+    "distinct_details": 6
+  },
+  "redemption": {
+    "monitoring": true,
+    "wind_helper_state": "subscribed",
+    "live_orders_allowed": false,
+    "rows": 7,
+    "updated_times": [
+      "14:35:31",
+      "14:35:33",
+      "14:35:33",
+      "14:35:33",
+      "14:35:33",
+      "14:35:33",
+      "14:35:33"
+    ]
+  },
+  "qmt": {
+    "QMT1": {
+      "ready": true,
+      "positions": 5,
+      "orders": 9
+    },
+    "QMT2": {
+      "ready": true,
+      "positions": 7,
+      "orders": 4
+    }
+  },
+  "upload": {
+    "existing_problems": [
+      "india:process_not_ready",
+      "india:missing_or_stale_ack",
+      "china-internet:missing_or_stale_ack",
+      "basket-159605:missing_or_stale_ack",
+      "xop-family:missing_or_stale_ack"
+    ],
+    "receipts": [
+      {
+        "id": "sina",
+        "last_success_at": "2026-09-07T14:39:45.106+08:00"
+      },
+      {
+        "id": "silver",
+        "last_success_at": "2026-09-07T14:39:40.825+08:00"
+      },
+      {
+        "id": "nasdaq",
+        "last_success_at": "2026-09-07T14:39:47.771+08:00"
+      },
+      {
+        "id": "sp500",
+        "last_success_at": "2026-09-07T14:39:45.844+08:00"
+      },
+      {
+        "id": "nikkei225",
+        "last_success_at": "2026-09-07T14:39:45.229+08:00"
+      },
+      {
+        "id": "germany",
+        "last_success_at": "2026-09-07T14:39:47.781+08:00"
+      }
+    ]
+  },
+  "webull": {
+    "auth_state": "authenticated",
+    "data_state": "no_data",
+    "api_live": true
+  },
+  "trading_interfaces_called": false,
+  "dmit_changed": false
+}

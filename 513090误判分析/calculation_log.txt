@@ -1,0 +1,145 @@
+{
+  "K_close_HKD": 1054667.005,
+  "K_1500_HKD": 1059546.115,
+  "estimated_cash": 9547.19,
+  "final_cash": 9564.08,
+  "NAV_precise": 1.84332244,
+  "calc_close_mid_est": 1.8432886185281998,
+  "calc_close_mid_final": 1.8433223985282,
+  "calc_1500_mid_est": 1.8517277223486,
+  "fx_implied_1500": 0.8523015631084637,
+  "calc_1500_fx08555": 1.831977782765,
+  "calc_close_fx08555": 1.8236296255549997,
+  "max_pcf_rounding_error": 0.0049050000015995465
+}
+2026-08-28 1.9272 963599.5 9460.63 9491.47
+2026-08-31 1.9295 964755.02 9487.25 9478.68
+2026-09-01 1.9239 961964.95 8997.0 9734.62
+2026-09-02 1.9224 961176.2 9249.18 9627.73
+2026-09-03 1.8725 936242.64 9657.17 9436.4
+2026-09-04 1.8881 944049.52 9418.27 9488.02
+2026-09-07 1.9243 962173.22 9454.88 9689.65
+2026-09-08 1.8885 944260.29 9634.95 9547.19
+2026-09-09 1.8433 921661.22 9564.08 9331.24
+[
+  {
+    "date": "2026-08-28",
+    "stock_count": 17,
+    "stock_HKD": 1104381.35,
+    "fx": 0.86498,
+    "est_cash_CNY": 9491.47,
+    "final_cash_CNY": 9487.25,
+    "reconstructed_NAV": 1.929510060246,
+    "official_NAV": 1.92951004,
+    "error_CNY_per_basket": 0.010123000014573336,
+    "ETF_close": 1.91,
+    "expost_premium": -0.010111395947957957,
+    "shares_wan": 980998.8,
+    "net_baskets": null
+  },
+  {
+    "date": "2026-08-31",
+    "stock_count": 17,
+    "stock_HKD": 1101569.69,
+    "fx": 0.8651,
+    "est_cash_CNY": 9478.68,
+    "final_cash_CNY": 8997.0,
+    "reconstructed_NAV": 1.9239298776379998,
+    "official_NAV": 1.9239298999999999,
+    "error_CNY_per_basket": -0.011181000038050115,
+    "ETF_close": 1.894,
+    "expost_premium": -0.01555664787994615,
+    "shares_wan": 979048.8,
+    "net_baskets": -39.0
+  },
+  {
+    "date": "2026-09-01",
+    "stock_count": 17,
+    "stock_HKD": 1100519.11,
+    "fx": 0.86498,
+    "est_cash_CNY": 9734.62,
+    "final_cash_CNY": 9249.18,
+    "reconstructed_NAV": 1.9223523995356002,
+    "official_NAV": 1.9223523999999999,
+    "error_CNY_per_basket": -0.00023219978902488947,
+    "ETF_close": 1.903,
+    "expost_premium": -0.010067040777747005,
+    "shares_wan": 978448.8,
+    "net_baskets": -12.0
+  },
+  {
+    "date": "2026-09-02",
+    "stock_count": 17,
+    "stock_HKD": 1071234.23,
+    "fx": 0.86497,
+    "est_cash_CNY": 9627.73,
+    "final_cash_CNY": 9657.17,
+    "reconstructed_NAV": 1.8724852838462,
+    "official_NAV": 1.87248528,
+    "error_CNY_per_basket": 0.0019230999751016498,
+    "ETF_close": 1.852,
+    "expost_premium": -0.010940155428084242,
+    "shares_wan": 978198.8,
+    "net_baskets": -5.0
+  },
+  {
+    "date": "2026-09-03",
+    "stock_count": 17,
+    "stock_HKD": 1080798.43,
+    "fx": 0.86476,
+    "est_cash_CNY": 9436.4,
+    "final_cash_CNY": 9418.27,
+    "reconstructed_NAV": 1.8880990406535998,
+    "official_NAV": 1.88809904,
+    "error_CNY_per_basket": 0.00032679992727935314,
+    "ETF_close": 1.871,
+    "expost_premium": -0.009056219847450309,
+    "shares_wan": 976898.8,
+    "net_baskets": -26.0
+  },
+  {
+    "date": "2026-09-04",
+    "stock_count": 17,
+    "stock_HKD": 1101943.535,
+    "fx": 0.86458,
+    "est_cash_CNY": 9488.02,
+    "final_cash_CNY": 9454.88,
+    "reconstructed_NAV": 1.9243464429805999,
+    "official_NAV": 1.9243464399999999,
+    "error_CNY_per_basket": 0.0014902999391779304,
+    "ETF_close": 1.907,
+    "expost_premium": -0.009014198087949232,
+    "shares_wan": 971248.8,
+    "net_baskets": -113.0
+  },
+  {
+    "date": "2026-09-07",
+    "stock_count": 17,
+    "stock_HKD": 1080929.1,
+    "fx": 0.86465,
+    "est_cash_CNY": 9689.65,
+    "final_cash_CNY": 9634.95,
+    "reconstructed_NAV": 1.8885205926300002,
+    "official_NAV": 1.88852058,
+    "error_CNY_per_basket": 0.006315000005997717,
+    "ETF_close": 1.879,
+    "expost_premium": -0.005041290045142088,
+    "shares_wan": 970998.8,
+    "net_baskets": -5.0
+  },
+  {
+    "date": "2026-09-08",
+    "stock_count": 17,
+    "stock_HKD": 1054667.005,
+    "fx": 0.86482,
+    "est_cash_CNY": 9547.19,
+    "final_cash_CNY": 9564.08,
+    "reconstructed_NAV": 1.8433223985282,
+    "official_NAV": 1.84332244,
+    "error_CNY_per_basket": -0.020735900034196675,
+    "ETF_close": 1.846,
+    "expost_premium": 0.0014525727793994747,
+    "shares_wan": 970148.8,
+    "net_baskets": -17.0
+  }
+]

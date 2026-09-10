@@ -140,4 +140,4 @@ SetThirdInfoParam = interface.SetThirdInfoParam
 GetErrorMsg = interface.GetErrorMsg
 ReceiveRawEvent = interface.ReceiveRawEvent
 
-__version__ = "1.0.9.2.macos.re7"
+__version__ = "1.0.9.2.macos.re8"
