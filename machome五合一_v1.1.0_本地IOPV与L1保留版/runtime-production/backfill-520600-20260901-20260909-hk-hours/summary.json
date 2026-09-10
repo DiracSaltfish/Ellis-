@@ -1,0 +1,70 @@
+{
+  "days": {
+    "2026-09-01": {
+      "components": 50,
+      "midpoint_rows": 332,
+      "premium_rows": 332,
+      "settlement_rows": 332,
+      "midpoint_fx": 0.86498,
+      "actual_buy_settlement": 0.85723,
+      "actual_sell_settlement": 0.85737
+    },
+    "2026-09-02": {
+      "components": 50,
+      "midpoint_rows": 332,
+      "premium_rows": 332,
+      "settlement_rows": 332,
+      "midpoint_fx": 0.86497,
+      "actual_buy_settlement": 0.85761,
+      "actual_sell_settlement": 0.85759
+    },
+    "2026-09-03": {
+      "components": 50,
+      "midpoint_rows": 332,
+      "premium_rows": 332,
+      "settlement_rows": 332,
+      "midpoint_fx": 0.86476,
+      "actual_buy_settlement": 0.8573,
+      "actual_sell_settlement": 0.8573
+    },
+    "2026-09-04": {
+      "components": 50,
+      "midpoint_rows": 332,
+      "premium_rows": 332,
+      "settlement_rows": 332,
+      "midpoint_fx": 0.86458,
+      "actual_buy_settlement": 0.8566,
+      "actual_sell_settlement": 0.8568
+    },
+    "2026-09-07": {
+      "components": 50,
+      "midpoint_rows": 332,
+      "premium_rows": 332,
+      "settlement_rows": 332,
+      "midpoint_fx": 0.86465,
+      "actual_buy_settlement": 0.85569,
+      "actual_sell_settlement": 0.85571
+    },
+    "2026-09-08": {
+      "components": 50,
+      "midpoint_rows": 332,
+      "premium_rows": 332,
+      "settlement_rows": 332,
+      "midpoint_fx": 0.86482,
+      "actual_buy_settlement": 0.85547,
+      "actual_sell_settlement": 0.85553
+    },
+    "2026-09-09": {
+      "components": 50,
+      "midpoint_rows": 332,
+      "premium_rows": 332,
+      "settlement_rows": 332,
+      "midpoint_fx": 0.86418,
+      "actual_buy_settlement": 0.85572,
+      "actual_sell_settlement": 0.85568
+    }
+  },
+  "source": "native TGW exact one-minute close; 广发基金 PCF; 1navs 人民币对港币中间价 + 最终结算汇率",
+  "rows": 2324,
+  "sha256": "2c8629c934668c495f2ce0865059f409ada5d3ef71ff8cf885bcb8db57a3a850"
+}

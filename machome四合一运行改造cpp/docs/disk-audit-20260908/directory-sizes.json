@@ -1,0 +1,263 @@
+{
+  "directories": [
+    {
+      "path": "build-cpp-default",
+      "allocated_MiB": 146.94,
+      "logical_MiB": 144.96,
+      "files": 726,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "build-cpp-native",
+      "allocated_MiB": 43.47,
+      "logical_MiB": 41.83,
+      "files": 544,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "dist-cpp",
+      "allocated_MiB": 1882.8,
+      "logical_MiB": 1875.69,
+      "files": 3364,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "build-release-native",
+      "allocated_MiB": 153.2,
+      "logical_MiB": 148.42,
+      "files": 1988,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "dist-native",
+      "allocated_MiB": 671.02,
+      "logical_MiB": 668.37,
+      "files": 1240,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "dist-monitor-sync",
+      "allocated_MiB": 206.89,
+      "logical_MiB": 205.96,
+      "files": 439,
+      "tracked": 0,
+      "special": [
+        "Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem"
+      ]
+    },
+    {
+      "path": "build-cpp-native-334",
+      "allocated_MiB": 145.35,
+      "logical_MiB": 142.61,
+      "files": 1269,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "build-monitor-sync-release",
+      "allocated_MiB": 283.08,
+      "logical_MiB": 277.69,
+      "files": 2263,
+      "tracked": 0,
+      "special": [
+        "Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem"
+      ]
+    },
+    {
+      "path": "app/dist-live-readonly-20260907",
+      "allocated_MiB": 412.84,
+      "logical_MiB": 410.99,
+      "files": 876,
+      "tracked": 0,
+      "special": [
+        "archive/20260907T024017Z-14491/Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem",
+        "Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem"
+      ]
+    },
+    {
+      "path": "app/dist-live-readonly-20260907-r3",
+      "allocated_MiB": 412.94,
+      "logical_MiB": 411.08,
+      "files": 878,
+      "tracked": 0,
+      "special": [
+        "archive/20260907T032824Z-66247/Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem",
+        "Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem"
+      ]
+    },
+    {
+      "path": "app/dist-live-readonly-20260907-r4",
+      "allocated_MiB": 206.47,
+      "logical_MiB": 205.54,
+      "files": 439,
+      "tracked": 0,
+      "special": [
+        "Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem"
+      ]
+    },
+    {
+      "path": "app/build-release",
+      "allocated_MiB": 150.11,
+      "logical_MiB": 147.14,
+      "files": 1343,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "app/dist",
+      "allocated_MiB": 634.86,
+      "logical_MiB": 632.97,
+      "files": 907,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "app/dist-live-readonly-20260907-r2",
+      "allocated_MiB": 206.45,
+      "logical_MiB": 205.52,
+      "files": 438,
+      "tracked": 0,
+      "special": [
+        "Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem"
+      ]
+    },
+    {
+      "path": "app/dist-candidate-20260907",
+      "allocated_MiB": 412.82,
+      "logical_MiB": 410.98,
+      "files": 876,
+      "tracked": 0,
+      "special": [
+        "archive/20260907T022731Z-80296/Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem",
+        "Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem"
+      ]
+    },
+    {
+      "path": "app/build-release-integration-root",
+      "allocated_MiB": 206.45,
+      "logical_MiB": 201.54,
+      "files": 1824,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "app/dist-integration-root",
+      "allocated_MiB": 958.18,
+      "logical_MiB": 954.82,
+      "files": 1603,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "app/build-integration-root",
+      "allocated_MiB": 327.77,
+      "logical_MiB": 324.15,
+      "files": 1316,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "app/build-acceptance-20260905",
+      "allocated_MiB": 188.32,
+      "logical_MiB": 182.62,
+      "files": 2145,
+      "tracked": 0,
+      "special": [
+        "Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem"
+      ]
+    },
+    {
+      "path": "app/build-release.pre-schedule-audit-20260904T1705",
+      "allocated_MiB": 45.64,
+      "logical_MiB": 43.8,
+      "files": 686,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "app/dist-ui-20260907",
+      "allocated_MiB": 147.84,
+      "logical_MiB": 146.91,
+      "files": 439,
+      "tracked": 0,
+      "special": [
+        "Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem"
+      ]
+    },
+    {
+      "path": "app/build",
+      "allocated_MiB": 139.83,
+      "logical_MiB": 137.99,
+      "files": 687,
+      "tracked": 0,
+      "special": []
+    },
+    {
+      "path": "app/dist-candidate-20260905",
+      "allocated_MiB": 424.3,
+      "logical_MiB": 422.41,
+      "files": 894,
+      "tracked": 0,
+      "special": [
+        "Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem"
+      ]
+    },
+    {
+      "path": "app/dist-pages-20260907-bebaa87",
+      "allocated_MiB": 149.54,
+      "logical_MiB": 148.6,
+      "files": 443,
+      "tracked": 0,
+      "special": [
+        "Machome 四合一运行中心.app/Contents/Resources/upload/machome-upload-component/_internal/ca-bundle.pem"
+      ]
+    }
+  ],
+  "archives": [
+    {
+      "path": "dist-cpp/archive",
+      "MiB": 1748.62,
+      "versions": 13
+    },
+    {
+      "path": "dist-native/archive",
+      "MiB": 536.77,
+      "versions": 4
+    },
+    {
+      "path": "app/dist-live-readonly-20260907/archive",
+      "MiB": 206.42,
+      "versions": 1
+    },
+    {
+      "path": "app/dist-live-readonly-20260907-r3/archive",
+      "MiB": 206.47,
+      "versions": 1
+    },
+    {
+      "path": "app/dist/archive",
+      "MiB": 500.57,
+      "versions": 4
+    },
+    {
+      "path": "app/dist-candidate-20260907/archive",
+      "MiB": 206.41,
+      "versions": 1
+    },
+    {
+      "path": "app/dist-integration-root/archive",
+      "MiB": 821.21,
+      "versions": 6
+    },
+    {
+      "path": "app/dist-candidate-20260905/archive",
+      "MiB": 218.23,
+      "versions": 1
+    }
+  ]
+}

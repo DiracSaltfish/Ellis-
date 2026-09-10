@@ -1,0 +1,56 @@
+{
+  "index.html": {
+    "identical": true,
+    "sha256": "15464ac98925575c6d52e0c303a5f68fe975e2e48977f7d5a93de9f2f78ac744"
+  },
+  "app.js": {
+    "identical": true,
+    "sha256": "81f7a9795c0e673332cf045fde58f5b89acb0169e8ef59633a2ad32af0b05039"
+  },
+  "style.css": {
+    "identical": true,
+    "sha256": "15c4649c49659595e775afcb8470959894d282fc1ea537246510a626cd9b7363"
+  },
+  "ledger.json": {
+    "identical": true,
+    "sha256": "8cd534d4a2e9817476b67ce0941a4b3484e4486ab68732f78565a30be34ac2fb"
+  },
+  "health": {
+    "active_date": "2026-09-09",
+    "active_subscriptions": 0,
+    "candidates": 121,
+    "errors": {},
+    "feed_at": "0001-01-01T00:00:00Z",
+    "feed_state": "scheduled_idle",
+    "frames": 0,
+    "fx_polling": false,
+    "group_loads": [
+      1980,
+      1971,
+      1971
+    ],
+    "last_write_at": "0001-01-01T00:00:00Z",
+    "mode": "live",
+    "now": "2026-09-09T21:47:27.429486+08:00",
+    "paused": false,
+    "pcf_complete_date": "",
+    "pcf_last_attempt": "0001-01-01T00:00:00Z",
+    "pcf_next_attempt": "2026-09-10T08:40:00+08:00",
+    "pcf_ready": 121,
+    "pcf_schedule": "08:40 Asia/Shanghai weekdays; retry missing every 5m until 16:08",
+    "quote_count": 0,
+    "quote_window_open": false,
+    "rejected_frames": 0,
+    "run_id": "1788961562353436000",
+    "schema_version": "intranet-iopv.v1",
+    "sequence": 0,
+    "session": 0,
+    "shared_l1": true,
+    "signal_basis": "midpoint",
+    "started_at": "2026-09-09T21:46:02.353436+08:00",
+    "subscription_schedule": "09:15–15:01 CN (close buffer); 09:15–16:10 HK",
+    "subscriptions": 751,
+    "written_rows": 0
+  },
+  "513090_history_rows": 340
+}

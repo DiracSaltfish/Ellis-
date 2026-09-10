@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "socket_path": "/private/tmp/machome-ibkr-bridge-local-test/quotes.sock",
+  "health_file": "/private/tmp/machome-ibkr-bridge-local-test/health.json",
+  "tws": {
+    "host": "127.0.0.1",
+    "port": 1,
+    "client_id": 1999000041,
+    "market_data_type": 1,
+    "reconnect_minimum_ms": 1000,
+    "reconnect_maximum_ms": 2000,
+    "connect_timeout_ms": 1000,
+    "heartbeat_interval_ms": 1000,
+    "heartbeat_stale_ms": 3000
+  },
+  "limits": {
+    "maximum_clients": 4,
+    "maximum_request_bytes": 4096
+  },
+  "subscriptions": [
+    {
+      "id": "XOP.SMART",
+      "symbol": "XOP",
+      "security_type": "STK",
+      "exchange": "SMART",
+      "primary_exchange": "ARCA",
+      "currency": "USD",
+      "generic_ticks": ""
+    }
+  ]
+}

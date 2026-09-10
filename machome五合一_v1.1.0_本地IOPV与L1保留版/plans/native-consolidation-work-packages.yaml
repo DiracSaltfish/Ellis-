@@ -1,0 +1,300 @@
+schema_version: 1
+plan: native-consolidation-detailed-checklist
+execution: internal_checklist_not_independently_dispatched
+workspace: /Users/ellis/工具程序开发/machome四合一运行改造cpp
+read_only_baselines:
+  - /Users/ellis/newnavnav
+  - /Users/ellis/工具程序开发/溢价率拉升监控cpp
+  - /Users/ellis/Desktop/ETF交割/WebullData
+  - /Users/ellis/Desktop/ETF交割/实时申购赎回数据
+global_rules:
+  - Do not modify, install, start, stop, or reconfigure any baseline program.
+  - Do not deploy to machome without a new explicit user instruction.
+  - Tests must default to fixtures, record-only sinks, fake QMT, and disabled notifications.
+  - Runtime artifacts must not import, execute, link, or read code from baseline paths.
+  - Premium scope is A-server and A UI only; B is protocol compatibility only.
+
+tasks:
+  - id: G-00
+    title: Freeze manifests and golden replay corpus
+    depends_on: []
+    deliverables:
+      - tools/read-only-baseline-manifest
+      - fixtures/upload
+      - fixtures/premium
+      - fixtures/webull
+      - fixtures/redemption
+      - provenance manifests with redacted inputs
+    gate:
+      - Fixture tests run without baseline processes.
+      - Baseline directory hashes and mtimes are unchanged.
+
+  - id: G-01
+    title: Introduce IModuleEngine and ModuleContext
+    depends_on: [G-00]
+    deliverables:
+      - Native engine lifecycle interface
+      - Four mock engines on four QThreads
+      - Bounded command and snapshot channels
+      - Legacy clients isolated behind test-only probes
+    gate:
+      - One blocked mock engine does not block UI or the other engines.
+      - Agent shutdown and restart recovery tests pass.
+
+  - id: G-02
+    title: Build injectable ClockService and ScheduleCoordinator
+    depends_on: [G-01]
+    deliverables:
+      - Virtual clock
+      - Idempotent scheduled-job ledger
+      - Catch-up and sleep/wake behavior
+      - Schedule timeline snapshot for UI
+    gate:
+      - All documented market and daily boundaries pass deterministic tests.
+      - Wall clock and monotonic timeout responsibilities are separated.
+
+  - id: G-03
+    title: Build shared storage credential notification and server services
+    depends_on: [G-02]
+    deliverables:
+      - Per-module data roots and migrations
+      - Secret references without secret echo
+      - Bounded notification queues
+      - Reusable HTTP WS TCP and UDS components
+    gate:
+      - Slow disk and malformed client tests do not block unrelated engines.
+      - Security and redaction tests pass.
+
+  - id: G-04
+    title: Switch native UI to typed Agent engine events
+    depends_on: [G-03]
+    deliverables:
+      - Engine snapshot and event DTOs
+      - UI routing retained without localhost data dependency
+      - Reference-counted detail subscriptions
+    gate:
+      - Existing four module page tests pass against mock native engines.
+      - Closing detail pages releases subscriptions.
+
+  - id: G-05
+    title: Add no-legacy build and runtime gates
+    depends_on: [G-04]
+    deliverables:
+      - Legacy path and Mach-O dependency scanner
+      - Child-process allowlist audit
+      - Native-only production config schema
+      - Isolated test with baseline paths unavailable
+    gate:
+      - Bundle contains no baseline absolute path or executable dependency.
+      - Production config contains no old labels or managed baseline processes.
+
+  - id: P-01
+    title: Import Premium A core into new namespace
+    depends_on: [G-05]
+    deliverables:
+      - app/modules/premium/engine
+      - Source provenance and hash manifest
+      - B client and trading code exclusion test
+    gate:
+      - Imported core builds only from this workspace.
+      - No B-side trading symbol is linked into the Agent.
+
+  - id: P-02
+    title: Implement PremiumAEngine and schedules
+    depends_on: [P-01]
+    deliverables:
+      - Native signal calculation persistence and notification pipeline
+      - Market phase and reset logic
+      - Direct typed events for existing A UI pages
+    gate:
+      - Three-model golden replay and all time-boundary tests pass.
+
+  - id: P-03
+    title: Preserve Premium external contracts
+    depends_on: [P-02]
+    deliverables:
+      - Compatible 8421 summary and detail service
+      - Compatible 19195 L1 service
+      - Bundled TGW helper if SDK isolation is required
+    gate:
+      - Existing B client can consume data but cannot send trading commands to A.
+      - Old Premium deployment is not executed or loaded.
+
+  - id: P-04
+    title: Complete Premium A native UI and acceptance
+    depends_on: [P-03]
+    deliverables:
+      - Five A-side pages backed directly by PremiumAEngine
+      - Protocol and full replay report
+    gate:
+      - Premium runs with the old deployment directory unavailable.
+
+  - id: U-01
+    title: Freeze Upload business and uploader golden contracts
+    depends_on: [P-04]
+    deliverables:
+      - Go API WS and storage contract fixtures
+      - Per-uploader formula and payload fixtures
+      - Daily job inventory
+    gate:
+      - Every production worker and scheduled job maps to a fixture and owner.
+
+  - id: U-02
+    title: Implement UploadEngine repositories and compatibility protocols
+    depends_on: [U-01]
+    deliverables:
+      - Native repositories and schema migrations
+      - Bidirectional WS contract
+      - Optional compatibility 8080 service
+    gate:
+      - API WS and persisted-data golden tests pass.
+
+  - id: U-03
+    title: Implement Upload market valuation and upload jobs
+    depends_on: [U-02]
+    deliverables:
+      - Shared native IBKR integration
+      - Isolated per-uploader state machines
+      - Record-only sink and failure isolation
+    gate:
+      - Per-uploader payload and ACK tests pass with zero production upload.
+
+  - id: U-04
+    title: Implement Upload daily and market-close scheduler jobs
+    depends_on: [U-03]
+    deliverables:
+      - All autonomous fetch fit calibration history and close jobs
+      - Job ledger and manual idempotent rerun controls
+    gate:
+      - Cross-day restart sleep/wake and retry tests pass.
+
+  - id: U-05
+    title: Complete Upload native UI
+    depends_on: [U-04]
+    deliverables:
+      - Fund detail history ranking debug statistics settings guide and message pages
+      - Native worker and job matrix
+    gate:
+      - No daily operation requires the old Vue UI.
+
+  - id: U-06
+    title: Accept Upload as a self-contained module
+    depends_on: [U-05]
+    deliverables:
+      - Full replay report
+      - Record-only trading-day report
+      - No-old-label process evidence
+    gate:
+      - Upload runs with old newnavnav paths unavailable.
+
+  - id: W-01
+    title: Build the bundled headless Webull browser helper
+    depends_on: [U-06]
+    deliverables:
+      - helpers/webull with locked runtime
+      - Owner-only UDS raw-event protocol
+      - New MachomeHub Chrome profile migration tool
+    gate:
+      - Helper starts without old source venv or config paths.
+
+  - id: W-02
+    title: Implement WebullEngine data and service plane
+    depends_on: [W-01]
+    deliverables:
+      - Native normalize validate sequence store and schedule logic
+      - Compatible 18765 v2 service
+      - Native Agent control actions
+    gate:
+      - HTTP and MQTT golden replay is field-identical.
+
+  - id: W-03
+    title: Complete Webull native UI and acceptance
+    depends_on: [W-02]
+    deliverables:
+      - Existing four pages connected directly to WebullEngine
+      - Login restart and schedule acceptance report
+    gate:
+      - Old Webull source venv runner and LaunchAgent are absent.
+      - Helper failure does not affect other engines.
+
+  - id: R-01
+    title: Implement RedemptionEngine canonical state and schedules
+    depends_on: [W-03]
+    deliverables:
+      - Native seven-symbol monitor and history
+      - Alert decision logic
+      - Compatible 6787 read service
+    gate:
+      - State and notification golden replay passes.
+
+  - id: R-02
+    title: Build bundled Wind probe helper
+    depends_on: [R-01]
+    deliverables:
+      - Bundled C probe and ABI manifest
+      - Owner-only UDS canonical capture protocol
+      - Safe stop and cleanup state machine
+    gate:
+      - ABI mismatch fails closed.
+      - No SIGKILL Wind behavior exists.
+
+  - id: R-03
+    title: Implement native PCF persistence and retry policy
+    depends_on: [R-02]
+    deliverables:
+      - PCF cache parser fetch scheduler and repository
+      - Direction and basket opportunity calculation
+    gate:
+      - PCF error retry stale and limit golden tests pass.
+
+  - id: R-04
+    title: Integrate QMT1 and QMT2 into RedemptionEngine
+    depends_on: [R-03]
+    deliverables:
+      - Two independent QmtClient lifecycles
+      - Full-sync and reconciliation gate
+      - Compile-time and config mutation disable switches
+    gate:
+      - Fake-QMT order safety suite passes.
+      - Real order mutation remains disabled by default.
+
+  - id: R-05
+    title: Complete Redemption native UI and acceptance
+    depends_on: [R-04]
+    deliverables:
+      - Main table history PCF QMT settings and logs backed by RedemptionEngine
+      - Wind and schedule acceptance report
+    gate:
+      - Old ETFMonitorHost and source paths are absent.
+      - Wind helper failure does not affect other engines.
+
+  - id: I-01
+    title: Full native integration and fault-injection suite
+    depends_on: [R-05]
+    deliverables:
+      - Eight-hour soak report
+      - Cross-day sleep/wake and restart report
+      - Network disk helper and malformed-client fault report
+    gate:
+      - Resource usage is bounded and all unrelated modules remain responsive.
+
+  - id: I-02
+    title: Build isolated native-only release candidate
+    depends_on: [I-01]
+    deliverables:
+      - Signed app and build manifest
+      - Dependency and child-process audit
+      - Per-module rollback package
+    gate:
+      - Full suite passes while all four baseline paths are unavailable.
+      - No deployment or launch on machome has occurred.
+
+  - id: I-03
+    title: Prepare but do not execute production canary runbook
+    depends_on: [I-02]
+    deliverables:
+      - Per-module canary enable and disable steps
+      - Evidence templates and stop conditions
+      - Explicit user-approval checkpoint
+    gate:
+      - Production execution requires a separate explicit user instruction.

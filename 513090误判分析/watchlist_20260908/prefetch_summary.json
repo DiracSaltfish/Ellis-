@@ -1,0 +1,10 @@
+{
+  "symbols": 197,
+  "requests": 292,
+  "status_counts": {
+    "nav:FETCHED": 197,
+    "pcf:RAW_XML_REQUIRES_SCHEMA_VALIDATION": 95
+  },
+  "nav_with_target_day": 197,
+  "baseline_files": 64
+}

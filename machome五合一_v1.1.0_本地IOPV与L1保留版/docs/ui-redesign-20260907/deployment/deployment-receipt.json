@@ -1,0 +1,45 @@
+{
+  "at": 1788755540.807761,
+  "ui_release": "ui-20260907-overview-zh",
+  "changed_files": [
+    "Contents/MacOS/Machome 四合一运行中心",
+    "Contents/Resources/ui_release.json",
+    "Contents/Resources/ui_source_manifest.json",
+    "Contents/_CodeSignature/CodeResources"
+  ],
+  "preserved_backend_pids": [
+    19460,
+    19465,
+    19466,
+    19467,
+    19468,
+    19508,
+    19509,
+    19511,
+    19512,
+    19513,
+    19514,
+    19517,
+    19518,
+    19519,
+    19520,
+    19521
+  ],
+  "old_ui_pids": [
+    19686
+  ],
+  "new_ui_pids": [
+    20247
+  ],
+  "same_agent_instance": "c3aba336-7ae1-4793-ac5f-c837ab5a04b6",
+  "config_unchanged": true,
+  "signature_verified": true,
+  "backup": "/Users/ellis/Library/Application Support/MachomeHub/ui-update-20260907/before.app",
+  "installed_hashes": {
+    "Contents/MacOS/Machome 四合一运行中心": "889ca837160bcb98fba50f5e324c8e8ce771e8523ac9642747cc98967b03e2fb",
+    "Contents/Resources/ui_release.json": "f7c9472116686aef27bf5f6ccb1e5f92a45e7933d779d1c8c71d97ffa5194bf2",
+    "Contents/Resources/ui_source_manifest.json": "940956592686b63c22074a9cfa4e159a48617721866393dde01889a0a1ae592d",
+    "Contents/_CodeSignature/CodeResources": "b14b0adbe7ea3c7156aff8b0e20c8ffe3d839b4c60bd1b63d16edf48d2a9396d"
+  },
+  "launch_method": "open -a in existing user session"
+}

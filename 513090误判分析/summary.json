@@ -1,0 +1,14 @@
+{
+  "K_close_HKD": 1054667.005,
+  "K_1500_HKD": 1059546.115,
+  "estimated_cash": 9547.19,
+  "final_cash": 9564.08,
+  "NAV_precise": 1.84332244,
+  "calc_close_mid_est": 1.8432886185281998,
+  "calc_close_mid_final": 1.8433223985282,
+  "calc_1500_mid_est": 1.8517277223486,
+  "fx_implied_1500": 0.8523015631084637,
+  "calc_1500_fx08555": 1.831977782765,
+  "calc_close_fx08555": 1.8236296255549997,
+  "max_pcf_rounding_error": 0.0049050000015995465
+}

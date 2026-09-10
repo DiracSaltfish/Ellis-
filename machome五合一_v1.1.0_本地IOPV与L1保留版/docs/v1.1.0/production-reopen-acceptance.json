@@ -1,0 +1,216 @@
+{
+  "at": "2026-09-09T13:01:05.660794",
+  "health": {
+    "candidates": 120,
+    "errors": {},
+    "feed_at": "2026-09-09T13:01:05.638594+08:00",
+    "feed_state": "streaming",
+    "frames": 22007,
+    "group_loads": [
+      1959,
+      1951,
+      1962
+    ],
+    "last_write_at": "2026-09-09T13:01:00.797505209+08:00",
+    "mode": "live",
+    "now": "2026-09-09T13:01:05.64759+08:00",
+    "paused": false,
+    "pcf_ready": 120,
+    "quote_count": 744,
+    "rejected_frames": 0,
+    "run_id": "1788929175886319000",
+    "schema_version": "intranet-iopv.v1",
+    "sequence": 297,
+    "session": 2,
+    "shared_l1": true,
+    "signal_basis": "midpoint",
+    "started_at": "2026-09-09T12:46:15.88632+08:00",
+    "subscriptions": 750,
+    "written_rows": 120
+  },
+  "history_rows": 152,
+  "live_row": {
+    "suspended": null,
+    "suspension_pending": null,
+    "fx_error": "FX: stale/unhealthy FX: status=cfets_unavailable, healthy=false, quote_age=175s, snapshot_age=4s",
+    "fx_generated_at": "2026-09-09T13:00:47.616794005+08:00",
+    "hkd_assets": 1060467.3,
+    "cny_assets": 9331.24,
+    "book_premiums": [
+      {
+        "side": "bid",
+        "level": 1,
+        "price": 1.845,
+        "volume": 2677700,
+        "midpoint_premium_pct": -0.3527750822531983,
+        "settlement_buy_premium_pct": null,
+        "settlement_sell_premium_pct": null
+      },
+      {
+        "side": "ask",
+        "level": 1,
+        "price": 1.846,
+        "volume": 752800,
+        "midpoint_premium_pct": -0.29876574625441465,
+        "settlement_buy_premium_pct": null,
+        "settlement_sell_premium_pct": null
+      },
+      {
+        "side": "bid",
+        "level": 2,
+        "price": 1.844,
+        "volume": 3490400,
+        "midpoint_premium_pct": -0.40678441825197087,
+        "settlement_buy_premium_pct": null,
+        "settlement_sell_premium_pct": null
+      },
+      {
+        "side": "ask",
+        "level": 2,
+        "price": 1.847,
+        "volume": 1217300,
+        "midpoint_premium_pct": -0.2447564102556421,
+        "settlement_buy_premium_pct": null,
+        "settlement_sell_premium_pct": null
+      },
+      {
+        "side": "bid",
+        "level": 3,
+        "price": 1.843,
+        "volume": 2776200,
+        "midpoint_premium_pct": -0.46079375425075453,
+        "settlement_buy_premium_pct": null,
+        "settlement_sell_premium_pct": null
+      },
+      {
+        "side": "ask",
+        "level": 3,
+        "price": 1.848,
+        "volume": 3766200,
+        "midpoint_premium_pct": -0.19074707425685844,
+        "settlement_buy_premium_pct": null,
+        "settlement_sell_premium_pct": null
+      },
+      {
+        "side": "bid",
+        "level": 4,
+        "price": 1.842,
+        "volume": 3317500,
+        "midpoint_premium_pct": -0.5148030902495271,
+        "settlement_buy_premium_pct": null,
+        "settlement_sell_premium_pct": null
+      },
+      {
+        "side": "ask",
+        "level": 4,
+        "price": 1.849,
+        "volume": 4419600,
+        "midpoint_premium_pct": -0.13673773825808588,
+        "settlement_buy_premium_pct": null,
+        "settlement_sell_premium_pct": null
+      },
+      {
+        "side": "bid",
+        "level": 5,
+        "price": 1.841,
+        "volume": 2067400,
+        "midpoint_premium_pct": -0.5688124262483107,
+        "settlement_buy_premium_pct": null,
+        "settlement_sell_premium_pct": null
+      },
+      {
+        "side": "ask",
+        "level": 5,
+        "price": 1.85,
+        "volume": 6515400,
+        "midpoint_premium_pct": -0.08272840225930223,
+        "settlement_buy_premium_pct": null,
+        "settlement_sell_premium_pct": null
+      }
+    ],
+    "symbol": "513090.SH",
+    "name": "香港证券ETF易方达",
+    "trade_date": "2026-09-09",
+    "calculated_at": "2026-09-09T13:00:51.797783209+08:00",
+    "minute": "13:00",
+    "pcf_sha256": "cb52738d22c12633784377d7d946510148757588f8bf339c1de94e3ad3cad2da",
+    "channel": "shanghai",
+    "midpoint_iopv": 1.851531742628,
+    "settlement_buy_iopv": null,
+    "settlement_sell_iopv": null,
+    "etf_price": 1.845,
+    "midpoint_premium_pct": -0.3527750822531983,
+    "settlement_buy_premium_pct": null,
+    "settlement_sell_premium_pct": null,
+    "midpoint_fx": 0.86418,
+    "settlement_buy_fx": null,
+    "settlement_sell_fx": null,
+    "fx_at": "2026-09-09T12:57:57+08:00",
+    "fx_model": "",
+    "fx_status": "",
+    "fx_actionable": false,
+    "components": 17,
+    "priced": 17,
+    "missing": [],
+    "stale": [],
+    "reasons": [
+      "SETTLEMENT_FX_UNAVAILABLE"
+    ],
+    "eligible_for_signal": false,
+    "oldest_quote_at": "2026-09-09T13:00:09+08:00",
+    "etf_quote_at": "2026-09-09T13:00:51.238+08:00",
+    "book": {
+      "bids": [
+        {
+          "price": 1.845,
+          "volume": 2677700
+        },
+        {
+          "price": 1.844,
+          "volume": 3490400
+        },
+        {
+          "price": 1.843,
+          "volume": 2776200
+        },
+        {
+          "price": 1.842,
+          "volume": 3317500
+        },
+        {
+          "price": 1.841,
+          "volume": 2067400
+        }
+      ],
+      "asks": [
+        {
+          "price": 1.846,
+          "volume": 752800
+        },
+        {
+          "price": 1.847,
+          "volume": 1217300
+        },
+        {
+          "price": 1.848,
+          "volume": 3766200
+        },
+        {
+          "price": 1.849,
+          "volume": 4419600
+        },
+        {
+          "price": 1.85,
+          "volume": 6515400
+        }
+      ],
+      "observed_at": "2026-09-09T13:00:51.238+08:00"
+    },
+    "sequence": 293,
+    "run_id": "1788929175886319000",
+    "mode": "live",
+    "unit": 500000,
+    "cash": 9331.24
+  },
+  "historical_rows_preserved": 151
+}

@@ -1,0 +1,8 @@
+{
+  "minute_rows": 332,
+  "detail_rows": 5644,
+  "all_17_terminal_minutes_equal_daily_close": true,
+  "all_minutes_within_daily_high_low": true,
+  "negative_premium_matched_minutes": 242,
+  "max_daily_NAV_error_CNY_per_basket": 0.020735900034196675
+}

@@ -1,0 +1,13 @@
+{
+  "src/ui/HubClient.cpp": "dd6d496e345a024e5889e4a8dec95d5559812c2c8bc5c17898bade510f950b66",
+  "src/ui/HubClient.h": "f7ac3a12521dd8cfb8a4aece517d5c1e3945c6559e4d5494cb1b9ab277e6b5d2",
+  "src/ui/MainWindow.cpp": "4cb39f7776b787c685067aa7e4c441550f5a403c1365539a52cabcbf3b78400f",
+  "src/ui/MainWindow.h": "ccbcbd93c4bb56313e2a3dcfb5dce68573f259686e8c19cefffe87270c1a79b4",
+  "src/ui/ModulePages.cpp": "56c632fa4d55a3df4e3df5818cbf507e93df633bfed685ebe9f2199c732d56da",
+  "src/ui/ModulePages.h": "3b2c5ed87a53ec9d039c2b44bd5e084ad5c4bd341616c03e80f1a7d6bb9fe086",
+  "src/ui/ServiceOverview.cpp": "3bf591593ce88b4e02a1971e1c740aa0a81d84ff082a32f125dfa89a881defb0",
+  "src/ui/ServiceOverview.h": "e49c72d9c93dcb8c00ae510990dcfc7ae6ccaf83885e1dfaa88b06de841f208a",
+  "src/ui/UiText.cpp": "e916d952254aedf71ccdb0dfa1439ace06e39dc4bffa3d9ae1a18d8147cc9587",
+  "src/ui/UiText.h": "db310d2194f3dd41dbb6a6a79234ff85835b32a4da5b5e86560a56f72f2a075a",
+  "src/ui/main.cpp": "51aa1eb262249df7013d0e8a49bd1b08685ccbe13fd32a81c25e91fadfbeda47"
+}

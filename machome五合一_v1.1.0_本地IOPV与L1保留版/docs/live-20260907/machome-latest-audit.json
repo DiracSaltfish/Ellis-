@@ -1,0 +1,22 @@
+{
+  "at": 1788752919.836742,
+  "build_id": "1.0.0-unversioned-dirty-20260907T033508Z",
+  "live_qmt_orders_compiled": false,
+  "manifest_sha256": "25c83129e0437910054429fd224719fef359dae5307f64ff7928876cbb8d8d56",
+  "unresolved_commands": 0,
+  "order_actions_today": 0,
+  "qmt": {
+    "QMT1": {
+      "ready": true,
+      "positions_synced": true,
+      "orders_synced": true,
+      "position_rows": 5
+    },
+    "QMT2": {
+      "ready": true,
+      "positions_synced": true,
+      "orders_synced": true,
+      "position_rows": 7
+    }
+  }
+}

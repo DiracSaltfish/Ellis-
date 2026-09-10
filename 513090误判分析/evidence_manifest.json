@@ -1,0 +1,465 @@
+{
+  "recorded_at": "2026-09-09T00:34:41.759570+08:00",
+  "files": [
+    {
+      "file": "raw/eastmoney_etf.json",
+      "bytes": 244,
+      "sha256": "7d098330ce491825e73d5f9a7ad80a61c64c237483b6f1a4a30c4b9e3bb7329e"
+    },
+    {
+      "file": "raw/eastmoney_fundgz.js",
+      "bytes": 3924,
+      "sha256": "3b20843aa013c7a0a70a1482b5d467b1d4df60b762e335b29ce99103ed1d17e2"
+    },
+    {
+      "file": "raw/fund.html",
+      "bytes": 411929,
+      "sha256": "74b233cef7b5df3aaa553a85118b300ecadbc56deca976727955346911e5cc4d"
+    },
+    {
+      "file": "raw/halfyear.pdf",
+      "bytes": 1470490,
+      "sha256": "38852052a977ddfbcaa355076f54cd207b2209a7c57c12ae953c1f35787ff3bc"
+    },
+    {
+      "file": "raw/halfyear.txt",
+      "bytes": 97287,
+      "sha256": "61cd4996e603720d55b6e1ca104e73ebf994b4fc766f7ae49249612b923e257e"
+    },
+    {
+      "file": "raw/halfyear_source.json",
+      "bytes": 474,
+      "sha256": "6747b6c015ab674e6e3dd3a208f8247c5aa35f052fbfd3e8a540715d88ca90e6"
+    },
+    {
+      "file": "raw/pcf_2026-08-28_baseinfo.json",
+      "bytes": 1422,
+      "sha256": "bf9e7e3358bb82dca4d0a6354d0bc2d03c67c93c8c3a445f155531c55e360722"
+    },
+    {
+      "file": "raw/pcf_2026-08-28_stocklist.json",
+      "bytes": 6714,
+      "sha256": "463dcf64f935fb4343c1d28d118ad02944c9b0e29e8cd299cb15cf0757175df5"
+    },
+    {
+      "file": "raw/pcf_2026-08-31_baseinfo.json",
+      "bytes": 1423,
+      "sha256": "6cba7202d057ede53c06cca12f8d875ef145fb687d5f24ed359aec534fd45c7e"
+    },
+    {
+      "file": "raw/pcf_2026-08-31_stocklist.json",
+      "bytes": 6714,
+      "sha256": "3cd21a91aa5a18a7ea5ba6b166f738554598a3eef97c0757347e0ad936373700"
+    },
+    {
+      "file": "raw/pcf_2026-09-01_baseinfo.json",
+      "bytes": 1422,
+      "sha256": "205580904a2472f371df1301a9d6b6605856242045b6eba9d60214c2989a9e8f"
+    },
+    {
+      "file": "raw/pcf_2026-09-01_stocklist.json",
+      "bytes": 6713,
+      "sha256": "0391f93d9b584ad5b446c94d0fc2161163fd7c4c24a6ce6e837f3cf504f647a2"
+    },
+    {
+      "file": "raw/pcf_2026-09-02_baseinfo.json",
+      "bytes": 1422,
+      "sha256": "a84e88ec8280afbff15116b0c8b0cde81c105ae73fc6f6855b4caf92f7ec388e"
+    },
+    {
+      "file": "raw/pcf_2026-09-02_stocklist.json",
+      "bytes": 6711,
+      "sha256": "2e8ea80b6df3b7e3895802c70bc272411ffaa57958a42cf89eeb1e2e9ee75454"
+    },
+    {
+      "file": "raw/pcf_2026-09-03_baseinfo.json",
+      "bytes": 1422,
+      "sha256": "ee5969c15a57d12c5f7de79d9f0d9e3678b9641205ff3f373b248e3b6afb102b"
+    },
+    {
+      "file": "raw/pcf_2026-09-03_stocklist.json",
+      "bytes": 6712,
+      "sha256": "30c0fc4ebec1128b84f23ea11453cdbbac2edf8d22ec1737405879d24bd3c448"
+    },
+    {
+      "file": "raw/pcf_2026-09-04_baseinfo.json",
+      "bytes": 1423,
+      "sha256": "93a6c1c46bc07435fc2ef443d1dabe3d02e96f484a28bab119cfd627829eaec7"
+    },
+    {
+      "file": "raw/pcf_2026-09-04_stocklist.json",
+      "bytes": 6715,
+      "sha256": "41459e9111e5dfa5d50c6b210dc3753fa1078c2ac844bb55388cdaed8143ef20"
+    },
+    {
+      "file": "raw/pcf_2026-09-07_baseinfo.json",
+      "bytes": 1423,
+      "sha256": "30cd28358c58db5eb9eb8710cc98d87c47639dcc2df4602081c0709e3ca82ffe"
+    },
+    {
+      "file": "raw/pcf_2026-09-07_stocklist.json",
+      "bytes": 6710,
+      "sha256": "b0ad0d33ffbf3880af7ee56761e16b295eabcdf26cc1dc64effe4949cfd294f2"
+    },
+    {
+      "file": "raw/pcf_2026-09-08_base.json",
+      "bytes": 1423,
+      "sha256": "c5caa084141d3865183943df926c87224d4e4a79d9e9dce9ffe1673f353e4e1a"
+    },
+    {
+      "file": "raw/pcf_2026-09-08_baseinfo.json",
+      "bytes": 1423,
+      "sha256": "c5caa084141d3865183943df926c87224d4e4a79d9e9dce9ffe1673f353e4e1a"
+    },
+    {
+      "file": "raw/pcf_2026-09-08_stocklist.json",
+      "bytes": 6714,
+      "sha256": "3f6fd6a9f51896496238c47abdb5cd476f059a709c54a645659ce8c2e928a254"
+    },
+    {
+      "file": "raw/pcf_2026-09-09_baseinfo.json",
+      "bytes": 1423,
+      "sha256": "5cd1336f071ffd3b69cc2d9a976c7e108af7bcc376ad44dadf35b052a8b109b6"
+    },
+    {
+      "file": "raw/pcf_2026-09-09_stocklist.json",
+      "bytes": 6713,
+      "sha256": "136d34bc5bb2d4fda1022348adc86847426c4eae20df5e4fb6224baa477c076a"
+    },
+    {
+      "file": "raw/prospectus.pdf",
+      "bytes": 1086682,
+      "sha256": "2ddf11051cfcf82fa8a0750e8988219836aaa821574327a9f80d98a756e64e1d"
+    },
+    {
+      "file": "raw/prospectus.txt",
+      "bytes": 297220,
+      "sha256": "cdac863c8460117d3d59004ca1d168a9ef96e8a97a4f0abd277d03e8444b359b"
+    },
+    {
+      "file": "raw/prospectus_source.json",
+      "bytes": 502,
+      "sha256": "a15f7a0e13dcd3ef82e75875409196e573ecd382d6e7d1166ab1833fbe722cff"
+    },
+    {
+      "file": "raw/safe_fx.html",
+      "bytes": 36857,
+      "sha256": "b59cb4097cd6292b015d2b4f74959fe5da483bc2790e02815f9faf86a5d684a1"
+    },
+    {
+      "file": "raw/settlement_notice.pdf",
+      "bytes": 224589,
+      "sha256": "01d5876efc281b6a8bfab879d7acb4a33818e134aa1069f6819401cf1e75ea43"
+    },
+    {
+      "file": "raw/settlement_notice.txt",
+      "bytes": 1476,
+      "sha256": "a5a13b065d335def9b808e9c0c4556040d449442cb1f2391ff1c0a6a7b732dd7"
+    },
+    {
+      "file": "raw/settlement_notice_source.json",
+      "bytes": 610,
+      "sha256": "9041cdc7d64dfefe75f79f04cf49466ed9bb9bd13e83711afe65aeedd9e23601"
+    },
+    {
+      "file": "raw/shares_2026-08-28.json",
+      "bytes": 100728,
+      "sha256": "535e9f89a2b0b90efb547508e39972feddfc4451b9211b69cab894cdd4abd413"
+    },
+    {
+      "file": "raw/shares_2026-08-31.json",
+      "bytes": 100729,
+      "sha256": "c17c125b1aef78ac359658dcacfbbc43d363f238de415626ebf027bca6566874"
+    },
+    {
+      "file": "raw/shares_2026-09-01.json",
+      "bytes": 100728,
+      "sha256": "45ca0087a9c4fdc07622548f238e9bcf4d4cc2743425a6df9d80d09917eed422"
+    },
+    {
+      "file": "raw/shares_2026-09-02.json",
+      "bytes": 100842,
+      "sha256": "ca493bee8c0b0430a11bdb56e5d46e929a3f8fe11c73f5215b2f90485574c10b"
+    },
+    {
+      "file": "raw/shares_2026-09-03.json",
+      "bytes": 100952,
+      "sha256": "284f29a8ab2df08b9e2b392494b2e3128db42e5de8431d707bafdf80ab4ba2d7"
+    },
+    {
+      "file": "raw/shares_2026-09-04.json",
+      "bytes": 101177,
+      "sha256": "2452fc40aada5498149baa861bba793bee22bef13db31e574943afd3b85286fa"
+    },
+    {
+      "file": "raw/shares_2026-09-07.json",
+      "bytes": 101294,
+      "sha256": "f789c7f3adad235e7e9c456893102699536fc516b90456f434c2a806e8600cf3"
+    },
+    {
+      "file": "raw/shares_2026-09-08.json",
+      "bytes": 101290,
+      "sha256": "96c3baf05cbfd2e77455e7a50bee45a92efeea9df8b169078e320f7b649c52e8"
+    },
+    {
+      "file": "raw/sse_common.js",
+      "bytes": 8324,
+      "sha256": "0990c231aee829ef5260801a3585d23fcd1221dd1954d1252df868f356a2a3bd"
+    },
+    {
+      "file": "raw/sse_funddata.js",
+      "bytes": 92332,
+      "sha256": "22988a9fd35de3a545ed096edac2dcc76bb242a65b137ff8a05f0026cf7cda89"
+    },
+    {
+      "file": "raw/sse_iopv.json",
+      "bytes": 94,
+      "sha256": "9f86d6b58d2c9d733c5b942b8ff792f6c6d6eded4d5d45039a5db6a77f0e9f57"
+    },
+    {
+      "file": "raw/sse_iopv_line_probe.json",
+      "bytes": 5165,
+      "sha256": "d15d66899684c3cefd448ecb9ddca1293e39f4c81f1061f36930596ee1e98f30"
+    },
+    {
+      "file": "raw/sse_main.js",
+      "bytes": 5083,
+      "sha256": "c7c1438a3cb3405e9f431e4c745415b3c95c707dd502555bab6bc2c7ee45a0e6"
+    },
+    {
+      "file": "raw/sse_shares.html",
+      "bytes": 27487,
+      "sha256": "c9297f7bc1a8ff9b6d62a0f7da2c778c83683f47f7458fae36d926a6aacc0d3c"
+    },
+    {
+      "file": "raw/sse_shares_probe.json",
+      "bytes": 101290,
+      "sha256": "6524f943567da706ab69e77f9e192a18887bb3692d578bbbbb6265e4c8e3c434"
+    },
+    {
+      "file": "raw/sse_snap.json",
+      "bytes": 324,
+      "sha256": "1432efb4e7dfd97ae6ae48baa11217b83b3a22f33a7a3eedaa8433167e6034e2"
+    },
+    {
+      "file": "raw/sse_table.js",
+      "bytes": 112996,
+      "sha256": "dc851f48426d0ae2a4dd651f86c20ff598b25ed1edd6c9a012f444665081742c"
+    },
+    {
+      "file": "raw/tencent_00388_minute_probe.json",
+      "bytes": 13458,
+      "sha256": "344fd10fa7226db915eade04c049e02875e9a8a999b006f410469c1edd8c9156"
+    },
+    {
+      "file": "raw/tencent_00388_probe.json",
+      "bytes": 2134,
+      "sha256": "2ed72f15d01ed3273b6699d7f423c6d200007e00df2d4917bd7b02bfc6ad3c72"
+    },
+    {
+      "file": "raw/tencent_hk00165_day.json",
+      "bytes": 1987,
+      "sha256": "a25bce204ef25d4305d1f7882712f0cbd1823bd70e2e7f916b98059b8bc28ba0"
+    },
+    {
+      "file": "raw/tencent_hk00165_minute.json",
+      "bytes": 12592,
+      "sha256": "41a0268f5521a958f2a77c3e5973e1fb32c958d468c06031c1a583d3acede956"
+    },
+    {
+      "file": "raw/tencent_hk00388_day.json",
+      "bytes": 2203,
+      "sha256": "136a60d112b8bb46dd8a2243319c77f3f059a8fa020a947e2240f914a53cb8b9"
+    },
+    {
+      "file": "raw/tencent_hk00388_minute.json",
+      "bytes": 13458,
+      "sha256": "968376fae4f653ad3da5d91b585055f88938e1f40e22b405d50512feb8fb2e1c"
+    },
+    {
+      "file": "raw/tencent_hk01359_day.json",
+      "bytes": 1988,
+      "sha256": "a0f146587428ccf689d642cf80e35dd2eb2584c8ef598a7a33296cfd230b03ff"
+    },
+    {
+      "file": "raw/tencent_hk01359_minute.json",
+      "bytes": 12893,
+      "sha256": "c70468c6154882dd88cb52a013101524f983e3e48b0cee878d91f9b080186c78"
+    },
+    {
+      "file": "raw/tencent_hk01375_day.json",
+      "bytes": 1976,
+      "sha256": "17edf0be54760f7b504377956a915a694e6fe8d18d16620591f01ce3324da4c8"
+    },
+    {
+      "file": "raw/tencent_hk01375_minute.json",
+      "bytes": 12354,
+      "sha256": "d70806e2d46fef6079a7440d246bf9b6cda70adcf14cc29f3757497faee426eb"
+    },
+    {
+      "file": "raw/tencent_hk01456_day.json",
+      "bytes": 2738,
+      "sha256": "f41edce61256ffa91ef34ad578c84f19b3c1df4c46d35d1b776593e477a1ed1c"
+    },
+    {
+      "file": "raw/tencent_hk01456_minute.json",
+      "bytes": 12332,
+      "sha256": "bcae8a0402401bc6ac4c3a8ad6c9503c3cdc71471d298f8f95c2c0c1453ffa60"
+    },
+    {
+      "file": "raw/tencent_hk01776_day.json",
+      "bytes": 2014,
+      "sha256": "188663b5381abfe0cc5fae213399f17a53ae54b3bec5eae41e2f6351bb56d74e"
+    },
+    {
+      "file": "raw/tencent_hk01776_minute.json",
+      "bytes": 13011,
+      "sha256": "4ef43f4e44be3b6b0f9676de8bda1571eb137f07c36c64a53f06dfd21105b1ab"
+    },
+    {
+      "file": "raw/tencent_hk01788_day.json",
+      "bytes": 1996,
+      "sha256": "82bda5e4f552868cd55b3a4fe088b64570de63b295323f6ec4e635f9cad823b1"
+    },
+    {
+      "file": "raw/tencent_hk01788_minute.json",
+      "bytes": 12882,
+      "sha256": "71ec855ec08c9b492b09cdbd17052cd074b70a6d1ba17069735241e56e2ba54c"
+    },
+    {
+      "file": "raw/tencent_hk02611_day.json",
+      "bytes": 2209,
+      "sha256": "29559bcdd282daeb2aebc22c1d3041fa2ffa53faa2e95ac86fb47db6f504c128"
+    },
+    {
+      "file": "raw/tencent_hk02611_minute.json",
+      "bytes": 13308,
+      "sha256": "1af8851334abf7c959363947f142ec89afb8a9c4a122b7c840effb5e86fd11b6"
+    },
+    {
+      "file": "raw/tencent_hk03908_day.json",
+      "bytes": 2023,
+      "sha256": "27e2310a7bcf2f82b2522a95c5a1e6bf42fe1451f00cb4659875134f7ec0d339"
+    },
+    {
+      "file": "raw/tencent_hk03908_minute.json",
+      "bytes": 13434,
+      "sha256": "3fea613df84ad4da700433ee92704000b557bb810dfdf0cfa9eb9dcf63cc9741"
+    },
+    {
+      "file": "raw/tencent_hk03958_day.json",
+      "bytes": 1963,
+      "sha256": "f2b6402bd9fb800d00763d874acc5e83c1c78ba5a44e02686c53d2c9d2883036"
+    },
+    {
+      "file": "raw/tencent_hk03958_minute.json",
+      "bytes": 12544,
+      "sha256": "36cbc6fdd71f7a34a10707b6914b5d7e1d9e3c56e18429407e0f713097705083"
+    },
+    {
+      "file": "raw/tencent_hk06030_day.json",
+      "bytes": 2030,
+      "sha256": "d10a32e67e23546803ed6e64009ab7a9453efc83e54653619a759a69d9c6a032"
+    },
+    {
+      "file": "raw/tencent_hk06030_minute.json",
+      "bytes": 13284,
+      "sha256": "3aff20187acaf05a71ba333009678ff2684bc70fb4b707e5585764eff05e39f0"
+    },
+    {
+      "file": "raw/tencent_hk06066_day.json",
+      "bytes": 2018,
+      "sha256": "6ae8496ac46e531a6b68c67384fde4a874afa3467b17a5a922273c2477692a97"
+    },
+    {
+      "file": "raw/tencent_hk06066_minute.json",
+      "bytes": 12951,
+      "sha256": "614c23979e77050bccdb179d9ac0d6d10def1afd186cc909e6d39aeab7772a93"
+    },
+    {
+      "file": "raw/tencent_hk06099_day.json",
+      "bytes": 2196,
+      "sha256": "8b7b249ccc70d879bcb601550d83ffa7265e5ca2f77e9955fc7b7aa4c3c186ce"
+    },
+    {
+      "file": "raw/tencent_hk06099_minute.json",
+      "bytes": 12933,
+      "sha256": "65a7d1286870bbe529a0cfa794dbe0edff97349fb172ab5b759bd9da0caf3745"
+    },
+    {
+      "file": "raw/tencent_hk06178_day.json",
+      "bytes": 1969,
+      "sha256": "ae8520990654b9c7aa128f67628202434ca8166891d495f6f5c9750d96bafb7d"
+    },
+    {
+      "file": "raw/tencent_hk06178_minute.json",
+      "bytes": 12132,
+      "sha256": "180633e156db6044075479f4d99cf8ff0d4280c05235c0e7199181ddf7f3c279"
+    },
+    {
+      "file": "raw/tencent_hk06806_day.json",
+      "bytes": 1976,
+      "sha256": "66697be7cf231e6be0d88d2efbdf626a4c9c3ce4afb64ba57c97824425afebbf"
+    },
+    {
+      "file": "raw/tencent_hk06806_minute.json",
+      "bytes": 12721,
+      "sha256": "baab537badc774d6a965b1bf2424fe2fd3f22843d77a7229fd6a689eda5c9dfd"
+    },
+    {
+      "file": "raw/tencent_hk06881_day.json",
+      "bytes": 1977,
+      "sha256": "cfcb8ff611abd0d488388d29a82c6754f6ab95f87338670c0593d5a69d1e05d7"
+    },
+    {
+      "file": "raw/tencent_hk06881_minute.json",
+      "bytes": 12761,
+      "sha256": "3c12fe9ad4e426bd649335b992532975069803827d7a551f28613702022c6b3f"
+    },
+    {
+      "file": "raw/tencent_hk06886_day.json",
+      "bytes": 2019,
+      "sha256": "d6b33c620161d78754ff482c4930bb5cd5994d1d7e4ef2d10aa486d9b029d117"
+    },
+    {
+      "file": "raw/tencent_hk06886_minute.json",
+      "bytes": 13230,
+      "sha256": "ddabfd393ad2f212d1d3b59e42ec4ca154af892fe0d447ac1a6bfa9e7e55127e"
+    },
+    {
+      "file": "raw/tencent_sh513090_day.json",
+      "bytes": 2177,
+      "sha256": "af131d0449f46d82e49a5ca876d32b04e1c25ccb9659bd3ff2a3a324735326e7"
+    },
+    {
+      "file": "raw/tencent_sh513090_minute.json",
+      "bytes": 11079,
+      "sha256": "4e2a791b7809706585817c88189f02e5ea020c82c684dd4921e5fd838c3a12a3"
+    },
+    {
+      "file": "raw/user_customer_service.png",
+      "bytes": 200943,
+      "sha256": "bbf3a8eec4bf04abdbcf77ccaf34dd663b9547baf97e15e30608ce55cf09c604"
+    },
+    {
+      "file": "raw/user_fx_prediction.png",
+      "bytes": 529918,
+      "sha256": "573937ea657041fb478c0282375d280c88bc4247f740888172edc18d5eb0f258"
+    },
+    {
+      "file": "raw/user_market.png",
+      "bytes": 577681,
+      "sha256": "bb27561294783d33d79daadbae4d59153cbf6d6ac6ee26d2cd7ff7b61ad5c8a3"
+    },
+    {
+      "file": "raw/user_shares.png",
+      "bytes": 163992,
+      "sha256": "12065b6f99546c6e3ae91e8d33e3986d4915a126193caaaab64e105bd4362e75"
+    },
+    {
+      "file": "raw/user_website.png",
+      "bytes": 451343,
+      "sha256": "272263db5ff063986c5cc656667d4a743b2a0c2a2af488d9abb923deced0d9fa"
+    }
+  ]
+}

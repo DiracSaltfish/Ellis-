@@ -1,0 +1,8 @@
+{
+  "feature": "V32 local IOPV channels, configurable signal thresholds, matching Wind helper",
+  "files": {
+    "Contents/MacOS/machome-hub-agent": "840f1c8e1db19410a2d36eef4643aa2262f143cf20eb0e0bcefd1ca97f9090a3",
+    "Contents/Helpers/machome-iopv-server": "dbad7ff8c2ba2ff2b88823f1398fc7b8003326fe128a2f2ccc4bb4e63b1d6ba6",
+    "Contents/Helpers/machome-wind-probe-helper": "92abd6821219ace269562151ee3b1b5cd7e8b52d15565045a5419aebc64f70cf"
+  }
+}

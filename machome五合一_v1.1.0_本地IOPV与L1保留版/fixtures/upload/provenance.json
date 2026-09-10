@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "baseline_repository": "newnavnav",
+  "captured_at": "2026-09-04",
+  "sanitized": true,
+  "runtime_dependency": false,
+  "timezone": "Asia/Shanghai",
+  "sources": [
+    {"file": "scripts/private_valuation_uploader.py", "sha256": "0d98e733011ec552ef8d917e4ee5e207c03afdbcc12027c7b94c3e0f3654e86a"},
+    {"file": "scripts/private_xop_family_uploader.py", "sha256": "a258824a0c2e4d5835d5eefa35445c574ca24f36296c617b2759d11f707ea716"},
+    {"file": "scripts/private_nasdaq_valuation_uploader.py", "sha256": "5c2c6003bb8bf147c4942aab5a5c0bfc77a7431b05ccb828b0465d0a173f64d6"},
+    {"file": "scripts/private_161226_silver_uploader.py", "sha256": "d6de1e8a177f3df07b08316e1d7a9d2896d8fafa17955bbbb7e436b329c4ef1c"},
+    {"file": "scripts/private_china_internet_valuation_uploader.py", "sha256": "c12e9e19ace13ed96f48febcdf28787ea2ec6c643574c59158820a311eed1c2d"},
+    {"file": "scripts/private_164824_valuation_uploader.py", "sha256": "e32d88045ea7dacfedbb22fedeac150f18414a86900f24a1b0cbf0ffe5b157bf"},
+    {"file": "scripts/sina_ws_uploader.py", "sha256": "4cbc6a825e986603774b5a05016cf4e82aa22139dc66b99d940a6e7b85cffa41"},
+    {"file": "internal/navsync/scheduler.go", "sha256": "92681192e8abe2c3f12ebadfa842167cb616045e5a9f5bec27ef850ebeba0b88"},
+    {"file": "internal/closesync/daily_close.go", "sha256": "3f5812ff46b6df74a57c912cfc55006145867bf1164982cee266b66c3d52de7b"},
+    {"file": "internal/valuation/engine.go", "sha256": "c0f07f496b97f1df1d0556b00bf3590c2816eea1a3d5fae29888ef17cf5a086a"}
+  ]
+}

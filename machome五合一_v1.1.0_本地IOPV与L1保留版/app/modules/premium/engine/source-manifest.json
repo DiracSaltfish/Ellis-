@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "module": "premium_a",
+  "captured_at": "2026-09-04",
+  "baseline_access": "read_only",
+  "source_root": "/Users/ellis/工具程序开发/溢价率拉升监控cpp",
+  "namespace": "machome::premium::engine",
+  "transforms": [
+    "include paths rebased to bundled engine",
+    "namespace premium renamed",
+    "native in-process event surface added to copied CoreServer"
+  ],
+  "excluded_source_prefixes": [
+    "src/client",
+    "src/console",
+    "src/client/QmtClient"
+  ],
+  "files": [
+    {
+      "source": "src/common/BridgeFrame.h",
+      "sha256": "de8dbe8fcd3f8f3234634daa2702619c7d84456d68dcfd4a037c70cc69246edb",
+      "destination": "app/modules/premium/engine/common/BridgeFrame.h"
+    },
+    {
+      "source": "src/common/BridgeFrame.cpp",
+      "sha256": "7bef2f352e4bd7935522367ac13e97565d9bfa1cd919c9f5abe22031facb1cb3",
+      "destination": "app/modules/premium/engine/common/BridgeFrame.cpp"
+    },
+    {
+      "source": "src/common/MarketSchedule.h",
+      "sha256": "9abc77b64348a395029dd7a4983b04f576e7dc3e4753ba1bfaf4c869bf100254",
+      "destination": "app/modules/premium/engine/common/MarketSchedule.h"
+    },
+    {
+      "source": "src/common/MarketSchedule.cpp",
+      "sha256": "6dac5c5f5626cf7b1d0bc4dfe57ff9930c6afb570e6f912e4e1f16ff19f1b65c",
+      "destination": "app/modules/premium/engine/common/MarketSchedule.cpp"
+    },
+    {
+      "source": "src/common/MarketTypes.h",
+      "sha256": "41257c77fa07907269dbf13837a79316d1954da076557ac39c5826b3def325b2",
+      "destination": "app/modules/premium/engine/common/MarketTypes.h"
+    },
+    {
+      "source": "src/common/MarketTypes.cpp",
+      "sha256": "59fa32d8375fa410656c726324ec3396472a7711ac73fac1b3386b6ffc1e2bbe",
+      "destination": "app/modules/premium/engine/common/MarketTypes.cpp"
+    },
+    {
+      "source": "src/common/PersistenceWriter.h",
+      "sha256": "ce2890e1fb2d1f2622d4edc04882549f33e5abb9dc16cd953258382d61ad696c",
+      "destination": "app/modules/premium/engine/common/PersistenceWriter.h"
+    },
+    {
+      "source": "src/common/PersistenceWriter.cpp",
+      "sha256": "e0ba1484604bd03d4181fd5517383ad8cd0bc9ea38e94c61c8a4f396ec3417c2",
+      "destination": "app/modules/premium/engine/common/PersistenceWriter.cpp"
+    },
+    {
+      "source": "src/common/SignalEngine.h",
+      "sha256": "3d3afcb7c7347f8e6f48d601bad7f371d3006f91ed12c51266058f5049107aa0",
+      "destination": "app/modules/premium/engine/common/SignalEngine.h"
+    },
+    {
+      "source": "src/common/SignalEngine.cpp",
+      "sha256": "e6adb6f85cfa3a4b1204558a0c388da1d832eaebf848ade97789b2e8fc574b86",
+      "destination": "app/modules/premium/engine/common/SignalEngine.cpp"
+    },
+    {
+      "source": "src/common/SnapshotParser.h",
+      "sha256": "30f1f876107a21cf6ef597a975313bab042ca7f42fef9730f5182bc4b52f7606",
+      "destination": "app/modules/premium/engine/common/SnapshotParser.h"
+    },
+    {
+      "source": "src/common/SnapshotParser.cpp",
+      "sha256": "baaa302dd9dca087271216f0e24c3be5cdff5fe165d5a9228fbe6e48d2ad30de",
+      "destination": "app/modules/premium/engine/common/SnapshotParser.cpp"
+    },
+    {
+      "source": "src/server/LegacyL1Server.h",
+      "sha256": "8ab4ef46f16f53285e19ec32c14d869789d0a2d86006165c1dba1943c4b3e6cb",
+      "destination": "app/modules/premium/engine/server/LegacyL1Server.h"
+    },
+    {
+      "source": "src/server/LegacyL1Server.cpp",
+      "sha256": "27f3baa2e88eafc54d9f4ba3acfd41d440aa2621f9f3ffc915e6daa6664c8ff2",
+      "destination": "app/modules/premium/engine/server/LegacyL1Server.cpp"
+    },
+    {
+      "source": "src/server/PushPlusNotifier.h",
+      "sha256": "9de76ef522de94152e26b0bded387cb9af44c83e6d7729b4a72a2a883529c620",
+      "destination": "app/modules/premium/engine/server/PushPlusNotifier.h"
+    },
+    {
+      "source": "src/server/PushPlusNotifier.cpp",
+      "sha256": "79d84443a09cb9254c7f0ec12cc75e017d806f5cdf32f16ca5a2f13548d82f2c",
+      "destination": "app/modules/premium/engine/server/PushPlusNotifier.cpp"
+    },
+    {
+      "source": "src/server/CoreServer.h",
+      "sha256": "970bbdcc045e457d5ff7309865f42642e191624f6703407392e2b99271a34551",
+      "destination": "app/modules/premium/engine/server/CoreServer.h"
+    },
+    {
+      "source": "src/server/CoreServer.cpp",
+      "sha256": "d0121290990bbe5c4d7eabdef80abf10a1367604021f94e71b3df2d9c2545bf6",
+      "destination": "app/modules/premium/engine/server/CoreServer.cpp"
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "deployment": {
+    "at": "2026-09-08T00:57:18Z",
+    "target": "/Users/ellis/Applications/Machome 四合一运行中心.app",
+    "backup": "/Users/ellis/Library/Application Support/MachomeHub/ui-update-20260908/before.app",
+    "config_unchanged": true,
+    "launch_environment_unchanged": true,
+    "agent_pids": [
+      30908
+    ],
+    "new_manifest": {
+      "schema_version": 1,
+      "kind": "machome_hub_build_manifest",
+      "build_id": "1.0.0-97e5b63312b8-dirty-20260908T005024Z",
+      "version": "1.0.0",
+      "built_at": "2026-09-08T00:50:24Z",
+      "build_type": "Release",
+      "source": {
+        "content_sha256": "e189a800a91538a8e38212229f6b0af65e83dd0fecea29d83b8b419ee7eece94",
+        "git_commit": "97e5b63312b848ab56849c6df24fb4da023f587d",
+        "git_commit_short": "97e5b63312b8",
+        "git_dirty": true
+      },
+      "components": [
+        "Machome 四合一运行中心",
+        "machome-hub-agent",
+        "machome-webull-browser-helper",
+        "machome-wind-probe-helper",
+        "machome-wind-tbapi-probe",
+        "machome-ibkr-bridge",
+        "machome-premium-tgw-helper",
+        "machome-upload-component",
+        "machome-upload-web"
+      ],
+      "features": {
+        "live_qmt_orders_compiled": false
+      },
+      "contains_deployment_secrets": false
+    }
+  },
+  "runtime": {
+    "at": "2026-09-08T01:03:42Z",
+    "instance_id": "084c2654-803f-4bd6-a337-a602c0d838fd",
+    "build_time": "2026-09-08T00:50:24Z",
+    "build_id": "1.0.0-97e5b63312b8-dirty-20260908T005024Z",
+    "control_ready": true,
+    "config_bound": true,
+    "modules": {
+      "upload": {
+        "lifecycle": "running",
+        "work_state": "degraded",
+        "error_present": false,
+        "observed_at": "2026-09-08T01:03:42.443Z",
+        "ready": false,
+        "collection_expected": false,
+        "workers": 16,
+        "workers_running": 11,
+        "network_permission_error": false,
+        "acknowledgements": [
+          {
+            "source": "home-mac",
+            "state": "ok",
+            "last_success_at": "2026-09-08T08:57:20.623+08:00",
+            "accepted": 0
+          }
+        ]
+      },
+      "webull": {
+        "lifecycle": "running",
+        "work_state": "active",
+        "error_present": true,
+        "observed_at": "2026-09-08T01:03:40.396Z",
+        "auth_state": "authenticated",
+        "collector_running": true,
+        "api_live": true,
+        "data_state": "flowing",
+        "schedule_mode": "auto"
+      },
+      "monitor_sync": {
+        "lifecycle": "running",
+        "work_state": "active",
+        "error_present": false,
+        "observed_at": "2026-09-08T01:03:42.162Z",
+        "running": true,
+        "clients": 0,
+        "pending": 0,
+        "port": 18976,
+        "data_root": "/Users/ellis/MachomeHubData/monitor-sync"
+      },
+      "redemption": {
+        "lifecycle": "running",
+        "work_state": "scheduled_idle",
+        "error_present": false,
+        "observed_at": "2026-09-08T01:03:42.462Z",
+        "monitoring": false,
+        "phase": "daily_reset",
+        "wind": {
+          "state": "ready",
+          "running": false,
+          "last_cleanup_at": "2026-09-08T01:01:00.251Z",
+          "cleanup_deleted_count": 0
+        },
+        "helper_state": "ready",
+        "symbols": 7,
+        "qmt": {
+          "QMT1": {
+            "state": "disconnected",
+            "policy": "on_demand"
+          },
+          "QMT2": {
+            "state": "disconnected",
+            "policy": "on_demand"
+          }
+        }
+      },
+      "premium": {
+        "lifecycle": "running",
+        "work_state": "scheduled_idle",
+        "error_present": false,
+        "observed_at": "2026-09-08T01:03:42.161Z",
+        "phase": "盘外驻留",
+        "ready_symbols": 0,
+        "watchlist_symbols": 197,
+        "adapter_connected": true,
+        "upstream_healthy": false
+      }
+    }
+  },
+  "notes": [
+    "Wind cleanup completed after manual filesystem permission grant.",
+    "Webull runtime mode restored to pre-deployment auto; original initial_schedule_mode configuration remains unchanged.",
+    "India uploader reached TWS history and CFETS reads after permission grant; currently rate-limited retry after source/connection failures.",
+    "Webull valid data flows; non-target or shallow MQTT depth warnings remain."
+  ],
+  "trading_calls_made": false,
+  "signature_verified": true
+}

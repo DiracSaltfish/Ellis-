@@ -1,0 +1,17 @@
+{
+  "ctest_passed": 37,
+  "ctest_failed": 0,
+  "ctest_evidence": true,
+  "python_business_tests": 191,
+  "go_all_packages_passed": true,
+  "supervisor_tests": 7,
+  "hermetic_checks": 20,
+  "hermetic_all_passed": true,
+  "signed_bundle_native_integration_passed": true,
+  "codesign_verified": true,
+  "source_matches_packaged": true,
+  "soak_seconds": 300.2,
+  "production_deployed": false,
+  "production_business_validated": false,
+  "unconditional_monday_takeover_approved": false
+}

@@ -1,0 +1,9 @@
+/build/
+/outputs/
+*.dylib
+*.so
+*.a
+
+/data/
+/dist/
+/config.local.json

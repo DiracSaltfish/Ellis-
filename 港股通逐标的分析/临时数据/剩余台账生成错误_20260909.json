@@ -1,0 +1,1498 @@
+[
+  {
+    "order": 11,
+    "raw": {
+      "标的代码": "159117.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 12,
+    "raw": {
+      "标的代码": "159125.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 13,
+    "raw": {
+      "标的代码": "520770.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 14,
+    "raw": {
+      "标的代码": "159118.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 15,
+    "raw": {
+      "标的代码": "159850.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 16,
+    "raw": {
+      "标的代码": "526030.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 17,
+    "raw": {
+      "标的代码": "513660.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 18,
+    "raw": {
+      "标的代码": "520990.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 19,
+    "raw": {
+      "标的代码": "159333.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 20,
+    "raw": {
+      "标的代码": "513200.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 21,
+    "raw": {
+      "标的代码": "513060.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 22,
+    "raw": {
+      "标的代码": "520710.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 23,
+    "raw": {
+      "标的代码": "513240.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 24,
+    "raw": {
+      "标的代码": "159105.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 25,
+    "raw": {
+      "标的代码": "159711.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 26,
+    "raw": {
+      "标的代码": "159718.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 27,
+    "raw": {
+      "标的代码": "513600.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 28,
+    "raw": {
+      "标的代码": "159792.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 29,
+    "raw": {
+      "标的代码": "513810.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 30,
+    "raw": {
+      "标的代码": "513020.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 31,
+    "raw": {
+      "标的代码": "526000.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 32,
+    "raw": {
+      "标的代码": "159557.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 33,
+    "raw": {
+      "标的代码": "513210.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 34,
+    "raw": {
+      "标的代码": "159268.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 35,
+    "raw": {
+      "标的代码": "520560.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 36,
+    "raw": {
+      "标的代码": "159776.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 37,
+    "raw": {
+      "标的代码": "159137.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 38,
+    "raw": {
+      "标的代码": "513150.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 39,
+    "raw": {
+      "标的代码": "513990.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 40,
+    "raw": {
+      "标的代码": "520530.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 41,
+    "raw": {
+      "标的代码": "159318.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 42,
+    "raw": {
+      "标的代码": "159751.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 43,
+    "raw": {
+      "标的代码": "159269.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 44,
+    "raw": {
+      "标的代码": "159251.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 45,
+    "raw": {
+      "标的代码": "159271.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 46,
+    "raw": {
+      "标的代码": "159712.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 47,
+    "raw": {
+      "标的代码": "159126.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 48,
+    "raw": {
+      "标的代码": "520940.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 49,
+    "raw": {
+      "标的代码": "513550.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 50,
+    "raw": {
+      "标的代码": "159266.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 51,
+    "raw": {
+      "标的代码": "510900.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 52,
+    "raw": {
+      "标的代码": "520890.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 53,
+    "raw": {
+      "标的代码": "159131.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 54,
+    "raw": {
+      "标的代码": "159312.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 55,
+    "raw": {
+      "标的代码": "513750.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 56,
+    "raw": {
+      "标的代码": "159892.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 57,
+    "raw": {
+      "标的代码": "513860.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 58,
+    "raw": {
+      "标的代码": "526010.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 59,
+    "raw": {
+      "标的代码": "159615.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 60,
+    "raw": {
+      "标的代码": "159167.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 61,
+    "raw": {
+      "标的代码": "520750.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 62,
+    "raw": {
+      "标的代码": "513780.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 63,
+    "raw": {
+      "标的代码": "159185.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 64,
+    "raw": {
+      "标的代码": "513980.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 65,
+    "raw": {
+      "标的代码": "520510.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 66,
+    "raw": {
+      "标的代码": "159169.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 67,
+    "raw": {
+      "标的代码": "513120.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 68,
+    "raw": {
+      "标的代码": "513280.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 69,
+    "raw": {
+      "标的代码": "159506.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 70,
+    "raw": {
+      "标的代码": "520690.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 71,
+    "raw": {
+      "标的代码": "520810.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 72,
+    "raw": {
+      "标的代码": "159545.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 73,
+    "raw": {
+      "标的代码": "513800.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 74,
+    "raw": {
+      "标的代码": "159130.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 75,
+    "raw": {
+      "标的代码": "520930.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 76,
+    "raw": {
+      "标的代码": "159316.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 77,
+    "raw": {
+      "标的代码": "159102.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 78,
+    "raw": {
+      "标的代码": "520500.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 79,
+    "raw": {
+      "标的代码": "520970.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 80,
+    "raw": {
+      "标的代码": "520760.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 81,
+    "raw": {
+      "标的代码": "513930.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 82,
+    "raw": {
+      "标的代码": "526050.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 83,
+    "raw": {
+      "标的代码": "159569.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 84,
+    "raw": {
+      "标的代码": "520950.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 85,
+    "raw": {
+      "标的代码": "513820.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 86,
+    "raw": {
+      "标的代码": "520880.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 87,
+    "raw": {
+      "标的代码": "159302.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 88,
+    "raw": {
+      "标的代码": "159735.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 89,
+    "raw": {
+      "标的代码": "159331.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 90,
+    "raw": {
+      "标的代码": "520900.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 91,
+    "raw": {
+      "标的代码": "520660.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 92,
+    "raw": {
+      "标的代码": "159091.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 93,
+    "raw": {
+      "标的代码": "159691.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 94,
+    "raw": {
+      "标的代码": "159198.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 95,
+    "raw": {
+      "标的代码": "513630.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 96,
+    "raw": {
+      "标的代码": "520850.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 97,
+    "raw": {
+      "标的代码": "513620.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 98,
+    "raw": {
+      "标的代码": "159726.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 99,
+    "raw": {
+      "标的代码": "159286.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 100,
+    "raw": {
+      "标的代码": "513950.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 101,
+    "raw": {
+      "标的代码": "520820.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 102,
+    "raw": {
+      "标的代码": "159132.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 103,
+    "raw": {
+      "标的代码": "159127.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 104,
+    "raw": {
+      "标的代码": "520960.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 105,
+    "raw": {
+      "标的代码": "513690.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 106,
+    "raw": {
+      "标的代码": "513700.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 107,
+    "raw": {
+      "标的代码": "520520.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 108,
+    "raw": {
+      "标的代码": "513970.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 109,
+    "raw": {
+      "标的代码": "159237.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 110,
+    "raw": {
+      "标的代码": "520910.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 111,
+    "raw": {
+      "标的代码": "513260.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 112,
+    "raw": {
+      "标的代码": "520590.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 113,
+    "raw": {
+      "标的代码": "159323.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 114,
+    "raw": {
+      "标的代码": "513010.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 115,
+    "raw": {
+      "标的代码": "159366.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 116,
+    "raw": {
+      "标的代码": "520550.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 117,
+    "raw": {
+      "标的代码": "159742.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 118,
+    "raw": {
+      "标的代码": "513070.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 119,
+    "raw": {
+      "标的代码": "513180.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 120,
+    "raw": {
+      "标的代码": "513170.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 121,
+    "raw": {
+      "标的代码": "159245.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 122,
+    "raw": {
+      "标的代码": "159101.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 123,
+    "raw": {
+      "标的代码": "159519.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 124,
+    "raw": {
+      "标的代码": "520620.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 125,
+    "raw": {
+      "标的代码": "159280.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 126,
+    "raw": {
+      "标的代码": "159121.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 127,
+    "raw": {
+      "标的代码": "159281.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 128,
+    "raw": {
+      "标的代码": "513380.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 129,
+    "raw": {
+      "标的代码": "520680.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 130,
+    "raw": {
+      "标的代码": "159152.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 131,
+    "raw": {
+      "标的代码": "159010.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 132,
+    "raw": {
+      "标的代码": "159750.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 133,
+    "raw": {
+      "标的代码": "513330.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 134,
+    "raw": {
+      "标的代码": "159202.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 135,
+    "raw": {
+      "标的代码": "159186.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 136,
+    "raw": {
+      "标的代码": "159960.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 137,
+    "raw": {
+      "标的代码": "520790.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 138,
+    "raw": {
+      "标的代码": "513890.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 139,
+    "raw": {
+      "标的代码": "520780.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 140,
+    "raw": {
+      "标的代码": "520570.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 141,
+    "raw": {
+      "标的代码": "159239.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 142,
+    "raw": {
+      "标的代码": "513230.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 143,
+    "raw": {
+      "标的代码": "159568.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 144,
+    "raw": {
+      "标的代码": "520920.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 145,
+    "raw": {
+      "标的代码": "159028.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 146,
+    "raw": {
+      "标的代码": "520650.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 147,
+    "raw": {
+      "标的代码": "159210.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 148,
+    "raw": {
+      "标的代码": "159699.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 149,
+    "raw": {
+      "标的代码": "159135.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 150,
+    "raw": {
+      "标的代码": "520740.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 151,
+    "raw": {
+      "标的代码": "159015.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 152,
+    "raw": {
+      "标的代码": "159262.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 153,
+    "raw": {
+      "标的代码": "520840.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 154,
+    "raw": {
+      "标的代码": "159120.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 155,
+    "raw": {
+      "标的代码": "520610.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 156,
+    "raw": {
+      "标的代码": "513770.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 157,
+    "raw": {
+      "标的代码": "159567.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 158,
+    "raw": {
+      "标的代码": "159741.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 159,
+    "raw": {
+      "标的代码": "159747.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 160,
+    "raw": {
+      "标的代码": "513130.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 161,
+    "raw": {
+      "标的代码": "513160.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 162,
+    "raw": {
+      "标的代码": "526070.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 163,
+    "raw": {
+      "标的代码": "520980.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 164,
+    "raw": {
+      "标的代码": "159109.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 165,
+    "raw": {
+      "标的代码": "159220.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 166,
+    "raw": {
+      "标的代码": "159277.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 167,
+    "raw": {
+      "标的代码": "520860.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 168,
+    "raw": {
+      "标的代码": "520730.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 169,
+    "raw": {
+      "标的代码": "513190.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 170,
+    "raw": {
+      "标的代码": "513090.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 171,
+    "raw": {
+      "标的代码": "520670.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 172,
+    "raw": {
+      "标的代码": "513140.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 173,
+    "raw": {
+      "标的代码": "513040.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 174,
+    "raw": {
+      "标的代码": "159128.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 175,
+    "raw": {
+      "标的代码": "159740.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 176,
+    "raw": {
+      "标的代码": "520630.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 177,
+    "raw": {
+      "标的代码": "159143.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 178,
+    "raw": {
+      "标的代码": "159170.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 179,
+    "raw": {
+      "标的代码": "159285.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 180,
+    "raw": {
+      "标的代码": "513590.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 181,
+    "raw": {
+      "标的代码": "159179.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 182,
+    "raw": {
+      "标的代码": "159265.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 183,
+    "raw": {
+      "标的代码": "520720.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 184,
+    "raw": {
+      "标的代码": "513530.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 185,
+    "raw": {
+      "标的代码": "159297.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 186,
+    "raw": {
+      "标的代码": "159954.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 187,
+    "raw": {
+      "标的代码": "159636.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 188,
+    "raw": {
+      "标的代码": "159191.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 189,
+    "raw": {
+      "标的代码": "513320.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 190,
+    "raw": {
+      "标的代码": "513900.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 191,
+    "raw": {
+      "标的代码": "520600.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 192,
+    "raw": {
+      "标的代码": "513560.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 193,
+    "raw": {
+      "标的代码": "159788.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 194,
+    "raw": {
+      "标的代码": "513720.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 195,
+    "raw": {
+      "标的代码": "513580.SH",
+      "名称 / 市场": "SH"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 196,
+    "raw": {
+      "标的代码": "159196.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  },
+  {
+    "order": 197,
+    "raw": {
+      "标的代码": "159688.SZ",
+      "名称 / 市场": "SZ"
+    },
+    "error": "IndexError('tuple index out of range')"
+  }
+]

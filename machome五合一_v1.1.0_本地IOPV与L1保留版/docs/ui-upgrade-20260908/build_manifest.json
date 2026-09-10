@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "kind": "machome_hub_build_manifest",
+  "build_id": "1.0.0-97e5b63312b8-dirty-20260908T005024Z",
+  "version": "1.0.0",
+  "built_at": "2026-09-08T00:50:24Z",
+  "build_type": "Release",
+  "source": {
+    "content_sha256": "e189a800a91538a8e38212229f6b0af65e83dd0fecea29d83b8b419ee7eece94",
+    "git_commit": "97e5b63312b848ab56849c6df24fb4da023f587d",
+    "git_commit_short": "97e5b63312b8",
+    "git_dirty": true
+  },
+  "components": [
+    "Machome 四合一运行中心",
+    "machome-hub-agent",
+    "machome-webull-browser-helper",
+    "machome-wind-probe-helper",
+    "machome-wind-tbapi-probe",
+    "machome-ibkr-bridge",
+    "machome-premium-tgw-helper",
+    "machome-upload-component",
+    "machome-upload-web"
+  ],
+  "features": {"live_qmt_orders_compiled": false},
+  "contains_deployment_secrets": false
+}

@@ -1,0 +1,15 @@
+{
+  "source": "https://1navs.com/private/hk-connect-fx",
+  "field": "人民币对港币中间价（HKD/CNY）",
+  "unit": "CNY per HKD",
+  "retrieved_at": "2026-09-09T21:42:07+08:00",
+  "days": [
+    {"trade_date": "2026-09-01", "hkd_cny_central_parity": 0.86498, "actual_buy_settlement": 0.85723, "actual_sell_settlement": 0.85737},
+    {"trade_date": "2026-09-02", "hkd_cny_central_parity": 0.86497, "actual_buy_settlement": 0.85761, "actual_sell_settlement": 0.85759},
+    {"trade_date": "2026-09-03", "hkd_cny_central_parity": 0.86476, "actual_buy_settlement": 0.85730, "actual_sell_settlement": 0.85730},
+    {"trade_date": "2026-09-04", "hkd_cny_central_parity": 0.86458, "actual_buy_settlement": 0.85660, "actual_sell_settlement": 0.85680},
+    {"trade_date": "2026-09-07", "hkd_cny_central_parity": 0.86465, "actual_buy_settlement": 0.85569, "actual_sell_settlement": 0.85571},
+    {"trade_date": "2026-09-08", "hkd_cny_central_parity": 0.86482, "actual_buy_settlement": 0.85547, "actual_sell_settlement": 0.85553},
+    {"trade_date": "2026-09-09", "hkd_cny_central_parity": 0.86418, "actual_buy_settlement": 0.85572, "actual_sell_settlement": 0.85568}
+  ]
+}

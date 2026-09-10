@@ -1,0 +1,41 @@
+{
+  "at": "2026-09-07T08:17:09Z",
+  "results": [
+    {
+      "type": "command_result",
+      "command_id": "dfa5df2e-7206-4f96-8121-ff40a7963eb3",
+      "state": "accepted",
+      "message": "命令已持久化，正等待模块串行门校验",
+      "action": "webull_set_mode"
+    },
+    {
+      "type": "command_result",
+      "command_id": "dfa5df2e-7206-4f96-8121-ff40a7963eb3",
+      "state": "running",
+      "message": "命令正在异步执行",
+      "action": "webull_set_mode"
+    },
+    {
+      "type": "command_result",
+      "command_id": "dfa5df2e-7206-4f96-8121-ff40a7963eb3",
+      "state": "running",
+      "message": "Webull 已受理 set_schedule_mode，正在用新鲜 v2 status/ready 核验业务后置条件",
+      "action": "webull_set_mode"
+    },
+    {
+      "type": "command_result",
+      "command_id": "dfa5df2e-7206-4f96-8121-ff40a7963eb3",
+      "state": "succeeded",
+      "message": "Webull 控制已由新鲜 v2 status/ready 确认",
+      "action": "webull_set_mode"
+    }
+  ],
+  "work_state": "scheduled_idle",
+  "status": {
+    "schedule_mode": "auto",
+    "collector_running": false,
+    "scheduled_idle": true,
+    "api_live": true,
+    "auth_state": "authenticated"
+  }
+}

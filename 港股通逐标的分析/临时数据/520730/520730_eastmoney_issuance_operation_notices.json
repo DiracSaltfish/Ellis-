@@ -1,0 +1,133 @@
+{
+  "retrieved_at_utc": "2026-09-09T04:13:46.173783+00:00",
+  "fund_code": "520730",
+  "source_page": "https://fundf10.eastmoney.com/jjgg_520730.html",
+  "source_api": "https://api.fund.eastmoney.com/f10/JJGG",
+  "api_meta": {
+    "total_count": 8,
+    "page_size": 50,
+    "pages": 1,
+    "type": 1
+  },
+  "latest_updated_prospectus": null,
+  "latest_prospectus_any": {
+    "FUNDCODE": "520730",
+    "TITLE": "万家恒生港股通汽车主题交易型开放式指数证券投资基金招募说明书",
+    "ShortTitle": "万家恒生港股通汽车主题ETF",
+    "NEWCATEGORY": "1",
+    "PUBLISHDATE": "2026-03-31T00:00:00",
+    "PUBLISHDATEDesc": "2026-03-31",
+    "ATTACHTYPE": "0",
+    "ID": "AN202603301820866372",
+    "notice_date": "2026-03-31",
+    "notice_url": "https://fund.eastmoney.com/gonggao/520730,AN202603301820866372.html",
+    "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202603301820866372_1.pdf"
+  },
+  "latest_product_summary_update": null,
+  "all_issuance_operation_notices": [
+    {
+      "FUNDCODE": "520730",
+      "TITLE": "万家恒生港股通汽车主题交易型开放式指数证券投资基金上市交易公告",
+      "ShortTitle": "万家恒生港股通汽车主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-05-15T00:00:00",
+      "PUBLISHDATEDesc": "2026-05-15",
+      "ATTACHTYPE": "0",
+      "ID": "AN202605151822336013",
+      "notice_date": "2026-05-15",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520730,AN202605151822336013.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202605151822336013_1.pdf"
+    },
+    {
+      "FUNDCODE": "520730",
+      "TITLE": "万家恒生港股通汽车主题交易型开放式指数证券投资基金上市交易公告书",
+      "ShortTitle": "万家恒生港股通汽车主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-05-12T00:00:00",
+      "PUBLISHDATEDesc": "2026-05-12",
+      "ATTACHTYPE": "0",
+      "ID": "AN202605111822167643",
+      "notice_date": "2026-05-12",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520730,AN202605111822167643.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202605111822167643_1.pdf"
+    },
+    {
+      "FUNDCODE": "520730",
+      "TITLE": "万家恒生港股通汽车主题交易型开放式指数证券投资基金基金合同生效公告",
+      "ShortTitle": "万家恒生港股通汽车主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-05-01T00:00:00",
+      "PUBLISHDATEDesc": "2026-05-01",
+      "ATTACHTYPE": "0",
+      "ID": "AN202604301821857781",
+      "notice_date": "2026-05-01",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520730,AN202604301821857781.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202604301821857781_1.pdf"
+    },
+    {
+      "FUNDCODE": "520730",
+      "TITLE": "万家恒生港股通汽车主题交易型开放式指数证券投资基金托管协议",
+      "ShortTitle": "万家恒生港股通汽车主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-03-31T00:00:00",
+      "PUBLISHDATEDesc": "2026-03-31",
+      "ATTACHTYPE": "0",
+      "ID": "AN202603301820866459",
+      "notice_date": "2026-03-31",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520730,AN202603301820866459.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202603301820866459_1.pdf"
+    },
+    {
+      "FUNDCODE": "520730",
+      "TITLE": "万家恒生港股通汽车主题交易型开放式指数证券投资基金基金产品资料概要",
+      "ShortTitle": "万家恒生港股通汽车主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-03-31T00:00:00",
+      "PUBLISHDATEDesc": "2026-03-31",
+      "ATTACHTYPE": "0",
+      "ID": "AN202603301820866456",
+      "notice_date": "2026-03-31",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520730,AN202603301820866456.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202603301820866456_1.pdf"
+    },
+    {
+      "FUNDCODE": "520730",
+      "TITLE": "万家恒生港股通汽车主题交易型开放式指数证券投资基金基金合同",
+      "ShortTitle": "万家恒生港股通汽车主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-03-31T00:00:00",
+      "PUBLISHDATEDesc": "2026-03-31",
+      "ATTACHTYPE": "0",
+      "ID": "AN202603301820866441",
+      "notice_date": "2026-03-31",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520730,AN202603301820866441.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202603301820866441_1.pdf"
+    },
+    {
+      "FUNDCODE": "520730",
+      "TITLE": "万家恒生港股通汽车主题交易型开放式指数证券投资基金基金份额发售公告",
+      "ShortTitle": "万家恒生港股通汽车主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-03-31T00:00:00",
+      "PUBLISHDATEDesc": "2026-03-31",
+      "ATTACHTYPE": "0",
+      "ID": "AN202603301820866439",
+      "notice_date": "2026-03-31",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520730,AN202603301820866439.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202603301820866439_1.pdf"
+    },
+    {
+      "FUNDCODE": "520730",
+      "TITLE": "万家恒生港股通汽车主题交易型开放式指数证券投资基金招募说明书",
+      "ShortTitle": "万家恒生港股通汽车主题ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2026-03-31T00:00:00",
+      "PUBLISHDATEDesc": "2026-03-31",
+      "ATTACHTYPE": "0",
+      "ID": "AN202603301820866372",
+      "notice_date": "2026-03-31",
+      "notice_url": "https://fund.eastmoney.com/gonggao/520730,AN202603301820866372.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202603301820866372_1.pdf"
+    }
+  ]
+}

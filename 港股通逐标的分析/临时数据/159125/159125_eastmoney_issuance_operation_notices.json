@@ -1,0 +1,133 @@
+{
+  "retrieved_at_utc": "2026-09-09T04:13:11.347361+00:00",
+  "fund_code": "159125",
+  "source_page": "https://fundf10.eastmoney.com/jjgg_159125.html",
+  "source_api": "https://api.fund.eastmoney.com/f10/JJGG",
+  "api_meta": {
+    "total_count": 8,
+    "page_size": 50,
+    "pages": 1,
+    "type": 1
+  },
+  "latest_updated_prospectus": null,
+  "latest_prospectus_any": {
+    "FUNDCODE": "159125",
+    "TITLE": "招商国证港股通科技交易型开放式指数证券投资基金招募说明书",
+    "ShortTitle": "招商国证港股通科技ETF",
+    "NEWCATEGORY": "1",
+    "PUBLISHDATE": "2025-09-30T00:00:00",
+    "PUBLISHDATEDesc": "2025-09-30",
+    "ATTACHTYPE": "0",
+    "ID": "AN202509291752854081",
+    "notice_date": "2025-09-30",
+    "notice_url": "https://fund.eastmoney.com/gonggao/159125,AN202509291752854081.html",
+    "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202509291752854081_1.pdf"
+  },
+  "latest_product_summary_update": null,
+  "all_issuance_operation_notices": [
+    {
+      "FUNDCODE": "159125",
+      "TITLE": "关于招商国证港股通科技交易型开放式指数证券投资基金上市交易的公告",
+      "ShortTitle": "招商国证港股通科技ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-11-03T00:00:00",
+      "PUBLISHDATEDesc": "2025-11-03",
+      "ATTACHTYPE": "0",
+      "ID": "AN202511031774185629",
+      "notice_date": "2025-11-03",
+      "notice_url": "https://fund.eastmoney.com/gonggao/159125,AN202511031774185629.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202511031774185629_1.pdf"
+    },
+    {
+      "FUNDCODE": "159125",
+      "TITLE": "招商国证港股通科技交易型开放式指数证券投资基金上市交易公告书",
+      "ShortTitle": "招商国证港股通科技ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-11-03T00:00:00",
+      "PUBLISHDATEDesc": "2025-11-03",
+      "ATTACHTYPE": "0",
+      "ID": "AN202511021773804206",
+      "notice_date": "2025-11-03",
+      "notice_url": "https://fund.eastmoney.com/gonggao/159125,AN202511021773804206.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202511021773804206_1.pdf"
+    },
+    {
+      "FUNDCODE": "159125",
+      "TITLE": "招商国证港股通科技交易型开放式指数证券投资基金基金合同生效公告",
+      "ShortTitle": "招商国证港股通科技ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-10-25T00:00:00",
+      "PUBLISHDATEDesc": "2025-10-25",
+      "ATTACHTYPE": "0",
+      "ID": "AN202510241768285704",
+      "notice_date": "2025-10-25",
+      "notice_url": "https://fund.eastmoney.com/gonggao/159125,AN202510241768285704.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202510241768285704_1.pdf"
+    },
+    {
+      "FUNDCODE": "159125",
+      "TITLE": "招商国证港股通科技交易型开放式指数证券投资基金基金份额发售公告",
+      "ShortTitle": "招商国证港股通科技ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-09-30T00:00:00",
+      "PUBLISHDATEDesc": "2025-09-30",
+      "ATTACHTYPE": "0",
+      "ID": "AN202509291752854099",
+      "notice_date": "2025-09-30",
+      "notice_url": "https://fund.eastmoney.com/gonggao/159125,AN202509291752854099.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202509291752854099_1.pdf"
+    },
+    {
+      "FUNDCODE": "159125",
+      "TITLE": "招商国证港股通科技交易型开放式指数证券投资基金基金产品资料概要",
+      "ShortTitle": "招商国证港股通科技ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-09-30T00:00:00",
+      "PUBLISHDATEDesc": "2025-09-30",
+      "ATTACHTYPE": "0",
+      "ID": "AN202509291752854098",
+      "notice_date": "2025-09-30",
+      "notice_url": "https://fund.eastmoney.com/gonggao/159125,AN202509291752854098.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202509291752854098_1.pdf"
+    },
+    {
+      "FUNDCODE": "159125",
+      "TITLE": "招商国证港股通科技交易型开放式指数证券投资基金招募说明书",
+      "ShortTitle": "招商国证港股通科技ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-09-30T00:00:00",
+      "PUBLISHDATEDesc": "2025-09-30",
+      "ATTACHTYPE": "0",
+      "ID": "AN202509291752854081",
+      "notice_date": "2025-09-30",
+      "notice_url": "https://fund.eastmoney.com/gonggao/159125,AN202509291752854081.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202509291752854081_1.pdf"
+    },
+    {
+      "FUNDCODE": "159125",
+      "TITLE": "招商国证港股通科技交易型开放式指数证券投资基金基金合同",
+      "ShortTitle": "招商国证港股通科技ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-09-30T00:00:00",
+      "PUBLISHDATEDesc": "2025-09-30",
+      "ATTACHTYPE": "0",
+      "ID": "AN202509291752854080",
+      "notice_date": "2025-09-30",
+      "notice_url": "https://fund.eastmoney.com/gonggao/159125,AN202509291752854080.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202509291752854080_1.pdf"
+    },
+    {
+      "FUNDCODE": "159125",
+      "TITLE": "招商国证港股通科技交易型开放式指数证券投资基金托管协议",
+      "ShortTitle": "招商国证港股通科技ETF",
+      "NEWCATEGORY": "1",
+      "PUBLISHDATE": "2025-09-30T00:00:00",
+      "PUBLISHDATEDesc": "2025-09-30",
+      "ATTACHTYPE": "0",
+      "ID": "AN202509291752854079",
+      "notice_date": "2025-09-30",
+      "notice_url": "https://fund.eastmoney.com/gonggao/159125,AN202509291752854079.html",
+      "eastmoney_pdf_url": "https://pdf.dfcfw.com/pdf/H2_AN202509291752854079_1.pdf"
+    }
+  ]
+}

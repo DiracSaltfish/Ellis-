@@ -1,0 +1,3 @@
+fund_code,fund_name,manager,exchange,etf_class,official_notice_page,official_pcf_page,official_pcf_file_pattern,third_party_fallback,owner_confirmation_required,notes
+159518,嘉实标普石油天然气勘探及生产精选行业ETF（QDII）,嘉实基金,深交所,跨境ETF,https://fundf10.eastmoney.com/jjgg_159518.html,https://www.jsfund.cn/Services/cn/jsp/pcf/index.jsp?SiteID=1&fundcode=159518,,https://money.finance.sina.com.cn/fund/go.php/vAkFundInfo_JJSGSHJBXX/q/159518.phtml,yes,嘉实PCF页需核验实时性；同日申赎底层轧差待确认
+,,,,,,,,,,

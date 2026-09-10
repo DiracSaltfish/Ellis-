@@ -1,0 +1,132 @@
+[
+  {
+    "file": "cmd/web/main.go",
+    "before_sha256": "e9fb073da243b9a6217d396a06928e3233543fe27bb372011d18410c73ec33a5",
+    "after_sha256": "045d47f07b0785f9c3fec4869f434b4a00aaf1d9dd571b45802b861a55d3adf7"
+  },
+  {
+    "file": "internal/runtimestatus/persistence.go",
+    "before_sha256": null,
+    "after_sha256": "0282418ee3c459a891c42d5fb7e57ad3e7d666e16e3dba3de88c841c13a84523"
+  },
+  {
+    "file": "internal/runtimestatus/persistence_test.go",
+    "before_sha256": null,
+    "after_sha256": "05ea6ff227a6cc053fc20b2cb0847eff7818889785be9d40fb4b24b4e23492ca"
+  },
+  {
+    "file": "internal/runtimestatus/status.go",
+    "before_sha256": "01cbddc3b68f8ca11cb35387eebfa415cdc7b7683051e3c9ab9203c29f21dd7a",
+    "after_sha256": "c9a21e2093a5a9a4432e76355a8f1ef99df0a8afcdf966fc5212e468e78e0aa7"
+  },
+  {
+    "file": "internal/monitoring/backend.go",
+    "before_sha256": "cec17c1cc307cd631f353a59683888b5f4d036d1dfe18c0a64da4f66c1d298e9",
+    "after_sha256": "5c5b148460eac256cff440f5263baf281a98a56a5737c5ef3668daab268809ee"
+  },
+  {
+    "file": "internal/monitoring/debounce_test.go",
+    "before_sha256": "1abde25b28dacd3828f8b4d07df108414921c40f8289612afdae665718f6c863",
+    "after_sha256": "0c89adbc4e115955b69bf36b014415ae992d704863eb0ac6541c27fcf4418312"
+  },
+  {
+    "file": "internal/monitoring/state.go",
+    "before_sha256": "4135b29c8bf917a94ae7b00586426c266657f0a2cbce96acf077b63ae3d08f81",
+    "after_sha256": "d2d0dbdc4b21f45c51a63c7055320e777d50354a6a28157aa04c60ee756a2a4d"
+  },
+  {
+    "file": "internal/hkconnectfx/spot_retention_test.go",
+    "before_sha256": null,
+    "after_sha256": "845466de6b49d404f47c67a0025c3093c42c93889839cf7493014aacd694efe3"
+  },
+  {
+    "file": "internal/hkconnectfx/service.go",
+    "before_sha256": "323e5ba0a8ceb6f16752bd13e8e32527f3af5933fb85352cb32e94b40e37d79f",
+    "after_sha256": "52178e53e16b0cfa1f08ba9963ed52c118d4605b818d662f73971712a5d16c31"
+  },
+  {
+    "file": "internal/hkconnectfx/chinamoney_test.go",
+    "before_sha256": "56e7d61f92897de1b1fb7a8b992e5f9f8ba8c28efab9dcdcff0049a546e57737",
+    "after_sha256": "6f6e5cddba19ab1181a5ef6e208730a189ffc959226cbeaecef6b762e6b5a060"
+  },
+  {
+    "file": "internal/hkconnectfx/chinamoney.go",
+    "before_sha256": "7f3807d5be3748433a71f0d4bde1f5ce1b0b4950ed4ace4b12509e88b1b38247",
+    "after_sha256": "d6771384c45aa0d37bcf6d114cdb32f4fe0aa52bfe3f09d6aff91ea191ad028a"
+  },
+  {
+    "file": "internal/hkconnectfx/spot_retention.go",
+    "before_sha256": null,
+    "after_sha256": "c50258163ca281b0d90c6ce5e14015d5dc23638cf46d431eeb9eed0a006b4ee8"
+  },
+  {
+    "file": "internal/privatevaluation/service.go",
+    "before_sha256": "7a7b8445398411bb610f259231f5e0a780e2aa06404d3c274c69e7ce22d137dd",
+    "after_sha256": "512b7ca5c6162c15068fa916810ae5ad262d1f19a8ee13797896b5044f842d47"
+  },
+  {
+    "file": "internal/privatevaluation/engine_test.go",
+    "before_sha256": "a01195fe0cbe0bf9895039d377dacd64399b55470b49763cb2b298094eb4224f",
+    "after_sha256": "b4eed6878e0ac75a76eac7e94e8206d2dcd0484c005d93184598a07759a8314c"
+  },
+  {
+    "file": "internal/privatevaluation/preopen_test.go",
+    "before_sha256": null,
+    "after_sha256": "4a323f890b1a0bb55a54e191ff0d634fe5842d18bebfc9fe88ec931b92fd39fb"
+  },
+  {
+    "file": "internal/privatevaluation/engine.go",
+    "before_sha256": "d3ef1e3a88ed9e7568fa20a1d757409059c425f423eb0ddfcfe63964ed428e52",
+    "after_sha256": "270d91dbdc62d0fcb6eeec39fb35d4d1dd88e7a3b5cf8410f48893b6f6cebf01"
+  },
+  {
+    "file": "internal/privatevaluation/model.go",
+    "before_sha256": "d2f7a6e4e3024a48d59c13e9f1720ae0042b1f5f5d82c345bef525ca2b532c0e",
+    "after_sha256": "b36d1854379f72b9173e0cd85f921945391c8af99e19cb32b4fd6a2784210bbe"
+  },
+  {
+    "file": "scripts/upload_health_monitor.py",
+    "before_sha256": "503dce1ff9e0dda41f70a6ae70f2ead458df4d4442206154364c0da6cb7d6a87",
+    "after_sha256": "8cb879b0b5a116aef09478d1fe78b255c1481647e82c41564939fcc7702366bb"
+  },
+  {
+    "file": "scripts/test_index_preopen.py",
+    "before_sha256": null,
+    "after_sha256": "cfd1c146fbe11a144ed7948fed318edfd0b8bd342f8738eb657caf39befd4780"
+  },
+  {
+    "file": "scripts/private_valuation_uploader.py",
+    "before_sha256": "296342a40bf71980ec30e83b415fb9add85cc7f709bf479060296c0fd33dfd13",
+    "after_sha256": "55c5d1abc858f397ceebcba83c016b57777d1048eeef37a5a9520d281e55bdfb"
+  },
+  {
+    "file": "scripts/test_index_wire_compatibility.py",
+    "before_sha256": null,
+    "after_sha256": "d53969e25c90163f1be6781c3efd5eea5da7d781f7831ad536fe28b0c9859327"
+  },
+  {
+    "file": "scripts/test_private_valuation_uploader.py",
+    "before_sha256": "272442bf2a43b747cf3a65a853749a3a23853b38d3b7c43fefeb8e2d4b5504c7",
+    "after_sha256": "94996cb9a800826b9fb4cbbc0ce9b3d0ecd4d769ece96062265ed153649144e8"
+  },
+  {
+    "file": "scripts/test_upload_alert_debounce.py",
+    "before_sha256": "fc1bad56c6927d91a128e796ffec61afafda0f8dbae4afe0d707db703d752210",
+    "after_sha256": "f19e59a612c4bb0ad8b7097fe94fa77ca537080f9e9de442aefd08197c3451fa"
+  },
+  {
+    "file": "scripts/private_nasdaq_valuation_uploader.py",
+    "before_sha256": "35f6f7b0f74e1b630a1ec00962e5ced037139f188906f23d2003f839878b812e",
+    "after_sha256": "6d7a07df440df66ba719a214c017fa4a28a5866f7a8f7704b98d5aeca8333b4d"
+  },
+  {
+    "file": "frontend/src/private/PrivateFundDetail.vue",
+    "before_sha256": "bc203b0a8b4a6cd0b4ec117981e31d4782ccca434cfaad53d642b1e542e948d4",
+    "after_sha256": "b699e2b0927417b0e88d74ad8fe6c10f86148808cf43c0a21096539c8c9e406c"
+  },
+  {
+    "file": "frontend/src/lib/privateTypes.ts",
+    "before_sha256": "d3d69a421dd4391512decb07a310d37043ce65e4cec0fefb1deac4b0ad886d9f",
+    "after_sha256": "de81a4fbacf730c51f80ce7439c7fae0eedfd90d57c2deb03341f0f32c200c03"
+  }
+]

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SSEPortfolioCompositionFile>
+  <FundInstrumentID>513130</FundInstrumentID>
+  <CreationRedemptionUnit>1000000</CreationRedemptionUnit>
+  <TradingDay>20260908</TradingDay>
+  <PreTradingDay>20260907</PreTradingDay>
+  <NAVperCU>566600.78</NAVperCU>
+  <NAV>0.5666</NAV>
+  <PreCashComponent>4326.44</PreCashComponent>
+  <EstimatedCashComponent>4330.28</EstimatedCashComponent>
+  <MaxCashRatio>1</MaxCashRatio>
+  <CreationLimit>2000000000</CreationLimit>
+  <RedemptionLimit>500000000</RedemptionLimit>
+  <PublishIOPVFlag>1</PublishIOPVFlag>
+  <CreationRedemptionSwitch>1</CreationRedemptionSwitch>
+  <CreationRedemptionMechanism>0</CreationRedemptionMechanism>
+  <RecordNumber>1</RecordNumber>
+  <ComponentList>
+    <Component>
+      <InstrumentID>3033</InstrumentID>
+      <InstrumentName>恒生科技</InstrumentName>
+      <Quantity>146527</Quantity>
+      <SubstitutionFlag>1</SubstitutionFlag>
+      <CreationPremiumRate>0.1</CreationPremiumRate>
+      <RedemptionDiscountRate>0</RedemptionDiscountRate>
+      <SubstitutionCashAmount>562270.5</SubstitutionCashAmount>
+      <UnderlyingSecurityID>103</UnderlyingSecurityID>
+    </Component>
+  </ComponentList>
+</SSEPortfolioCompositionFile>

@@ -1,0 +1,28 @@
+{
+  "candidates": 120,
+  "errors": {},
+  "feed_at": "2026-09-09T13:34:10.772626+08:00",
+  "feed_state": "streaming",
+  "frames": 9797,
+  "group_loads": [
+    1959,
+    1951,
+    1962
+  ],
+  "last_write_at": "2026-09-09T13:34:00.523197+08:00",
+  "mode": "live",
+  "now": "2026-09-09T13:34:10.824793+08:00",
+  "paused": false,
+  "pcf_ready": 120,
+  "quote_count": 744,
+  "rejected_frames": 0,
+  "run_id": "1788931966526078000",
+  "schema_version": "intranet-iopv.v1",
+  "sequence": 29,
+  "session": 2,
+  "shared_l1": true,
+  "signal_basis": "midpoint",
+  "started_at": "2026-09-09T13:32:46.526079+08:00",
+  "subscriptions": 750,
+  "written_rows": 240
+}

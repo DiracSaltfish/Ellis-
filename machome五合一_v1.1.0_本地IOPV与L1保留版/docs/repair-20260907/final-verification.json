@@ -1,0 +1,37 @@
+{
+  "verified_at": "2026-09-07T02:29:06.608667+00:00",
+  "bundle": "/Users/ellis/工具程序开发/machome四合一运行改造cpp/app/dist-candidate-20260907/Machome 四合一运行中心.app",
+  "zip": "/Users/ellis/工具程序开发/machome四合一运行改造cpp/app/dist-candidate-20260907/Machome-Operations-Hub-macOS.zip",
+  "zip_sha256": "b225a585ca7faacaa1611c436900c4dc21bc6fe4cac551155249413204394e18",
+  "build_id": "1.0.0-unversioned-dirty-20260907T022447Z",
+  "source_sha256": "ec60551261c58066eda8366c62c9fe8d193216224f00bfcb8dba8f2e52f446fe",
+  "source_matches_packaged": true,
+  "ctest_passed": 37,
+  "ctest_failed": 0,
+  "python_business_tests": 196,
+  "go_all_packages_passed": true,
+  "go_race_passed": true,
+  "supervisor_tests": 7,
+  "hermetic_signed_checks": 21,
+  "hermetic_all_passed": true,
+  "frozen_business_regression_tests": 5,
+  "packaged_scripts_match_source": true,
+  "packaged_frontend_files_verified": 8,
+  "signed_native_acceptance": {
+    "passed": true,
+    "engines": {
+      "redemption": "native",
+      "premium": "native_premium_a",
+      "webull": "native",
+      "upload": "native"
+    },
+    "seconds": 12.26,
+    "stores": "temporary",
+    "ports": "ephemeral",
+    "reconnect": true
+  },
+  "codesign_verified": true,
+  "deployed_machome": false,
+  "deployed_dmit": false,
+  "production_business_validated": false
+}

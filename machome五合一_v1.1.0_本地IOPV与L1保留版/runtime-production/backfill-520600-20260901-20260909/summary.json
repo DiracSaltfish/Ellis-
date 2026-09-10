@@ -1,0 +1,70 @@
+{
+  "days": {
+    "2026-09-01": {
+      "components": 50,
+      "midpoint_rows": 242,
+      "premium_rows": 242,
+      "settlement_rows": 242,
+      "midpoint_fx": 0.85743,
+      "actual_buy_settlement": 0.85723,
+      "actual_sell_settlement": 0.85737
+    },
+    "2026-09-02": {
+      "components": 50,
+      "midpoint_rows": 242,
+      "premium_rows": 242,
+      "settlement_rows": 242,
+      "midpoint_fx": 0.85722,
+      "actual_buy_settlement": 0.85761,
+      "actual_sell_settlement": 0.85759
+    },
+    "2026-09-03": {
+      "components": 50,
+      "midpoint_rows": 242,
+      "premium_rows": 242,
+      "settlement_rows": 242,
+      "midpoint_fx": 0.8568,
+      "actual_buy_settlement": 0.8573,
+      "actual_sell_settlement": 0.8573
+    },
+    "2026-09-04": {
+      "components": 50,
+      "midpoint_rows": 242,
+      "premium_rows": 242,
+      "settlement_rows": 242,
+      "midpoint_fx": 0.85593,
+      "actual_buy_settlement": 0.8566,
+      "actual_sell_settlement": 0.8568
+    },
+    "2026-09-07": {
+      "components": 50,
+      "midpoint_rows": 242,
+      "premium_rows": 242,
+      "settlement_rows": 242,
+      "midpoint_fx": 0.85595,
+      "actual_buy_settlement": 0.85569,
+      "actual_sell_settlement": 0.85571
+    },
+    "2026-09-08": {
+      "components": 50,
+      "midpoint_rows": 242,
+      "premium_rows": 242,
+      "settlement_rows": 242,
+      "midpoint_fx": 0.85583,
+      "actual_buy_settlement": 0.85547,
+      "actual_sell_settlement": 0.85553
+    },
+    "2026-09-09": {
+      "components": 50,
+      "midpoint_rows": 242,
+      "premium_rows": 242,
+      "settlement_rows": 0,
+      "midpoint_fx": 0.8552649999999999,
+      "actual_buy_settlement": null,
+      "actual_sell_settlement": null
+    }
+  },
+  "source": "native TGW exact one-minute close; 广发基金 PCF; 1navs daily 16:00 FX",
+  "rows": 1694,
+  "sha256": "baa93f69b728e7dd8bf56ee50251ac31b49f3ab20cdd9bcebcc2ed8778b62f6d"
+}

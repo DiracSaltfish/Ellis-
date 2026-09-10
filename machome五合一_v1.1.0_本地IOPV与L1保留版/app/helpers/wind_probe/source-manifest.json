@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "module": "redemption-wind-probe-helper",
+  "baseline": {
+    "source": "wind_tbapi_runtime_probe.c",
+    "sha256": "cbd57e294fe05ab688dbc7b2bf37f550b79b0a00d202be8fc2e953029cf76b52",
+    "access": "read-only",
+    "copied_code": true
+  },
+  "implementation": {
+    "helper": "Qt stdio helper performs exact Wind identity checks, ABI approval, bounded LLDB attach/detach, raw capture decode and confirmed unsubscribe.",
+    "probe_source": "wind_tbapi_probe.c",
+    "probe_source_sha256": "7de82c58e8531331cbaa813406019e584aea3dc9d0d345b068ced5ebd8d8c3d6",
+    "global_module_offset": "0xB0568",
+    "java_module_size": "0x28",
+    "live_requires_explicit_abi_approval": true
+  },
+  "safety": {
+    "sigkill_wind": false,
+    "legacy_runtime_dependency": false,
+    "default_mode": "disabled",
+    "raw_output_scope": "MachomeHub/data/redemption/raw-captures"
+  }
+}

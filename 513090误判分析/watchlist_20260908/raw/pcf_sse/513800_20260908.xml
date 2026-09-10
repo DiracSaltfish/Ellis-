@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SSEPortfolioCompositionFile>
+  <FundInstrumentID>513800</FundInstrumentID>
+  <CreationRedemptionUnit>400000</CreationRedemptionUnit>
+  <TradingDay>20260908</TradingDay>
+  <PreTradingDay>20260907</PreTradingDay>
+  <NAVperCU>768674.04</NAVperCU>
+  <NAV>1.9217</NAV>
+  <PreCashComponent>-808.43</PreCashComponent>
+  <EstimatedCashComponent>-808.43</EstimatedCashComponent>
+  <MaxCashRatio>1</MaxCashRatio>
+  <CreationLimit>10000000</CreationLimit>
+  <RedemptionLimit>300000000</RedemptionLimit>
+  <PublishIOPVFlag>1</PublishIOPVFlag>
+  <CreationRedemptionSwitch>1</CreationRedemptionSwitch>
+  <CreationRedemptionMechanism>0</CreationRedemptionMechanism>
+  <RecordNumber>1</RecordNumber>
+  <ComponentList>
+    <Component>
+      <InstrumentID>1473</InstrumentID>
+      <InstrumentName>ONE ETF TOPIX</InstrumentName>
+      <Quantity>4250</Quantity>
+      <SubstitutionFlag>1</SubstitutionFlag>
+      <CreationPremiumRate>0.1</CreationPremiumRate>
+      <RedemptionDiscountRate>0</RedemptionDiscountRate>
+      <SubstitutionCashAmount>769482.47</SubstitutionCashAmount>
+      <UnderlyingSecurityID>9999</UnderlyingSecurityID>
+    </Component>
+  </ComponentList>
+</SSEPortfolioCompositionFile>

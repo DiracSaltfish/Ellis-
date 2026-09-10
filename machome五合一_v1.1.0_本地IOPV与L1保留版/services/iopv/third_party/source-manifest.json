@@ -1,0 +1,16 @@
+{
+  "source": "machome\u56db\u5408\u4e00\u8fd0\u884c\u6539\u9020cpp/app/third_party/tgw_cpp; read-only source copy",
+  "files": {
+    "third_party/tgw_cpp/vendor-dgw-ca.crt": "b8655a5eec606d99265952c398e0c523ab057b3b2c55c3c0995174d5b7d56df0",
+    "third_party/tgw_cpp/src/internal.hpp": "9f09baed9bec634363a33ae8729352edb7fe0516cef3f519c5b913314bacf8a3",
+    "third_party/tgw_cpp/src/session.cpp": "7bcd05f4971406303a577705d8648830d0fb7b3e01aba5037d4593bcf75c4c07",
+    "third_party/tgw_cpp/src/config.cpp": "3f3774c805d5c7456730fedbc2bc77f5fa83f7ef48300691bf48ebd0a4f4458f",
+    "third_party/tgw_cpp/src/protocol.cpp": "fe1072ce7f8b000e857fdff2a08e93a8dc09c41dcca556ec32c5dc59b3000b96",
+    "third_party/tgw_cpp/src/websocket.cpp": "c4f03ef5d8f186e8f734f2e2bdafdff8b9cee04d2ecf20de5f22f63f16833a8f",
+    "third_party/tgw_cpp/include/tgw/protocol.hpp": "4ef160772683abca5640c476978557e8a956a66f8105c71d9020c16cfac6d81c",
+    "third_party/tgw_cpp/include/tgw/export.hpp": "fbb70e91e976a492c71d98fe78322935d618d3e3bc3ce9a844d79f62674d9675",
+    "third_party/tgw_cpp/include/tgw/session.hpp": "ccb96d264e8c50ce09336d69c37b3a7507ccb8fc341992dd7b0b3dfa3b80b665",
+    "third_party/tgw_cpp/include/tgw/types.hpp": "d36f7c39a3eed75cfe0619327d898276eb3466c44e53b71e44a22cc3d7a028b8",
+    "third_party/tgw_cpp/include/tgw/client.hpp": "5d272496649e029dabc38ace5dd1ce072b40555d9b4146615a2a906f3bdacb8c"
+  }
+}

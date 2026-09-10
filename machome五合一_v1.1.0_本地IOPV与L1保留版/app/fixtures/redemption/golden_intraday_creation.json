@@ -1,0 +1,44 @@
+{
+  "provenance": {
+    "source": "sanitized model of the legacy ETF monitor",
+    "timezone": "Asia/Shanghai",
+    "trading_phase": "continuous",
+    "contains_secrets": false
+  },
+  "pcf": {
+    "status": "ready",
+    "symbol": "159518",
+    "trading_day": "2026-09-04",
+    "creation_redemption_unit": 1000000,
+    "creation_allowed": true,
+    "redemption_allowed": true,
+    "components": []
+  },
+  "baseline": {
+    "windcode": "159518.SZ",
+    "observed_at": "2026-09-04T09:30:00+08:00",
+    "values": {
+      "etfbuynumber": 1,
+      "etfbuyamount": 1000000,
+      "etfsellnumber": 0,
+      "etfsellamount": 0
+    }
+  },
+  "change": {
+    "windcode": "159518.SZ",
+    "observed_at": "2026-09-04T09:31:00+08:00",
+    "values": {
+      "etfbuynumber": 1,
+      "etfbuyamount": 1000000,
+      "etfsellnumber": 1,
+      "etfsellamount": 1000000
+    }
+  },
+  "expected": {
+    "kind": "creation",
+    "actionable": true,
+    "full_baskets": 1,
+    "released_capacity_shares": 1000000,
+    "changed_field": "etfsellamount"
+  }
+}

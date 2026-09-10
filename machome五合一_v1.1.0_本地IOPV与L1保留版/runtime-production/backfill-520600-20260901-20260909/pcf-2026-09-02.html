@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<!-- 生成时间：2026-09-02 06:30:17 -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <!-- 基金名称(FundName C40)-(入参基金代码fundcode)-(当前交易日 TradingDay C8，格式化为YYYY-MM-DD) -->
+    <title>汽车港股(520600)-(2026-09-02)</title>
+    <style>
+        *{margin: 0;padding: 0}
+        html, body{width: 100%;}
+        body{
+            margin-bottom: 20px;
+        }
+        h1{
+            margin-top: 10px;
+            color: #ff6307;
+            font-size: 18px;
+            width: 100%;
+            text-align: center;
+        }
+        table{
+            width: 100%;
+        }
+        div.title{
+            margin-top: 16px;
+            padding: 1px 2px;
+            border: #cccccc 1px solid;
+        }
+        div.title p{
+            background-color: rgb(255, 128, 0);
+        }
+        div.title p span{
+            background-color: rgb(233, 233, 233);
+            font-size: 12px;
+            line-height: 35px;
+            display: block;
+            height: 35px;
+            width: 190px;
+            font-weight: bold;
+            padding-left: 10px;
+            border-right: white 1px solid;
+        }
+        table{
+            font-size: 12px;
+            border: #cccccc 1px solid;
+        }
+        table td, table th{
+            padding: 6px 4px;
+            width: 50%;
+        }
+        table th{
+            font-weight: bold;
+            text-align: right;
+        }
+        table.data-table td{
+            text-align: left;
+        }
+        table thead td{
+            font-weight: bold;
+            text-align: center;
+            width: auto;
+        }
+        table tbody td{
+            text-align: center;
+            width: auto;
+        }
+    </style>
+    <script src="/images/WdatePicker.js"></script>
+</head>
+<body>
+
+
+<!-- 非实物申赎模式显示 -->
+<h1>申购赎回清单</h1>
+
+<div style="text-align: right;padding-right: 10px;">
+    <form method="get" name="form" id="form">
+        <span style="font-size: 12px">日期：</span>
+        <!-- 当前交易日 TradingDay C8（原始格式，用于日期选择器） -->
+        <input id="begindate" name="date" onclick="WdatePicker({dateFmt:'yyyyMMdd',onpicked:function(){document.forms.form.submit()}})" value="20260902" style="
+        height: 24px;
+        font-size: 12px;
+        width: 100px;
+        padding-left: 8px;">
+    </form>
+</div>
+<div class="title">
+    <p><span>基本信息</span></p>
+</div>
+<table class="data-table">
+    <!-- 当前交易日 TradingDay C8，格式化为YYYY-MM-DD -->
+    <tr><th>最新公告日期：</th><td>2026-09-02</td></tr>
+    <!-- 基金名称 FundName C40 -->
+    <tr><th>基金名称：</th><td>汽车港股</td></tr>
+    <!-- 基金管理公司名称 FundCompanyName C50 -->
+    <tr><th>基金管理公司名称：</th><td>广发基金管理有限公司</td></tr>
+</table>
+
+<!-- 前一交易日 PreTradingDay C8，格式化为YYYY-MM-DD，具体业务含义按约定 -->
+<div class="title">
+    <p><span>2026-09-01日内容信息</span></p>
+</div>
+<table class="data-table">
+    <!-- 前一交易日现金差额 PreCashComponent N19(5) -->
+    <tr><th>现金差额(单位:元)：</th><td>-60.05</td></tr>
+    <!-- 前一交易日最小申赎单位净值 NAVperCU N19(5) -->
+    <tr><th>最小申购、赎回单位净值(单位：元)：</th><td>506,092.23</td></tr>
+    <!-- 前一交易日基金份额净值 NAV N19(5) -->
+    <tr><th>基金份额净值(单位:元)：</th><td>1.0122</td></tr>
+</table>
+
+<div class="title">
+    <p><span>2026-09-02日内容信息</span></p>
+</div>
+<table class="data-table">
+    <!-- T日每个篮子预估现金差额 EstimatedCashComponent N19(5) -->
+    <tr><th>最小申购、赎回单位的预估现金部分(单位:元)：</th><td>-14.28</td></tr>
+    <!-- 总的现金替代比例 MaxCashRatio N7(5) -->
+    <tr><th>现金替代比例上限：</th><td>100.00%</td></tr>
+    <!-- 当日申购限额 CreationLimit N18 -->
+    <tr><th>当日累计可申购的基金份额上限：</th><td>200,000,000.00</td></tr>
+    <!-- 当日赎回限额 RedemptionLimit N18 -->
+    <tr><th>当日累计可赎回的基金份额上限：</th><td>10,000,000.00</td></tr>
+    <!-- 当日净申购基金份额上限 NetCreationLimit N18 -->
+    <tr><th>当日净申购的基金份额上限：</th><td>-</td></tr>
+    <!-- 当日净赎回基金份额上限 NetRedemptionLimit N18 -->
+    <tr><th>当日净赎回的基金份额上限：</th><td>-</td></tr>
+    <!-- 单个账户净申购总额限制 NetCreationLimitPerAcct N18 -->
+    <tr><th>单个证券账户当日净申购的基金份额上限：</th><td>-</td></tr>
+    <!-- 单个账户净赎回总额限制 NetRedemptionLimitPerAcct N18 -->
+    <tr><th>单个证券账户当日净赎回的基金份额上限：</th><td>-</td></tr>
+    <!-- 单个账户累计申购总额限制 CreationLimitPerAcct N18 -->
+    <tr><th>单个证券账户当日累计可申购的基金份额上限：</th><td>-</td></tr>
+    <!-- 单个账户累计赎回总额限制 RedemptionLimitPerAcct N18 -->
+    <tr><th>单个证券账户当日累计可赎回的基金份额上限：</th><td>-</td></tr>
+    <!-- 是否发布IOPV PublishIOPVFlag C1：Y/B=是，N=否 -->
+    <tr><th>是否需要公布IOPV：</th><td>是</td></tr>
+    <!-- 每个篮子对应的ETF份额数（最小申赎单位） CreationRedemptionUnit N12 -->
+    <tr><th>最小申购、赎回单位(单位:份)：</th><td>500,000.00</td></tr>
+    <!-- 申购赎回的允许情况 CreationRedemptionSwitch C1 -->
+    <tr><th>申购赎回的允许情况：</th><td>申购和赎回皆允许</td></tr>
+    <!-- 申赎模式 CreationRedemptionMechanism C1 -->
+    <tr><th>申购赎回模式：</th><td>现金申赎</td></tr>
+</table>
+
+<div class="title">
+    <p><span>成份股信息内容</span></p>
+</div>
+<table>
+    <thead>
+    <tr>
+        <!-- 证券ID InstrumentID C20 -->
+        <td>证券代码</td>
+        <!-- 证券简称 InstrumentName C40 -->
+        <td>证券简称</td>
+        <!-- 该证券数量 Quantity N10 -->
+        <td>股票数量(股)</td>
+        <!-- 替代标志 SubstitutionFlag C1：0=禁止，1=允许，2=必须 -->
+        <td>现金替代标志</td>
+        <!-- 申购溢价比例 CreationPremiumRate N7(5) -->
+        <td>申购现金<br>替代溢价比例</td>
+        <!-- 赎回折价比例 RedemptionDiscountRate N7(5)（上交所特有，深交所无此字段） -->
+        <td>赎回现金<br>替代折价比例</td>
+        <!-- 替代金额 SubstitutionCashAmount N12(3) -->
+        <td>替代金额</td>
+        <!-- 挂牌市场 UnderlyingSecurityIDSource -->
+        <td>挂牌市场</td>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- 成分证券列表 ComponentList.Component -->
+    
+        
+        <tr>
+            <td>00175</td>
+            <td>吉利汽车</td>
+            <td>4,936</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>75,015.840</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>00179</td>
+            <td>德昌电机控股</td>
+            <td>204</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>3,345.600</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>00425</td>
+            <td>敏实集团</td>
+            <td>358</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>7,890.210</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>00470</td>
+            <td>先导智能</td>
+            <td>28</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>728.040</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>00501</td>
+            <td>豪威集团</td>
+            <td>13</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>815.810</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>00564</td>
+            <td>中创智领</td>
+            <td>106</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>1,154.350</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>00666</td>
+            <td>瑞浦兰钧</td>
+            <td>285</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>2,526.820</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>00699</td>
+            <td>均胜电子</td>
+            <td>53</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>552.420</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>00800</td>
+            <td>文远知行-W</td>
+            <td>346</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>4,579.030</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>00868</td>
+            <td>信义玻璃</td>
+            <td>965</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>7,291.150</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>00881</td>
+            <td>中升控股</td>
+            <td>619</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>2,104.210</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>01057</td>
+            <td>浙江世宝</td>
+            <td>94</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>342.710</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>01114</td>
+            <td>BRILLIANCE CHI</td>
+            <td>2,308</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>4,681.500</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>01211</td>
+            <td>比亚迪股份</td>
+            <td>1,130</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>86,257.970</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>01304</td>
+            <td>FORTIOR</td>
+            <td>7</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>735.670</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>01316</td>
+            <td>耐世特</td>
+            <td>438</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>1,989.020</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>01772</td>
+            <td>赣锋锂业</td>
+            <td>194</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>6,792.790</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>01810</td>
+            <td>小米集团-W</td>
+            <td>724</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>17,259.330</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02015</td>
+            <td>理想汽车-W</td>
+            <td>1,137</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>46,282.680</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02026</td>
+            <td>小马智行-W</td>
+            <td>112</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>5,468.750</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02050</td>
+            <td>三花智控</td>
+            <td>125</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>2,720.360</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02238</td>
+            <td>广汽集团</td>
+            <td>2,145</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>3,998.350</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02333</td>
+            <td>长城汽车</td>
+            <td>1,761</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>12,140.140</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02338</td>
+            <td>潍柴动力</td>
+            <td>1,482</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>40,508.050</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02382</td>
+            <td>舜宇光学科技</td>
+            <td>257</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>15,983.360</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02402</td>
+            <td>亿华通</td>
+            <td>20</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>216.250</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02431</td>
+            <td>佑驾创新</td>
+            <td>7</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>20.830</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02465</td>
+            <td>龙蟠科技</td>
+            <td>59</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>499.620</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02473</td>
+            <td>喜相逢集团</td>
+            <td>566</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>222.760</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02498</td>
+            <td>速腾聚创</td>
+            <td>165</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>2,568.990</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02525</td>
+            <td>禾赛-W</td>
+            <td>436</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>6,041.640</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02533</td>
+            <td>黑芝麻智能</td>
+            <td>311</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>3,020.970</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02570</td>
+            <td>重塑能源</td>
+            <td>3</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>38.950</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02582</td>
+            <td>国富氢能</td>
+            <td>5</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>38.690</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02650</td>
+            <td>挚达科技</td>
+            <td>14</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>105.780</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02665</td>
+            <td>图达通</td>
+            <td>74</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>142.420</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>02889</td>
+            <td>博泰车联</td>
+            <td>3</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>383.790</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>03606</td>
+            <td>福耀玻璃</td>
+            <td>265</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>12,767.540</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>03677</td>
+            <td>正力新能</td>
+            <td>26</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>112.450</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>03750</td>
+            <td>宁德时代</td>
+            <td>29</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>14,849.980</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>03808</td>
+            <td>中国重汽</td>
+            <td>632</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>21,615.230</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>03881</td>
+            <td>希迪智驾</td>
+            <td>15</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>229.780</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>03931</td>
+            <td>中创新航</td>
+            <td>233</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>3,436.260</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>09660</td>
+            <td>地平线</td>
+            <td>4,273</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>16,983.390</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>09690</td>
+            <td>途虎-W</td>
+            <td>247</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>2,668.490</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>09696</td>
+            <td>天齐锂业</td>
+            <td>103</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>3,348.110</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>09863</td>
+            <td>零跑汽车</td>
+            <td>518</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>16,354.180</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>09868</td>
+            <td>小鹏集团-W</td>
+            <td>1,168</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>44,897.580</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>09927</td>
+            <td>赛力斯</td>
+            <td>46</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>1,590.770</td>
+            <td>香港交易所</td>
+        </tr>
+        
+        <tr>
+            <td>09973</td>
+            <td>奇瑞汽车</td>
+            <td>126</td>
+            <td>允许现金替代</td>
+            <td>25.00%</td>
+            <td></td>
+            <td>2,787.900</td>
+            <td>香港交易所</td>
+        </tr>
+        
+    
+    </tbody>
+</table>
+</body>
+</html>
+
