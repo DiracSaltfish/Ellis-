@@ -2,6 +2,7 @@ package live
 
 import (
 	"context"
+	iopv "intranet-iopv"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -16,7 +17,7 @@ func TestSinaValidation(t *testing.T) {
 	for name, raw := range tests {
 		t.Run(name, func(t *testing.T) {
 			q := parseSina([]byte(raw), map[string]bool{"09866.HK": true}, now)
-			if (len(q) == 1) != (name == "valid") {
+			if (len(q) == 1) != (name == "valid" || name == "stale") {
 				t.Fatalf("unexpected accepted quotes: %v", q)
 			}
 		})
@@ -49,7 +50,7 @@ func TestSinaRoutingAndSchedule(t *testing.T) {
 	if !ok || got.Price != 29 {
 		t.Fatal("fallback missing")
 	}
-	if _, ok = s.componentQuote("09866.HK", now.Add(121*time.Second)); ok {
+	if _, ok = s.componentQuote("09866.HK", now.Add(241*time.Second)); ok {
 		t.Fatal("accepted stale fallback")
 	}
 	s.cfg.SinaFallbackSymbols = []string{}
@@ -71,5 +72,37 @@ func TestSinaRoutingAndSchedule(t *testing.T) {
 	}
 	if sinaPolling(time.Date(2026, 9, 12, 10, 0, 0, 0, Zone)) {
 		t.Fatal("weekend polling")
+	}
+}
+
+func TestSinaStaleLastTradeAndDailyPlan(t *testing.T) {
+	now := time.Date(2026, 9, 14, 10, 0, 0, 0, Zone)
+	raw := `var hq_str_rt_hk01698="TME,TME,31,31,32,30,31.4,0,0,31,32,100000,1000,0,0,60,28,2026/09/14,09:50:00";`
+	quotes, diag := parseSinaDetailed([]byte(raw), map[string]bool{"01698.HK": true, "09961.HK": true}, now)
+	q := quotes["01698.HK"]
+	if !sinaUsable(q, now) || !quoteFresh(q, now) || diag["01698.HK"].Status != "last_trade_stale" || diag["09961.HK"].Status != "missing_response" {
+		t.Fatal(quotes, diag)
+	}
+	if sinaUsable(q, now.Add(241*time.Second)) {
+		t.Fatal("old response accepted")
+	}
+	s := &Service{cfg: Config{DataDir: t.TempDir()}, activeDay: Day(now), started: now.Add(-time.Minute), feedAt: now, quotes: map[string]Quote{"00700.HK": {Price: 500, Observed: now, Received: now}}, sinaQuotes: quotes, errors: map[string]string{}, plan: iopv.Plan{Subscriptions: []string{"00700.HK", "01698.HK", "00853.HK"}}}
+	s.freezeSinaPlan(now)
+	if !s.sinaDaily.Frozen || !s.sinaAllowed("00853.HK") || s.sinaAllowed("00700.HK") {
+		t.Fatal(s.sinaDaily)
+	}
+	s.plan.Subscriptions = append(s.plan.Subscriptions, "09999.HK")
+	s.freezeSinaPlan(now.Add(time.Minute))
+	if s.sinaAllowed("09999.HK") {
+		t.Fatal("daily plan changed")
+	}
+	x := &Service{cfg: s.cfg, activeDay: Day(now)}
+	x.loadSinaPlan(now)
+	if !x.sinaDaily.Frozen || !x.sinaAllowed("01698.HK") {
+		t.Fatal("restart lost plan")
+	}
+	got, ok := s.componentQuote("01698.HK", now)
+	if !ok || got.Observed != q.Observed {
+		t.Fatal("stale last trade lost")
 	}
 }

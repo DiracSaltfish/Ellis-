@@ -5,6 +5,8 @@ from datetime import datetime
 from typing import Iterable, Optional
 from zoneinfo import ZoneInfo
 
+from minute_archive_compression import day_folder, day_lock
+
 
 BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 MINUTE_QUOTE_FIELDS = [
@@ -156,19 +158,24 @@ class IntradayMinuteArchive:
 
     def _append_rows(self, bucket: datetime, rows: list[dict], stored_at: datetime) -> None:
         day = bucket.strftime("%Y%m%d")
-        folder = os.path.join(self.root, day)
+        folder = day_folder(self.root, day)
         os.makedirs(folder, exist_ok=True)
         path = os.path.join(folder, "minute_quotes.csv")
-        exists = os.path.exists(path)
         stored_value = stored_at.astimezone(BEIJING_TZ).isoformat(timespec="seconds")
-        with open(path, "a", newline="", encoding="utf-8") as handle:
-            writer = csv.DictWriter(handle, fieldnames=MINUTE_QUOTE_FIELDS)
-            if not exists:
-                writer.writeheader()
-            for row in rows:
-                out = dict(row)
-                out["stored_at"] = stored_value
-                writer.writerow(out)
+        with day_lock(folder, exclusive=True):
+            if os.path.lexists(path + ".gz"):
+                raise RuntimeError("Cannot append to archived minute day; restore CSV first")
+            if os.path.islink(path):
+                raise ValueError("Minute CSV must not be a symlink")
+            exists = os.path.exists(path)
+            with open(path, "a", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(handle, fieldnames=MINUTE_QUOTE_FIELDS)
+                if not exists:
+                    writer.writeheader()
+                for row in rows:
+                    out = dict(row)
+                    out["stored_at"] = stored_value
+                    writer.writerow(out)
 
 
 def build_minute_row(quote: dict, bucket: datetime, captured_at: datetime) -> dict:

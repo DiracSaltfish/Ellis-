@@ -90,6 +90,12 @@ def main():
         process.stdin.write('{"action":"status"}\n')
         process.stdin.flush()
         assert receive(process)["state"] == "subscribed", "status polling must retain subscription state"
+        process.stdin.write('{"action":"subscribe_add","symbols":["158000.SZ","bad"]}\n')
+        process.stdin.flush()
+        failed=receive(process); assert failed["type"]=="pool_subscription" and failed["ok"] is False
+        added=receive(process); assert added["symbol"]=="158000.SZ" and added["ok"] is True
+        process.stdin.write('{"action":"status"}\n'); process.stdin.flush()
+        assert receive(process)["state"]=="subscribed", "new pool must preserve the legacy subscription"
         process.stdin.write('{"action":"unsubscribe","request_id":"stop-1"}\n')
         process.stdin.flush()
         stopped = receive(process)

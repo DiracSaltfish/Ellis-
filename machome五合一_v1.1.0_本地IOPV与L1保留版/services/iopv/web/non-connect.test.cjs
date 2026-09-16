@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const src=fs.readFileSync(__dirname+'/app.js','utf8');
+const code=src.slice(src.indexOf('function renderNonConnect(){'));
+const nodes={'non-connect-content':{},date:{value:'2026-09-14'}};
+const ctx={connectInfo:null,connectError:false,selected:'513890.SH',$:id=>nodes[id],today:()=> '2026-09-14',esc:s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))};vm.createContext(ctx);vm.runInContext(code,ctx);
+const render=()=>vm.runInContext('renderNonConnect()',ctx);
+render();assert.match(nodes['non-connect-content'].textContent,/正在核对/);
+ctx.connectInfo={status:'list_unavailable',symbol:'513890.SH'};render();assert.match(nodes['non-connect-content'].textContent,/暂不能判断/);
+ctx.connectInfo={status:'ready',symbol:'513890.SH',components:[{symbol:'01698.HK',name:'<script>x</script>'}],pcf_date:'2026-09-14',checked_at:'2026-09-14T14:00:00+08:00'};render();assert.match(nodes['non-connect-content'].innerHTML,/01698.HK/);assert(!nodes['non-connect-content'].innerHTML.includes('<script>'));assert.match(nodes['non-connect-content'].innerHTML,/当前估值公式未调整/);
+nodes.date.value='2025-01-02';render();assert.match(nodes['non-connect-content'].innerHTML,/不代表所选历史日期/);
+ctx.connectInfo.components=[];ctx.connectInfo.checked_at='2026-09-11T14:00:00+08:00';render();assert.match(nodes['non-connect-content'].innerHTML,/缓存名单/);assert.match(nodes['non-connect-content'].innerHTML,/均在沪或深/);
+console.log('PASS eligibility unavailable, current/historical distinction, cached list and escaped constituent names');

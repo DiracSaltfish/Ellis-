@@ -41,12 +41,18 @@ type Component struct {
 	RawFlag  string  `json:"raw_flag"`
 }
 type Basket struct {
-	Symbol     string      `json:"symbol"`
-	Date       string      `json:"trade_date"`
-	Unit       float64     `json:"creation_unit"`
-	Cash       float64     `json:"estimated_cash_cny"`
-	Hash       string      `json:"pcf_sha256"`
-	Components []Component `json:"components"`
+	PrevDate          string      `json:"previous_trade_date"`
+	PrevNAV           *float64    `json:"previous_nav"`
+	CreationAllowed   *bool       `json:"creation_allowed"`
+	RedemptionAllowed *bool       `json:"redemption_allowed"`
+	CreationLimit     *float64    `json:"creation_limit"`
+	RedemptionLimit   *float64    `json:"redemption_limit"`
+	Symbol            string      `json:"symbol"`
+	Date              string      `json:"trade_date"`
+	Unit              float64     `json:"creation_unit"`
+	Cash              float64     `json:"estimated_cash_cny"`
+	Hash              string      `json:"pcf_sha256"`
+	Components        []Component `json:"components"`
 }
 
 // This policy covers the first-batch PCFs only. Unknown substitution flags fail closed.
@@ -91,6 +97,7 @@ func ParsePCF(raw []byte, symbol, date string) (Basket, error) {
 		return fail("missing/invalid T-day estimated cash")
 	}
 	b := Basket{Symbol: symbol, Date: date, Unit: unit, Cash: cash, Hash: fmt.Sprintf("%x", sha256.Sum256(raw))}
+	applyModelMetadata(&b, root)
 	seen := map[string]bool{}
 	count := 0
 	for _, list := range root.Children {
@@ -177,4 +184,38 @@ func ParsePCF(raw []byte, symbol, date string) (Basket, error) {
 		return fail("empty basket")
 	}
 	return b, nil
+}
+
+// Optional metadata must never change valuation parsing; absent fields block model scoring.
+func applyModelMetadata(b *Basket, root node) {
+	if d, e := time.Parse("20060102", root.value("PreTradingDay")); e == nil {
+		b.PrevDate = d.Format("2006-01-02")
+	}
+	num := func(k string) *float64 {
+		v, e := number(root.value(k))
+		if e != nil {
+			return nil
+		}
+		return &v
+	}
+	b.PrevNAV = num("NAV")
+	b.CreationLimit = num("CreationLimit")
+	b.RedemptionLimit = num("RedemptionLimit")
+	yes, no := true, false
+	if strings.HasSuffix(b.Symbol, ".SH") {
+		switch root.value("CreationRedemptionSwitch") {
+		case "0":
+			b.CreationAllowed = &no
+			b.RedemptionAllowed = &no
+		case "1":
+			b.CreationAllowed = &yes
+			b.RedemptionAllowed = &yes
+		case "2":
+			b.CreationAllowed = &yes
+			b.RedemptionAllowed = &no
+		case "3":
+			b.CreationAllowed = &no
+			b.RedemptionAllowed = &yes
+		}
+	}
 }

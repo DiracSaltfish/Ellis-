@@ -1603,6 +1603,386 @@
       "symbol": "520600.SH",
       "name": "广发中证港股通汽车ETF",
       "qc": "MANUAL_PASS_GFFUNDS"
+    },
+    {
+      "symbol": "159365.SZ",
+      "name": "富国恒指港股通ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159570.SZ",
+      "name": "汇添富国证港股通创新药ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159303.SZ",
+      "name": "大成恒生医疗保健ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159920.SZ",
+      "name": "华夏恒生ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159040.SZ",
+      "name": "鹏华中证港股通互联网ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159117.SZ",
+      "name": "鹏华港股通低波红利ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159118.SZ",
+      "name": "华夏标普港股通低波红利ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159850.SZ",
+      "name": "华夏恒生中国企业ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159333.SZ",
+      "name": "万家中证港股通央企红利ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "513060.SH",
+      "name": "博时恒生医疗保健(QDII-ETF)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159711.SZ",
+      "name": "华夏中证港股通50ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159718.SZ",
+      "name": "平安中证港股通医药卫生综合ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159557.SZ",
+      "name": "嘉实恒生医疗保健ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159268.SZ",
+      "name": "汇添富国证港股通消费主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159318.SZ",
+      "name": "银华恒指港股通ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159751.SZ",
+      "name": "鹏华中证港股通科技ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159271.SZ",
+      "name": "鹏华恒生ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159712.SZ",
+      "name": "国泰中证港股通50ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159126.SZ",
+      "name": "南方中证港股通50ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159266.SZ",
+      "name": "永赢中证港股通央企红利ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159312.SZ",
+      "name": "广发恒指港股通ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "526010.SH",
+      "name": "汇添富中证港股通医疗主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159545.SZ",
+      "name": "易方达恒生港股通高股息低波动ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "513800.SH",
+      "name": "南方顶峰TOPIX(ETF-QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159302.SZ",
+      "name": "银华中证港股高股息ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159735.SZ",
+      "name": "银华中证港股通消费主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159091.SZ",
+      "name": "易方达中证港股通内地金融ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159691.SZ",
+      "name": "工银瑞信中证港股通高股息精选ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159726.SZ",
+      "name": "华夏恒生港股通中国内地企业高股息率ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "513950.SH",
+      "name": "富国恒生港股通高股息低波动ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "513690.SH",
+      "name": "博时恒生高股息ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "520520.SH",
+      "name": "华泰柏瑞恒生消费ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "513970.SH",
+      "name": "景顺长城恒生消费ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159237.SZ",
+      "name": "工银瑞信中证港股通汽车产业ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "520590.SH",
+      "name": "鹏华恒生科技ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159323.SZ",
+      "name": "华夏中证港股通汽车产业主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159742.SZ",
+      "name": "博时恒生科技ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "513070.SH",
+      "name": "易方达中证港股通消费主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159245.SZ",
+      "name": "富国国证港股通消费主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "520620.SH",
+      "name": "嘉实恒生消费ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159121.SZ",
+      "name": "易方达恒生港股通汽车主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159281.SZ",
+      "name": "天弘中证港股通央企红利ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159152.SZ",
+      "name": "平安恒生港股通科技主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159010.SZ",
+      "name": "博时恒生港股通科技主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159202.SZ",
+      "name": "万家恒生互联网科技业ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159186.SZ",
+      "name": "鹏华恒生港股通汽车主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159960.SZ",
+      "name": "平安港股通恒生中国企业ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159239.SZ",
+      "name": "富国恒生港股通汽车主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "513230.SH",
+      "name": "华夏中证港股通消费主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159028.SZ",
+      "name": "天弘恒生港股通汽车主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159210.SZ",
+      "name": "汇添富中证港股通汽车产业主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159699.SZ",
+      "name": "广发恒生消费(QDII-ETF)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159015.SZ",
+      "name": "国联恒生港股通科技ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159262.SZ",
+      "name": "广发恒生港股通科技主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159120.SZ",
+      "name": "国联安港股通科技ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159567.SZ",
+      "name": "银华国证港股通创新药ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159741.SZ",
+      "name": "嘉实恒生科技ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159747.SZ",
+      "name": "南方中证香港科技ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159109.SZ",
+      "name": "景顺长城恒生港股通50ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159220.SZ",
+      "name": "华宝标普港股通低波红利ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159277.SZ",
+      "name": "富国中证港股通高股息投资ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159128.SZ",
+      "name": "天弘国证港股通科技ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159740.SZ",
+      "name": "大成恒生科技ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159143.SZ",
+      "name": "平安恒生中国央企红利ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159170.SZ",
+      "name": "永赢国证港股通互联网ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159285.SZ",
+      "name": "华安国证港股通消费主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "513590.SH",
+      "name": "鹏华中证港股通消费主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159179.SZ",
+      "name": "工银瑞信中证港股通互联网ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159265.SZ",
+      "name": "鹏华国证港股通消费主题ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159297.SZ",
+      "name": "南方国证港股通创新药ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159954.SZ",
+      "name": "南方恒生中国企业ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159636.SZ",
+      "name": "工银瑞信国证港股通科技30ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159191.SZ",
+      "name": "易方达国证港股通科技ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159788.SZ",
+      "name": "易方达中证港股通中国100ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159196.SZ",
+      "name": "易方达中证港股通信息技术综合ETF",
+      "qc": "WATCHLIST_PENDING_QC"
+    },
+    {
+      "symbol": "159688.SZ",
+      "name": "华安恒生互联网科技业ETF(QDII)",
+      "qc": "WATCHLIST_PENDING_QC"
     }
   ],
   "deferred": [
@@ -1991,5 +2371,88 @@
       "single": "FAIL_5BP",
       "multi": "NOT_RUN"
     }
-  ]
+  ],
+  "watchlist_import": {
+    "date": "2026-09-12",
+    "source": "/Volumes/Upan/premiumWatchlistSymbols.csv",
+    "sha256": "1dedc22c4140c7d0a786cdf3e554441b41a7bfd34ebabd0c2601b2e2801842d1",
+    "added": [
+      "159365.SZ",
+      "159570.SZ",
+      "159303.SZ",
+      "159920.SZ",
+      "159040.SZ",
+      "159117.SZ",
+      "159118.SZ",
+      "159850.SZ",
+      "159333.SZ",
+      "513060.SH",
+      "159711.SZ",
+      "159718.SZ",
+      "159557.SZ",
+      "159268.SZ",
+      "159318.SZ",
+      "159751.SZ",
+      "159271.SZ",
+      "159712.SZ",
+      "159126.SZ",
+      "159266.SZ",
+      "159312.SZ",
+      "526010.SH",
+      "159545.SZ",
+      "513800.SH",
+      "159302.SZ",
+      "159735.SZ",
+      "159091.SZ",
+      "159691.SZ",
+      "159726.SZ",
+      "513950.SH",
+      "513690.SH",
+      "520520.SH",
+      "513970.SH",
+      "159237.SZ",
+      "520590.SH",
+      "159323.SZ",
+      "159742.SZ",
+      "513070.SH",
+      "159245.SZ",
+      "520620.SH",
+      "159121.SZ",
+      "159281.SZ",
+      "159152.SZ",
+      "159010.SZ",
+      "159202.SZ",
+      "159186.SZ",
+      "159960.SZ",
+      "159239.SZ",
+      "513230.SH",
+      "159028.SZ",
+      "159210.SZ",
+      "159699.SZ",
+      "159015.SZ",
+      "159262.SZ",
+      "159120.SZ",
+      "159567.SZ",
+      "159741.SZ",
+      "159747.SZ",
+      "159109.SZ",
+      "159220.SZ",
+      "159277.SZ",
+      "159128.SZ",
+      "159740.SZ",
+      "159143.SZ",
+      "159170.SZ",
+      "159285.SZ",
+      "513590.SH",
+      "159179.SZ",
+      "159265.SZ",
+      "159297.SZ",
+      "159954.SZ",
+      "159636.SZ",
+      "159191.SZ",
+      "159788.SZ",
+      "159196.SZ",
+      "159688.SZ"
+    ]
+  }
 }

@@ -14,6 +14,7 @@ import (
 )
 
 type l1Book struct {
+	Amount *float64  `json:"amt"`
 	Symbol string    `json:"s"`
 	QT     int64     `json:"qt"`
 	RT     int64     `json:"rt"`
@@ -31,6 +32,9 @@ func decodeL1(b l1Book, now time.Time, session uint64) (Quote, error) {
 	q := Quote{Symbol: b.Symbol, Price: b.Price, Observed: time.UnixMilli(b.QT), Received: time.UnixMilli(b.RT), Session: session}
 	if q.Observed.After(now.Add(2*time.Second)) || q.Received.After(now.Add(2*time.Second)) {
 		return Quote{}, fmt.Errorf("future L1 timestamp")
+	}
+	if b.Amount != nil && *b.Amount >= 0 && !math.IsNaN(*b.Amount) && !math.IsInf(*b.Amount, 0) {
+		q.Amount = b.Amount
 	}
 	q.Book.ObservedAt = q.Observed
 	for i := 0; i < 5; i++ {

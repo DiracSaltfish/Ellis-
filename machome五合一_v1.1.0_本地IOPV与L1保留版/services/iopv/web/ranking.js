@@ -1,0 +1,17 @@
+'use strict';
+const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let ledger=null;
+function fundDisplayName(r){const deadline=ledger?.records?.[r.symbol]?.creation_buy_deadline;const suffix=({'T日内':'T0','T日':'T0','T 日':'T0','T+1':'T+1'})[deadline];return (r.name||r.symbol)+(suffix||'');}
+fetch('/ledger.json').then(r=>{if(!r.ok)throw Error('台账读取失败');return r.json()}).then(v=>{ledger=v;render()}).catch(()=>{});
+const day=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai'}).format(new Date());
+let data=null, serial=0;
+$('rank-date').value=day();
+function render(){
+ const q=$('rank-search').value.trim().toLowerCase(),only=$('rank-only').checked;
+ const rows=(data?.rows||[]).map((r,i)=>({...r,rank:i+1})).filter(r=>(!only||r.premium_pass)&&(!q||(r.symbol+' '+fundDisplayName(r)).toLowerCase().includes(q)));
+ const num=(v)=>v==null?'—':Number(v).toFixed(1),pct=v=>(100*v).toFixed(1)+'%';
+ $('rank-rows').innerHTML=rows.map(r=>`<tr><td>${r.rank}</td><td><a href="/?symbol=${encodeURIComponent(r.symbol)}">${esc(fundDisplayName(r))}</a><br><small>${esc(r.symbol)}</small>${r.qc==='WATCHLIST_PENDING_QC'?'<br><span class="tag">估值待核验</span>':''}</td><td class="score" title="${esc([r.model_version,r.model_quality,r.time_scope,'14:30模型对照分：'+(r.comparison_1430==null?'—':r.comparison_1430),...Object.entries(r.features||{}).map(([k,v])=>k+': '+(v==null?'缺失分支':v))].join('；'))}">${r.score==null?'—':r.model_version?Number(r.score).toFixed(4):num(r.score)}${r.model_quality?.includes('参考')||r.model_quality?.includes('复评')?'<br><small class="tag">'+esc(r.model_quality)+'</small>':''}</td><td>${r.score==null?'—':num(r.mean_bp)}</td><td>${r.score==null?'—':num(r.p10_bp)}</td><td title="${esc(r.last_minute)}">${r.score==null?'—':num(r.last_bp)}</td><td>${r.score==null?'—':pct(r.positive_fraction)}</td><td title="${esc(r.first_minute||'')} 起始有效分钟">${r.minutes}/${data.expected_minutes||0}<br><small>${pct(r.coverage)}</small></td><td title="买入汇率 ${esc(r.buy_fx)}；中间价 ${esc(r.mid_fx)}；汇率时点 ${esc(r.fx_at)}">${r.score==null?'—':num(r.fx_gap_bp)}</td><td class="note ${r.premium_pass?'pass':''}">${(r.premium_pass?'通过溢价初筛':esc((r.reasons||[]).join('；')))+'<br><small>'+esc(r.time_scope||'旧版手工分')+'</small>'}</td></tr>`).join('')||'<tr><td colspan="10" class="empty">暂无符合条件的数据</td></tr>';
+}
+async function refresh(){const id=++serial;try{const p=new URLSearchParams({review:$('rank-review').checked?'1':'0',date:$('rank-date').value,slot:$('rank-slot').value});const r=await fetch('/api/v1/ranking?'+p,{cache:'no-store'});if(!r.ok)throw Error(await r.text());const v=await r.json();if(id!==serial)return;data=v;$('status').textContent=v.captured_at&&!v.captured_at.startsWith('0001')?`${v.date} · 截至 ${v.cutoff} · ${v.reviewed_at?'原快照':'实际计算'} ${new Date(v.captured_at).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false})} ${v.reviewed_at?' · 复评 '+new Date(v.reviewed_at).toLocaleTimeString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}):''} · ${v.rows.filter(x=>x.score!=null).length}/${v.rows.length} 只已评分 · ${v.status}`:v.status;render();}catch(e){if(id!==serial)return;data=null;render();$('status').textContent='读取失败 / 暂无快照：'+e.message;}}
+$('rank-review').onchange=refresh;$('rank-date').onchange=refresh;$('rank-slot').onchange=refresh;$('rank-search').oninput=render;$('rank-only').onchange=render;$('rank-refresh').onclick=refresh;
+setInterval(()=>{if(!$('rank-slot').value)refresh()},60000);refresh();

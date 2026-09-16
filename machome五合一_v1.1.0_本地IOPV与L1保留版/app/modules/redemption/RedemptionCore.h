@@ -23,6 +23,7 @@ struct ScheduleDecision {
 
 class RedemptionCore final {
 public:
+    static QJsonObject flowRatio(const QJsonObject &values, const QJsonObject &pcf, const QDate &day);
     static QString normalizeSymbol(const QString &value, QString *error = nullptr);
     static ScheduleDecision evaluateSchedule(const QDateTime &utcNow);
     static QJsonObject canonicalCapture(const QJsonObject &payload,

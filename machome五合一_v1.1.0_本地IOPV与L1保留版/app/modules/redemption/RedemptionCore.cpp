@@ -46,6 +46,26 @@ bool pcfReadyToday(const QJsonObject &pcf, const QDate &day) {
 
 } // namespace
 
+QJsonObject RedemptionCore::flowRatio(const QJsonObject &values, const QJsonObject &pcf, const QDate &day) {
+    QJsonObject out{{"buy_baskets", QJsonValue()}, {"sell_baskets", QJsonValue()},
+        {"net_baskets", QJsonValue()}, {"ratio", QJsonValue()}, {"ratio_label", "等待数据"},
+        {"basket_unit", QJsonValue()}, {"basket_status", "等待当日PCF"},
+        {"alerts_enabled", false}, {"basis", "daily_cumulative"}};
+    double buy=0, sell=0;
+    if (!finiteNumber(values.value("etfbuyamount"), &buy) || !finiteNumber(values.value("etfsellamount"), &sell)
+        || buy<0 || sell<0) return out;
+    out["ratio_label"] = buy==0 && sell==0 ? QStringLiteral("无申赎")
+        : sell==0 ? QStringLiteral("仅申购") : buy==0 ? QStringLiteral("仅赎回")
+        : QString::number(buy/sell, 'f', 2)+QStringLiteral(":1");
+    if (sell>0 && std::isfinite(buy/sell)) out["ratio"]=buy/sell;
+    double unit=0;
+    if (pcfReadyToday(pcf, day) && finiteNumber(pcf.value("creation_redemption_unit"), &unit) && unit>0) {
+        out["basket_unit"]=unit; out["basket_status"]="ready";
+        out["buy_baskets"]=buy/unit; out["sell_baskets"]=sell/unit; out["net_baskets"]=(buy-sell)/unit;
+    }
+    return out;
+}
+
 QString RedemptionCore::normalizeSymbol(const QString &value, QString *error) {
     QString symbol = value.trimmed().toUpper();
     if (symbol.endsWith(QStringLiteral(".SZ"))) symbol.chop(3);

@@ -225,6 +225,12 @@ qt_add_executable(machome-wind-probe-helper
 )
 target_link_libraries(machome-wind-probe-helper PRIVATE Qt6::Core)
 if(APPLE)
+    enable_language(OBJCXX)
+    add_library(machome-wind-batch-probe SHARED helpers/wind_probe/wind_batch_probe.mm)
+    target_compile_options(machome-wind-batch-probe PRIVATE -fobjc-arc)
+    target_link_libraries(machome-wind-batch-probe PRIVATE "-framework Foundation")
+    set_target_properties(machome-wind-batch-probe PROPERTIES OUTPUT_NAME "machome_wind_batch_probe" OBJCXX_STANDARD 17 CXX_VISIBILITY_PRESET hidden)
+    add_dependencies(machome-wind-probe-helper machome-wind-batch-probe)
     set_source_files_properties(helpers/wind_probe/wind_tbapi_probe.c
         PROPERTIES LANGUAGE CXX SKIP_AUTOMOC ON)
     add_library(machome-wind-tbapi-probe SHARED
@@ -529,6 +535,9 @@ if(APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 "$<TARGET_FILE:machome-wind-tbapi-probe>"
                 "$<TARGET_BUNDLE_DIR:machome-hub-ui>/Contents/Helpers/libmachome_wind_tbapi_probe.dylib"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "$<TARGET_FILE:machome-wind-batch-probe>"
+                "$<TARGET_BUNDLE_DIR:machome-hub-ui>/Contents/Helpers/libmachome_wind_batch_probe.dylib"
         VERBATIM
     )
 endif()
@@ -1040,4 +1049,10 @@ if(APPLE)
    target_link_libraries(${ui_target} PRIVATE machome-iopv-web)
   endif()
  endforeach()
+endif()
+
+if(BUILD_TESTING AND Python3_Interpreter_FOUND AND APPLE)
+    add_test(NAME wind-batch-decode COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_wind_batch_decode.py
+        $<TARGET_FILE:machome-wind-probe-helper>)
 endif()

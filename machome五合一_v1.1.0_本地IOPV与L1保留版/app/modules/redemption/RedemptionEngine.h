@@ -31,6 +31,7 @@ public:
 
     QJsonObject snapshot() const;
     QString databasePath() const;
+    QJsonObject hkSnapshot() const;
     quint16 compatibilityPortForTest() const;
     bool ingestCaptureForTest(const QJsonObject &capture, QString *error = nullptr);
     bool installPcfForTest(const QString &symbol, const QJsonObject &pcf,
@@ -83,6 +84,13 @@ private:
     };
 
     QDateTime nowUtc() const;
+    QStringList collectionSymbols() const;
+    void publishHkSnapshot();
+    QTimer hkTimer_;
+    QStringList hkWatchlist_;
+    QHash<QString, QString> hkErrors_;
+    QString hkPoolError_;
+    quint64 hkSequence_ = 0;
     bool openRepository(QString *error);
     bool migrateRepository(QString *error);
     void loadRepository();

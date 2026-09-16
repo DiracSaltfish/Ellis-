@@ -62,3 +62,81 @@ tmp/
 /analysis_520600/*.csv
 /analysis_520600/*.json
 /analysis_520600/periodic_reports/
+
+# Generated research inputs/results and local deployment captures (2026-09).
+# Scoped to research workspaces: application JSON, testdata and vendor SDKs stay tracked.
+/港股通逐标的分析/临时数据/
+/513090误判分析/raw/
+/513090误判分析/watchlist_*/raw/
+/513090误判分析/watchlist_*/outputs/
+/513090误判分析/watchlist_*/baseline_*/
+/溢价率拉升监控cpp/logs/
+/database for armmac/outputs/
+/港股通ETF轧差套利分析/**/*.json
+/港股通ETF轧差套利分析/**/*.jsonl
+/港股通ETF轧差套利分析/**/*.csv
+/港股通ETF轧差套利分析/**/*.parquet
+/港股通ETF轧差套利分析/**/*.feather
+/港股通ETF轧差套利分析/**/*.sqlite
+/港股通ETF轧差套利分析/**/*.sqlite-*
+/港股通ETF轧差套利分析/**/*.db
+/港股通ETF轧差套利分析/**/*.db-*
+/港股通ETF轧差套利分析/**/*.html
+/港股通ETF轧差套利分析/**/*.png
+/港股通ETF轧差套利分析/**/*.svg
+/港股通ETF轧差套利分析/**/*.pdf
+# Retain exported inference models, golden cases and curated test fixtures.
+!/港股通ETF轧差套利分析/live_model_v2/model_*.json
+!/港股通ETF轧差套利分析/live_model_v2/golden_*.json
+!/港股通ETF轧差套利分析/**/testdata/**
+!/港股通ETF轧差套利分析/**/fixtures/**
+/港股通ETF轧差套利分析/**/updated-server
+/港股通ETF轧差套利分析/**/machome-iopv-server
+/港股通ETF轧差套利分析/**/export-recovery
+/港股通ETF轧差套利分析/**/before-*.js
+/港股通ETF轧差套利分析/**/before-*.css
+/港股通ETF轧差套利分析/sina_recovery_*/datas.t.js
+/港股通ETF轧差套利分析/sina_recovery_*/utils.util.js
+/港股通ETF轧差套利分析/sina_recovery_*/page.txt
+/港股通ETF轧差套利分析/sina_recovery_*/sdk.txt
+/港股通ETF轧差套利分析/iopv_gaps_*/sina_sample.txt
+
+# Local runtime/release output; retain deployment scripts and documentation.
+/machome五合一_v1.1.0_本地IOPV与L1保留版/runtime-production/**
+!/machome五合一_v1.1.0_本地IOPV与L1保留版/runtime-production/**/
+!/machome五合一_v1.1.0_本地IOPV与L1保留版/runtime-production/**/*.py
+!/machome五合一_v1.1.0_本地IOPV与L1保留版/runtime-production/**/*.sh
+!/machome五合一_v1.1.0_本地IOPV与L1保留版/runtime-production/**/*.md
+!/machome五合一_v1.1.0_本地IOPV与L1保留版/runtime-production/**/*.patch
+
+# Local runtime/release output; retain deployment scripts and documentation.
+/machome五合一_v1.1.0_本地IOPV与L1保留版/releases/**
+!/machome五合一_v1.1.0_本地IOPV与L1保留版/releases/**/
+!/machome五合一_v1.1.0_本地IOPV与L1保留版/releases/**/*.py
+!/machome五合一_v1.1.0_本地IOPV与L1保留版/releases/**/*.sh
+!/machome五合一_v1.1.0_本地IOPV与L1保留版/releases/**/*.md
+!/machome五合一_v1.1.0_本地IOPV与L1保留版/releases/**/*.patch
+/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/**/captures*/
+/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/**/previews/
+/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/ui-redesign-20260907/before/
+/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/ui-redesign-20260907/deployment/**
+!/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/ui-redesign-20260907/deployment/**/
+!/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/ui-redesign-20260907/deployment/**/*.py
+/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/**/*.tgz
+/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/**/*.tar.gz
+/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/live-20260907/dmit-candidate/newnavnav-web
+/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/live-20260907/dmit-candidate/frontend-dist/
+/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/v1.1.0/hk-connect-validation/**/*.json
+/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/v1.1.0/hk-connect-validation/**/*.jsonl
+/machome五合一_v1.1.0_本地IOPV与L1保留版/docs/v1.1.0/hk-connect-validation/**/*.csv
+
+# Additional generated research exports and the rebuildable uploader executable.
+/港股通ETF轧差套利分析/**/*.ndjson
+/港股通ETF轧差套利分析/**/*.xlsx
+/港股通ETF轧差套利分析/**/*.xls
+/513090误判分析/**/*.json
+/513090误判分析/**/*.csv
+/513090误判分析/**/*.html
+!/513090误判分析/watchlist_*/inputs/premiumWatchlistSymbols.csv
+!/513090误判分析/watchlist_*/inputs/symbols.json
+/machome五合一_v1.1.0_本地IOPV与L1保留版/app/components/upload/machome-upload-web

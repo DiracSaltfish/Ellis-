@@ -25,6 +25,7 @@ type Candidate struct {
 	QC     string `json:"qc"`
 }
 type Quote struct {
+	Amount   *float64  `json:"amount_cny,omitempty"`
 	Source   string    `json:"source,omitempty"`
 	Symbol   string    `json:"symbol"`
 	Price    float64   `json:"price"`
@@ -44,6 +45,8 @@ type BookValue struct {
 	Sell   *float64 `json:"settlement_sell_premium_pct"`
 }
 type ComponentIssue struct {
+	Received         time.Time `json:"received_at,omitempty"`
+	Price            float64   `json:"price,omitempty"`
 	Symbol           string    `json:"symbol"`
 	Name             string    `json:"name"`
 	QuoteStatus      string    `json:"quote_status"`
@@ -54,6 +57,11 @@ type ComponentIssue struct {
 }
 
 type Point struct {
+	RecoveredAt    string   `json:"recovered_at,omitempty"`
+	RecoverySource string   `json:"recovery_source,omitempty"`
+	RecoveryCarry  []string `json:"recovery_carry_components,omitempty"`
+
+	CumulativeAmount   *float64         `json:"cumulative_amount_cny,omitempty"`
 	ComponentIssues    []ComponentIssue `json:"component_issues,omitempty"`
 	FallbackComponents []string         `json:"fallback_components,omitempty"`
 	Suspended          []string         `json:"suspended"`
@@ -192,6 +200,11 @@ func (d *Decoder) Decode(raw []byte, received time.Time, session uint64) (Quote,
 	}
 	q := Quote{Symbol: symbol, Price: float64(price) / 1e6, Observed: observed, Received: received, Session: session}
 	json.Unmarshal(state[phase], &q.Phase)
+	if e.Tag == "14" {
+		if a, err := integer("18"); err == nil && a >= 0 {
+			q.Amount = ptr(float64(a) / 1e5)
+		}
+	}
 	q.Book.ObservedAt = observed
 	levels := func(key string, scale float64) ([]float64, error) {
 		var s string
@@ -236,6 +249,7 @@ func reprice(p *Point, q Quote, now time.Time, navFresh bool) {
 	if q.Symbol == "" || Day(q.Observed) != p.Date {
 		return
 	}
+	p.CumulativeAmount = q.Amount
 	p.ETFAt = q.Observed
 	book := q.Book
 	p.Book = &book

@@ -51,7 +51,9 @@ func ParseFX(raw []byte, date, channel, direction string, now time.Time) (FX, er
 		return fail("missing/current-day parity")
 	}
 	age, qage := now.Sub(s.Generated), now.Sub(s.Quote.Observed)
-	if age < 0 || age > 3*time.Minute || qage < 0 || qage > 3*time.Minute || !s.Quote.Healthy || s.Quote.Pair != "HKD/CNY" {
+	// Public service clock can lead this host slightly; only envelope generation
+	// gets 2s skew tolerance. The underlying market observation cannot be future.
+	if age < -2*time.Second || age > 3*time.Minute || qage < 0 || qage > 3*time.Minute || !s.Quote.Healthy || s.Quote.Pair != "HKD/CNY" {
 		return fail(fmt.Sprintf("stale/unhealthy FX: status=%s, healthy=%t, quote_age=%.0fs, snapshot_age=%.0fs", s.Status, s.Quote.Healthy, qage.Seconds(), age.Seconds()))
 	}
 	est, status, actionable, model := s.Estimate, s.Status, s.Actionable, s.Model.Version

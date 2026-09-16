@@ -1,0 +1,396 @@
+{
+  "schema_version": 1,
+  "source": "亚洲市场 - T+0 QDII - 集思录.webarchive",
+  "source_table": "flex_qdiia",
+  "classification": "香港方向ETF候选；不作为港股通资格认定",
+  "symbols": [
+    {
+      "symbol": "159120.SZ",
+      "name": "港股通科技ETF国联安"
+    },
+    {
+      "symbol": "159262.SZ",
+      "name": "港股通科技ETF广发"
+    },
+    {
+      "symbol": "159741.SZ",
+      "name": "恒生科技ETF嘉实"
+    },
+    {
+      "symbol": "159323.SZ",
+      "name": "港股通汽车ETF华夏"
+    },
+    {
+      "symbol": "159742.SZ",
+      "name": "恒生科技ETF博时"
+    },
+    {
+      "symbol": "159128.SZ",
+      "name": "港股科技ETF天弘"
+    },
+    {
+      "symbol": "159239.SZ",
+      "name": "港股通汽车ETF富国"
+    },
+    {
+      "symbol": "159210.SZ",
+      "name": "港股通汽车ETF汇添富"
+    },
+    {
+      "symbol": "159688.SZ",
+      "name": "恒生互联网ETF华安"
+    },
+    {
+      "symbol": "159198.SZ",
+      "name": "港股通信息技术ETF富国"
+    },
+    {
+      "symbol": "159152.SZ",
+      "name": "港股通科技ETF平安"
+    },
+    {
+      "symbol": "159750.SZ",
+      "name": "港股科技50ETF招商"
+    },
+    {
+      "symbol": "159303.SZ",
+      "name": "恒生医疗ETF大成"
+    },
+    {
+      "symbol": "159892.SZ",
+      "name": "恒生医药ETF华夏"
+    },
+    {
+      "symbol": "159101.SZ",
+      "name": "港股通科技ETF华夏"
+    },
+    {
+      "symbol": "159740.SZ",
+      "name": "恒生科技ETF大成"
+    },
+    {
+      "symbol": "159179.SZ",
+      "name": "港股通互联网ETF工银"
+    },
+    {
+      "symbol": "159126.SZ",
+      "name": "港股通50ETF南方"
+    },
+    {
+      "symbol": "159712.SZ",
+      "name": "港股通50ETF国泰"
+    },
+    {
+      "symbol": "159331.SZ",
+      "name": "红利港股ETF国泰"
+    },
+    {
+      "symbol": "159121.SZ",
+      "name": "港股通汽车ETF易方达"
+    },
+    {
+      "symbol": "159281.SZ",
+      "name": "港股央企红利ETF天弘"
+    },
+    {
+      "symbol": "159788.SZ",
+      "name": "港股通100ETF易方达"
+    },
+    {
+      "symbol": "159237.SZ",
+      "name": "港股汽车ETF工银"
+    },
+    {
+      "symbol": "159245.SZ",
+      "name": "港股通消费ETF富国"
+    },
+    {
+      "symbol": "159318.SZ",
+      "name": "恒指港股通ETF银华"
+    },
+    {
+      "symbol": "159568.SZ",
+      "name": "港股互联网ETF博时"
+    },
+    {
+      "symbol": "159271.SZ",
+      "name": "恒生ETF鹏华"
+    },
+    {
+      "symbol": "159268.SZ",
+      "name": "港股通消费ETF汇添富"
+    },
+    {
+      "symbol": "159316.SZ",
+      "name": "港股通创新药ETF易方达"
+    },
+    {
+      "symbol": "159137.SZ",
+      "name": "港股通医疗ETF华宝"
+    },
+    {
+      "symbol": "159954.SZ",
+      "name": "恒生中国企业ETF南方"
+    },
+    {
+      "symbol": "159251.SZ",
+      "name": "港股通科技ETF万家"
+    },
+    {
+      "symbol": "159091.SZ",
+      "name": "港股通金融ETF易方达"
+    },
+    {
+      "symbol": "159365.SZ",
+      "name": "恒指港股通ETF富国"
+    },
+    {
+      "symbol": "159109.SZ",
+      "name": "恒生50ETF景顺"
+    },
+    {
+      "symbol": "159040.SZ",
+      "name": "港股通互联网ETF鹏华"
+    },
+    {
+      "symbol": "159169.SZ",
+      "name": "恒生生物科技ETF广发"
+    },
+    {
+      "symbol": "159286.SZ",
+      "name": "港股通创新药ETF鹏华"
+    },
+    {
+      "symbol": "159266.SZ",
+      "name": "港股央企红利ETF永赢"
+    },
+    {
+      "symbol": "159567.SZ",
+      "name": "港股创新药ETF银华"
+    },
+    {
+      "symbol": "159105.SZ",
+      "name": "恒生生物科技ETF易方达"
+    },
+    {
+      "symbol": "159920.SZ",
+      "name": "恒生ETF华夏"
+    },
+    {
+      "symbol": "159285.SZ",
+      "name": "港股通消费ETF华安"
+    },
+    {
+      "symbol": "159312.SZ",
+      "name": "恒指港股通ETF广发"
+    },
+    {
+      "symbol": "159132.SZ",
+      "name": "恒生生物科技ETF富国"
+    },
+    {
+      "symbol": "159519.SZ",
+      "name": "港股国企ETF国泰"
+    },
+    {
+      "symbol": "159718.SZ",
+      "name": "港股医药ETF平安"
+    },
+    {
+      "symbol": "159170.SZ",
+      "name": "港股通互联网ETF永赢"
+    },
+    {
+      "symbol": "159735.SZ",
+      "name": "港股消费ETF银华"
+    },
+    {
+      "symbol": "159202.SZ",
+      "name": "恒生互联网ETF万家"
+    },
+    {
+      "symbol": "159028.SZ",
+      "name": "港股汽车ETF天弘"
+    },
+    {
+      "symbol": "159196.SZ",
+      "name": "港股通信息技术ETF易方达"
+    },
+    {
+      "symbol": "159302.SZ",
+      "name": "港股高股息ETF银华"
+    },
+    {
+      "symbol": "159776.SZ",
+      "name": "港股医药ETF银华"
+    },
+    {
+      "symbol": "159135.SZ",
+      "name": "港股通科技ETF前海开源"
+    },
+    {
+      "symbol": "159747.SZ",
+      "name": "香港科技ETF南方"
+    },
+    {
+      "symbol": "159569.SZ",
+      "name": "港股红利低波ETF景顺"
+    },
+    {
+      "symbol": "159127.SZ",
+      "name": "港股通红利ETF南方"
+    },
+    {
+      "symbol": "159015.SZ",
+      "name": "恒生港股通科技ETF国联"
+    },
+    {
+      "symbol": "159125.SZ",
+      "name": "港股通科技ETF招商"
+    },
+    {
+      "symbol": "159191.SZ",
+      "name": "港股通科技ETF易方达"
+    },
+    {
+      "symbol": "159615.SZ",
+      "name": "恒生生物科技ETF南方"
+    },
+    {
+      "symbol": "159117.SZ",
+      "name": "港股通红利低波ETF鹏华"
+    },
+    {
+      "symbol": "159269.SZ",
+      "name": "港股通科技ETF南方"
+    },
+    {
+      "symbol": "159265.SZ",
+      "name": "港股消费ETF鹏华"
+    },
+    {
+      "symbol": "159751.SZ",
+      "name": "港股通科技ETF鹏华"
+    },
+    {
+      "symbol": "159691.SZ",
+      "name": "港股红利ETF工银"
+    },
+    {
+      "symbol": "159186.SZ",
+      "name": "港股通汽车ETF鹏华"
+    },
+    {
+      "symbol": "159185.SZ",
+      "name": "港股通信息技术ETF鹏华"
+    },
+    {
+      "symbol": "159010.SZ",
+      "name": "港股通科技ETF博时"
+    },
+    {
+      "symbol": "159280.SZ",
+      "name": "港股通互联网ETF汇添富"
+    },
+    {
+      "symbol": "159545.SZ",
+      "name": "恒生红利低波ETF易方达"
+    },
+    {
+      "symbol": "159699.SZ",
+      "name": "恒生消费ETF广发"
+    },
+    {
+      "symbol": "159711.SZ",
+      "name": "港股通50ETF华夏"
+    },
+    {
+      "symbol": "159726.SZ",
+      "name": "港股通高股息ETF华夏"
+    },
+    {
+      "symbol": "159960.SZ",
+      "name": "恒生中国企业ETF平安"
+    },
+    {
+      "symbol": "159118.SZ",
+      "name": "港股通红利低波ETF华夏"
+    },
+    {
+      "symbol": "159850.SZ",
+      "name": "恒生国企ETF华夏"
+    },
+    {
+      "symbol": "159143.SZ",
+      "name": "港股通央企红利ETF平安"
+    },
+    {
+      "symbol": "159130.SZ",
+      "name": "恒生生物科技ETF鹏华"
+    },
+    {
+      "symbol": "159131.SZ",
+      "name": "港股通信息技术ETF华宝"
+    },
+    {
+      "symbol": "159277.SZ",
+      "name": "港股通红利ETF富国"
+    },
+    {
+      "symbol": "159333.SZ",
+      "name": "港股央企红利ETF万家"
+    },
+    {
+      "symbol": "159102.SZ",
+      "name": "港股通生物科技ETF华安"
+    },
+    {
+      "symbol": "159167.SZ",
+      "name": "港股通医疗ETF工银"
+    },
+    {
+      "symbol": "159297.SZ",
+      "name": "港股通创新药ETF南方"
+    },
+    {
+      "symbol": "159506.SZ",
+      "name": "港股通创新药医疗ETF富国"
+    },
+    {
+      "symbol": "159557.SZ",
+      "name": "恒生医疗ETF嘉实"
+    },
+    {
+      "symbol": "158000.SZ",
+      "name": "港股通金融ETF鹏华"
+    },
+    {
+      "symbol": "158003.SZ",
+      "name": "港股通医疗ETF嘉实"
+    },
+    {
+      "symbol": "159366.SZ",
+      "name": "港股医疗ETF永赢"
+    },
+    {
+      "symbol": "159220.SZ",
+      "name": "港股通红利低波ETF华宝"
+    },
+    {
+      "symbol": "159217.SZ",
+      "name": "港股通创新药ETF工银"
+    },
+    {
+      "symbol": "159792.SZ",
+      "name": "港股通互联网ETF富国"
+    },
+    {
+      "symbol": "159636.SZ",
+      "name": "港股通科技30ETF工银"
+    },
+    {
+      "symbol": "159570.SZ",
+      "name": "港股通创新药ETF汇添富"
+    }
+  ]
+}

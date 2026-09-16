@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QSaveFile>
 #include <QJsonDocument>
 #include <QNetworkReply>
 #include <QRegularExpression>
@@ -66,6 +67,9 @@ RedemptionEngine::RedemptionEngine(QObject *parent)
     : hub::IModuleEngine(parent), compatibilityWs_(new QWebSocketServer(
           QStringLiteral("MachomeHub redemption compatibility"),
           QWebSocketServer::NonSecureMode, this)) {
+    hkTimer_.setParent(this);
+    hkTimer_.setInterval(1000);
+    connect(&hkTimer_, &QTimer::timeout, this, &RedemptionEngine::publishHkSnapshot);
     scheduleTimer_.setParent(this);
     scheduleTimer_.setInterval(200);
     connect(&scheduleTimer_, &QTimer::timeout, this, &RedemptionEngine::evaluateSchedule);
@@ -161,7 +165,9 @@ bool RedemptionEngine::migrateRepository(QString *error) {
         && execute(database_, QStringLiteral(
         "CREATE TABLE IF NOT EXISTS history(id INTEGER PRIMARY KEY AUTOINCREMENT,event_day TEXT NOT NULL,event_time TEXT NOT NULL,symbol TEXT NOT NULL,payload_json TEXT NOT NULL);"), error)
         && execute(database_, QStringLiteral(
-        "CREATE INDEX IF NOT EXISTS idx_redemption_history ON history(event_day,symbol,id DESC);"), error);
+        "CREATE INDEX IF NOT EXISTS idx_redemption_history ON history(event_day,symbol,id DESC);"), error)
+        && execute(database_, QStringLiteral("CREATE TABLE IF NOT EXISTS hk_history(id INTEGER PRIMARY KEY AUTOINCREMENT,event_day TEXT NOT NULL,event_time TEXT NOT NULL,symbol TEXT NOT NULL,payload_json TEXT NOT NULL);"), error)
+        && execute(database_, QStringLiteral("CREATE INDEX IF NOT EXISTS idx_hk_history ON hk_history(event_day,symbol,id DESC);"), error);
 }
 
 bool RedemptionEngine::persistPcfGate() {
@@ -221,6 +227,21 @@ void RedemptionEngine::loadRepository() {
         state.windcode = symbol;
         state.customName = names.value(displaySymbol(symbol)).toString();
         states_.insert(symbol, state);
+    }
+    const auto pool=context_.settings.value("hk_connect_pool").toObject();
+    if (pool.value("enabled").toBool(false)) {
+        const auto entries=pool.value("symbols").toArray();
+        if (entries.isEmpty() || entries.size()>150) hkPoolError_=QStringLiteral("新池清单必须包含1–150只ETF");
+        else for (const auto &entry:entries) {
+            const auto item=entry.toObject();
+            const auto code=item.value("symbol").toString().trimmed().toUpper();
+            static const QRegularExpression pattern(QStringLiteral("^1[0-9]{5}\\.SZ$"));
+            if (!pattern.match(code).hasMatch()) { hkPoolError_=QStringLiteral("新池代码不合法：")+code; break; }
+            if (!hkWatchlist_.contains(code)) hkWatchlist_.append(code);
+            if (!states_.contains(code)) { SymbolState state; state.windcode=code; state.customName=item.value("name").toString().left(80); states_.insert(code,state); }
+        }
+        if (collectionSymbols().size()>200) hkPoolError_=QStringLiteral("两池合计最多200只去重标的");
+        if (!hkPoolError_.isEmpty()) { for (const auto &s:hkWatchlist_) if (!watchlist_.contains(s)) states_.remove(s); hkWatchlist_.clear(); }
     }
     QSqlQuery pcf(database_);
     if (pcf.exec(QStringLiteral("SELECT symbol,payload_json FROM pcf"))) {
@@ -282,7 +303,9 @@ bool RedemptionEngine::appendHistory(const QJsonObject &record, QString *error) 
     const QDate currentDay = nowUtc().toTimeZone(QTimeZone("Asia/Shanghai")).date();
     if (!pruneHistory(currentDay, error)) return false;
     QSqlQuery query(database_);
-    query.prepare(QStringLiteral("INSERT INTO history(event_day,event_time,symbol,payload_json) VALUES(?,?,?,?)"));
+    query.prepare(record.value("pool_id").toString()=="hk_connect"
+        ? QStringLiteral("INSERT INTO hk_history(event_day,event_time,symbol,payload_json) VALUES(?,?,?,?)")
+        : QStringLiteral("INSERT INTO history(event_day,event_time,symbol,payload_json) VALUES(?,?,?,?)"));
     query.addBindValue(eventTime.toTimeZone(QTimeZone("Asia/Shanghai")).date().toString(Qt::ISODate));
     query.addBindValue(record.value(QStringLiteral("event_time")).toString());
     query.addBindValue(record.value(QStringLiteral("windcode")).toString());
@@ -305,6 +328,9 @@ bool RedemptionEngine::pruneHistory(const QDate &today, QString *error) {
         if (error) *error = query.lastError().text();
         return false;
     }
+    query.prepare(QStringLiteral("DELETE FROM hk_history WHERE event_day < ?"));
+    query.addBindValue(cutoff.toString(Qt::ISODate));
+    if (!query.exec()) { if(error) *error=query.lastError().text(); return false; }
     lastHistoryPruneDay_ = today;
     return true;
 }
@@ -364,6 +390,7 @@ void RedemptionEngine::start() {
     state_ = QStringLiteral("scheduled_idle");
     startCompatibilityServer();
     startWindHelper();
+    hkTimer_.start();
     scheduleTimer_.start();
     pcfTimer_.start();
     evaluateSchedule();
@@ -374,6 +401,7 @@ void RedemptionEngine::start() {
 void RedemptionEngine::stop(hub::StopMode mode) {
     Q_UNUSED(mode)
     if (!running_ && !initialized_) return;
+    hkTimer_.stop();
     scheduleTimer_.stop();
     pcfTimer_.stop();
     running_ = false;
@@ -388,6 +416,7 @@ void RedemptionEngine::stop(hub::StopMode mode) {
     running_ = false;
     state_ = QStringLiteral("stopped");
     publishSnapshot();
+    publishHkSnapshot();
 }
 
 QJsonObject RedemptionEngine::scheduleSnapshot() const {
@@ -457,6 +486,7 @@ QJsonObject RedemptionEngine::snapshot() const {
     for (const QString &symbol : watchlist_) items.append(symbolSnapshot(states_.value(symbol)));
     QJsonObject pcfRuntime;
     for (auto it = pcfRuntime_.constBegin(); it != pcfRuntime_.constEnd(); ++it) {
+        if (!watchlist_.contains(it.key())) continue;
         pcfRuntime.insert(displaySymbol(it.key()), QJsonObject{
                           {QStringLiteral("day"), it->day.toString(Qt::ISODate)},
                            {QStringLiteral("attempts"), it->attempts},
@@ -508,10 +538,61 @@ QJsonObject RedemptionEngine::snapshot() const {
             {QStringLiteral("sequence"), static_cast<qint64>(sequence_)}};
 }
 
+QStringList RedemptionEngine::collectionSymbols() const {
+    QStringList out=watchlist_;
+    for (const auto &s:hkWatchlist_) if (!out.contains(s)) out.append(s);
+    return out;
+}
+
+QJsonObject RedemptionEngine::hkSnapshot() const {
+    QJsonArray rows;
+    const QDate day=nowUtc().toTimeZone(QTimeZone("Asia/Shanghai")).date();
+    for (const auto &symbol:hkWatchlist_) {
+        const auto &s=states_[symbol];
+        const bool today=s.updatedAt.isValid() && s.updatedAt.toTimeZone(QTimeZone("Asia/Shanghai")).date()==day;
+        const auto values=today ? s.values : QJsonObject{};
+        const qint64 age=s.updatedAt.isValid() ? qMax<qint64>(0,s.updatedAt.secsTo(nowUtc())) : -1;
+        const QString status=!running_ || !monitoring_ ? QStringLiteral("未在监控时段 / 已停止")
+            : !hkErrors_.value(symbol).isEmpty() ? QStringLiteral("订阅 / 数据异常")
+            : !today ? (s.subId>=0 ? QStringLiteral("已订阅，等待首帧") : QStringLiteral("等待订阅"))
+            : age>120 ? QStringLiteral("超过120秒无新回调") : QStringLiteral("数据已更新");
+        rows.append(QJsonObject{{"symbol", displaySymbol(symbol)}, {"windcode",symbol}, {"name",s.customName},
+            {"values",values}, {"flow",RedemptionCore::flowRatio(values,s.pcf,day)},
+            {"status",status}, {"error",hkErrors_.value(symbol)}, {"updated_at",iso(s.updatedAt)},
+            {"age_seconds",age<0?QJsonValue():QJsonValue(age)}, {"sub_id",s.subId<0?QJsonValue():QJsonValue(s.subId)},
+            {"last_change",today?s.lastChange:QJsonArray{}}});
+    }
+    return {{"schema_version",1}, {"pool_id","hk_connect"}, {"title",QStringLiteral("港股通实时申购赎回")},
+        {"server_time",iso(nowUtc())}, {"trading_day",day.toString(Qt::ISODate)},
+        {"sequence",static_cast<qint64>(hkSequence_)}, {"running",running_}, {"monitoring",monitoring_},
+        {"error",hkPoolError_}, {"items",rows}, {"external_api_enabled",false},
+        {"classification",QStringLiteral("归档香港方向ETF候选；不作为港股通资格认定")},
+        {"alert_policy",QJsonObject{{"enabled",false},{"status","reserved"},{"basis","daily_cumulative"},
+            {"buy_ratio",QJsonValue()},{"sell_ratio",QJsonValue()},{"minimum_baskets",QJsonValue()},
+            {"window_seconds",QJsonValue()},{"cooldown_seconds",QJsonValue()}}}};
+}
+
+void RedemptionEngine::publishHkSnapshot() {
+    if (hkWatchlist_.isEmpty() && hkPoolError_.isEmpty()) return;
+    ++hkSequence_;
+    const auto hk=hkSnapshot();
+    QSaveFile file(QDir(context_.dataRoot).filePath("hk-connect-snapshot.json"));
+    if (file.open(QIODevice::WriteOnly)) {
+        file.setPermissions(QFileDevice::ReadOwner|QFileDevice::WriteOwner);
+        const auto bytes=QJsonDocument(hk).toJson(QJsonDocument::Compact);
+        if (file.write(bytes)!=bytes.size() || !file.commit()) hkPoolError_=QStringLiteral("网页快照写入失败");
+        else if (hkPoolError_==QStringLiteral("网页快照写入失败")) hkPoolError_.clear();
+    } else hkPoolError_=QStringLiteral("网页快照写入失败");
+    auto internal=snapshot(); internal.insert("hk_connect",hk);
+    emit snapshotReady(internal); // Never send the private pool through compatibility sockets.
+}
+
 void RedemptionEngine::publishSnapshot() {
     ++sequence_;
     const QJsonObject value = snapshot();
-    emit snapshotReady(value);
+    auto internal=value;
+    if (!hkWatchlist_.isEmpty() || !hkPoolError_.isEmpty()) internal.insert("hk_connect",hkSnapshot());
+    emit snapshotReady(internal);
     broadcastCompat(value);
 }
 
@@ -537,6 +618,9 @@ bool RedemptionEngine::ingestCapture(const QJsonObject &capture, bool replay,
     }
     QDateTime observed = QDateTime::fromString(
         canonical.value(QStringLiteral("observed_at")).toString(), Qt::ISODateWithMs);
+    if (hkWatchlist_.contains(symbol) && (!observed.isValid() || observed>nowUtc().addSecs(10))) {
+        if(error) *error=QStringLiteral("新池数据时间无效或超前"); return false;
+    }
     if (observed.isValid() && captureNotBeforeUtc_.isValid()
         && observed.toUTC() < captureNotBeforeUtc_) {
         // Match the original host's 09:00 cutoff: an asynchronous callback
@@ -554,6 +638,20 @@ bool RedemptionEngine::ingestCapture(const QJsonObject &capture, bool replay,
     state.subId = canonical.value(QStringLiteral("sub_id")).toInteger(-1);
     state.previousValues = previous;
     state.baseline = values;
+    if (hkWatchlist_.contains(symbol)) {
+        hkErrors_.remove(symbol);
+        const auto changes=RedemptionCore::changeDetails(previous,values);
+        if (!previous.isEmpty() && !changes.isEmpty()) {
+            state.lastChange=changes; state.lastChangeAt=observed;
+            if (!replay) {
+                QString storageError;
+                if (!appendHistory({{"pool_id","hk_connect"},{"event_time",iso(observed)},{"windcode",symbol},
+                    {"previous",previous},{"current",values},{"changes",changes}}, &storageError))
+                    hkPoolError_=QStringLiteral("新池历史写入失败：")+storageError;
+            }
+        }
+        if (!watchlist_.contains(symbol)) return true;
+    }
     state.opportunity = RedemptionCore::classifyIntradayOpportunity(
         previous.isEmpty() ? nullptr : &previous, values, state.pcf,
         observed.toTimeZone(QTimeZone("Asia/Shanghai")).date());
@@ -840,6 +938,9 @@ bool RedemptionEngine::setWatchlist(const QJsonArray &symbols, QString *error) {
         if (symbol.isEmpty()) return false;
         if (!next.contains(symbol)) next.append(symbol);
     }
+    QStringList combined=next;
+    for(const auto &s:hkWatchlist_) if(!combined.contains(s)) combined.append(s);
+    if(combined.size()>200) { if(error) *error=QStringLiteral("两池合计最多200只去重标的"); return false; }
     const bool restart = monitoring_;
     if (restart) stopMonitoring(QStringLiteral("更新观察列表"));
     QHash<QString, SymbolState> updated;
@@ -847,6 +948,7 @@ bool RedemptionEngine::setWatchlist(const QJsonArray &symbols, QString *error) {
         if (states_.contains(symbol)) updated.insert(symbol, states_.value(symbol));
         else { SymbolState state; state.windcode = symbol; updated.insert(symbol, state); }
     }
+    for (const auto &s:hkWatchlist_) if (!updated.contains(s)) updated.insert(s,states_.value(s));
     states_ = updated;
     watchlist_ = next;
     if (!persistSettings(error)) return false;
@@ -1241,6 +1343,19 @@ void RedemptionEngine::readHelperOutput() {
 
 void RedemptionEngine::handleHelperMessage(const QJsonObject &message) {
     const QString type = message.value(QStringLiteral("type")).toString();
+    if (type==QStringLiteral("pool_capture_error")) {
+        const QString code=message.value("symbol").toString();
+        if(hkWatchlist_.contains(code)) hkErrors_[code]=message.value("error").toString();
+        return;
+    }
+    if (type == QStringLiteral("pool_subscription")) {
+        const QString s=message.value("symbol").toString();
+        if (hkWatchlist_.contains(s) && monitoring_) {
+            if (message.value("ok").toBool()) { states_[s].subId=message.value("sub_id").toInteger(-1); hkErrors_.remove(s); }
+            else hkErrors_[s]=message.value("error").toString();
+        }
+        return;
+    }
     if (type == QStringLiteral("hello")) {
         helperReady_ = message.value(QStringLiteral("protocol")).toInt() == 1;
         helperState_ = helperReady_ ? QStringLiteral("ready") : QStringLiteral("blocked");
@@ -1270,6 +1385,11 @@ void RedemptionEngine::handleHelperMessage(const QJsonObject &message) {
             for (auto it = states_.begin(); it != states_.end(); ++it)
                 it->status = QStringLiteral("monitoring");
             emitStatus(QStringLiteral("Wind TBAPI2 原生订阅已确认"));
+            QStringList additions;
+            for (const auto &s:hkWatchlist_) if (!watchlist_.contains(s)) {
+                states_[s].subId=-1; hkErrors_.remove(s); additions.append(s);
+            }
+            if (!additions.isEmpty()) sendHelperCommand("subscribe_add",{{"symbols",QJsonArray::fromStringList(additions)}});
         }
         if (message.value(QStringLiteral("unsubscribed")).toBool(false)) {
             monitoring_ = false;
@@ -1325,7 +1445,9 @@ void RedemptionEngine::handleHelperMessage(const QJsonObject &message) {
     } else if (type == QStringLiteral("capture")) {
         QString error;
         if (!ingestCapture(message.value(QStringLiteral("payload")).toObject(), false, &error)) {
-            helperLastError_ = error;
+            const QString code=message.value("payload").toObject().value("windcode").toString();
+            if(hkWatchlist_.contains(code) && !watchlist_.contains(code)) hkErrors_[code]=error;
+            else helperLastError_ = error;
         }
     } else if (type == QStringLiteral("error")) {
         const QString detail = message.value(QStringLiteral("message")).toString();
@@ -1421,7 +1543,7 @@ void RedemptionEngine::fetchNextPcf(bool force) {
     }
     pcfRefreshPending_=false;
     const QDate day = now.toTimeZone(QTimeZone("Asia/Shanghai")).date();
-    for (const QString &symbol : watchlist_) {
+    for (const QString &symbol : collectionSymbols()) {
         PcfRuntime &runtime = pcfRuntime_[symbol];
         if (runtime.day != day) { runtime = {}; runtime.day = day; }
         const bool cached = states_.value(symbol).pcf.value(QStringLiteral("trading_day")).toString()
@@ -1743,7 +1865,7 @@ void RedemptionEngine::handleHttpRequest(QTcpSocket *socket) {
     } else if (path.startsWith(QStringLiteral("/api/v1/pcf/"))) {
         QString error;
         const QString symbol = RedemptionCore::normalizeSymbol(path.section(u'/', -1), &error);
-        if (!states_.contains(symbol) || states_.value(symbol).pcf.isEmpty())
+        if (!watchlist_.contains(symbol) || states_.value(symbol).pcf.isEmpty())
             writeHttp(socket, 404, {{QStringLiteral("error"), QStringLiteral("PCF 尚未就绪")}});
         else writeHttp(socket, 200, states_.value(symbol).pcf);
     } else writeHttp(socket, 404, {{QStringLiteral("error"), QStringLiteral("not found")}});

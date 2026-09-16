@@ -1,0 +1,16 @@
+initialization failed  select 1
+(lldb) expr -- void *$once = (void *)dlopen("/Users/ellis/Library/Containers/com.windin.mac.free/Data/tmp/machome-once-v2-20260915/probe.dylib", 0x6)
+* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP
+       frame #0: 0x0000000196d68c20 libsystem_kernel.dylib`mach_msg2_trap + 8
+libsystem_kernel.dylib`mach_msg2_trap:
+->  0x196d68c20 <+8>: ret    
+
+libsystem_kernel.dylib`macx_swapon:
+    0x196d68c24 <+0>: mov    x16, #-0x30               ; =-48 
+    0x196d68c28 <+4>: svc    #0x80
+    0x196d68c2c <+8>: ret    
+(lldb) expr -- int $ready = ((int (*)(const char *))dlsym($once,"once_start"))("/Users/ellis/Library/Containers/com.windin.mac.free/Data/tmp/machome-once-v2-20260915")
+(lldb) expr -- $ready
+(int) $ready = -5
+(lldb) process detach
+Process 99784 detached

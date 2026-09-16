@@ -1865,6 +1865,17 @@ RealtimePage::RealtimePage(ModuleConfig config, QWidget *parent)
     mainLayout->addWidget(ui::tablePanel(snapshotTable_,"redemptionSnapshot",QStringLiteral("查看 PCF"),{3,4,6,7,9,10}),1);
     connect(snapshotTable_, &QTableWidget::cellDoubleClicked, this, [this](int row, int) { openPcfForRow(row); });
     tabs->addTab(main, QStringLiteral("实时监控"));
+    auto *hkPage=new QWidget;
+    auto *hkLayout=new QVBoxLayout(hkPage);
+    hkStatus_=textLabel(QStringLiteral("港股通实时申购赎回 · 等待后台数据 · 比例提醒未启用"));
+    hkStatus_->setWordWrap(true); hkLayout->addWidget(hkStatus_);
+    hkTable_=makeTable({QStringLiteral("代码"),QStringLiteral("名称"),QStringLiteral("申购份额"),
+        QStringLiteral("赎回份额"),QStringLiteral("申购篮子"),QStringLiteral("赎回篮子"),
+        QStringLiteral("净篮子"),QStringLiteral("申赎比"),QStringLiteral("更新时间"),QStringLiteral("状态")});
+    hkTable_->setObjectName("hkConnectRedemptionTable");
+    hkLayout->addWidget(ui::tablePanel(hkTable_,"hkConnectRedemption"),1);
+    hkLayout->addWidget(textLabel(QStringLiteral("篮子按当日PCF单位换算；无单位显示—。当日累计比例，提醒与外部客户端接口暂未启用。")));
+    tabs->addTab(hkPage,QStringLiteral("港股通实时申购赎回"));
 
     auto *watchlist = new QWidget;
     auto *watchlistLayout = new QVBoxLayout(watchlist);
@@ -1999,6 +2010,7 @@ void RealtimePage::applySnapshot(const QJsonObject &message) {
         watchlistEdit_->document()->setModified(false);
     }
     updateRows(telemetry.value(QStringLiteral("snapshot")), true);
+    updateHkPool(telemetry.value("snapshot").toObject().value("hk_connect").toObject());
     if(auto *list=findChild<QTableWidget *>("realtimeWatchlistEditList"))for(int r=0;r<list->rowCount();++r){auto *code=list->item(r,0);if(!code)continue;const auto name=realtimeItems_.value(code->text()).value("name").toString();if(!name.isEmpty())list->item(r,1)->setText(name);}
     for (const auto &window : std::as_const(pcfWindows_)) {
         if (window) {
@@ -2010,11 +2022,35 @@ void RealtimePage::applySnapshot(const QJsonObject &message) {
     }
 }
 
+void RealtimePage::updateHkPool(const QJsonObject &pool) {
+    if (pool.isEmpty()) return;
+    const auto rows=pool.value("items").toArray();
+    hkStatus_->setText(QStringLiteral("%1只 · 交易日 %2 · %3 · 比例提醒未启用 %4")
+        .arg(rows.size()).arg(pool.value("trading_day").toString())
+        .arg(pool.value("monitoring").toBool()?QStringLiteral("Wind监控中"):QStringLiteral("已停止 / 非监控时段"))
+        .arg(pool.value("error").toString()));
+    const bool sorting=hkTable_->isSortingEnabled(); hkTable_->setSortingEnabled(false);
+    hkTable_->setRowCount(rows.size());
+    auto number=[](const QJsonValue &v){return v.isDouble()?QString::number(v.toDouble(),'f',2):QStringLiteral("—");};
+    for (int r=0;r<rows.size();++r) {
+        const auto item=rows[r].toObject();const auto v=item.value("values").toObject();const auto f=item.value("flow").toObject();
+        const QStringList cells{item.value("symbol").toString(),item.value("name").toString(),
+            number(v.value("etfbuyamount")),number(v.value("etfsellamount")),number(f.value("buy_baskets")),
+            number(f.value("sell_baskets")),number(f.value("net_baskets")),f.value("ratio_label").toString(),
+            ui::localTimeText(item.value("updated_at").toString()),item.value("status").toString()};
+        for (int c=0;c<cells.size();++c) { setCell(hkTable_,r,c,cells[c]);
+            hkTable_->item(r,c)->setToolTip(item.value("error").toString()+"\n"+f.value("basket_status").toString()+"\n"+
+                QString::fromUtf8(QJsonDocument(item.value("last_change").toArray()).toJson(QJsonDocument::Compact))); }
+    }
+    hkTable_->setSortingEnabled(sorting);
+}
+
 void RealtimePage::applyEvent(const QJsonObject &message) {
     ModulePage::applyEvent(message);
     const QString kind = message.value(QStringLiteral("event_kind")).toString();
     const auto payload = eventPayload(message);
-    if (kind.contains(QStringLiteral("snapshot"), Qt::CaseInsensitive)) {
+    if (kind.startsWith("redemption.hk_")) return;
+    if (kind == QStringLiteral("redemption.snapshot")) {
         updateRows(payload, true);
     } else if (kind.contains(QStringLiteral("change"), Qt::CaseInsensitive)) {
         updateRows(payload, false);

@@ -22,6 +22,7 @@ from typing import Optional
 from zoneinfo import ZoneInfo
 
 from intraday_minute_store import IntradayMinuteArchive, MINUTE_QUOTE_FIELDS
+from minute_archive_compression import open_minute_quotes
 from ib_us_uploader_support import bridge_from_args
 import sina_quote_uploader as base
 import upload_monitor_status as upload_health
@@ -568,14 +569,14 @@ class IntradayMinuteBackfillSync:
         day_key = local.strftime("%Y%m%d")
         if day_key != self.day_key:
             self.reset_for_day(day_key)
-        path = os.path.join(self.root, day_key, "minute_quotes.csv")
-        if not os.path.exists(path):
-            return 0
         start_offset = self.offset
-        with open(path, "r", encoding="utf-8", newline="") as handle:
-            handle.seek(start_offset)
-            payload = handle.read()
-            end_offset = handle.tell()
+        try:
+            with open_minute_quotes(self.root, day_key) as handle:
+                handle.seek(start_offset)
+                payload = handle.read()
+                end_offset = handle.tell()
+        except FileNotFoundError:
+            return 0
         if not payload:
             return 0
         rows = parse_intraday_minute_rows(payload, start_offset == 0)

@@ -76,6 +76,7 @@ func parseGFF520600PCF(raw []byte, date string) (Basket, error) {
 		componentBody = componentBody[:end+len("</table>")]
 	}
 	b := Basket{Symbol: "520600.SH", Date: date, Unit: unit, Cash: cash, Hash: fmt.Sprintf("%x", sha256.Sum256(raw))}
+	applyGFFModelMetadata(&b, body, dayBody)
 	seen := map[string]bool{}
 	for _, row := range gffRowRE.FindAllStringSubmatch(componentBody, -1) {
 		cells := gffCellRE.FindAllStringSubmatch(row[1], -1)
@@ -129,4 +130,56 @@ func parseGFF520600PCF(raw []byte, date string) (Basket, error) {
 		return Basket{}, fmt.Errorf("520600.SH: empty basket")
 	}
 	return b, nil
+}
+
+func applyGFFModelMetadata(b *Basket, body, dayBody string) {
+	for _, m := range regexp.MustCompile(`(\d{4}-\d{2}-\d{2})日内容信息`).FindAllStringSubmatch(body, -1) {
+		if m[1] < b.Date && m[1] > b.PrevDate {
+			b.PrevDate = m[1]
+		}
+	}
+	if b.PrevDate != "" {
+		start := strings.Index(body, b.PrevDate+"日内容信息")
+		part := body[start:]
+		if end := strings.Index(part, "</table>"); end >= 0 {
+			part = part[:end]
+		}
+		for _, m := range gffFieldRE.FindAllStringSubmatch(part, -1) {
+			if strings.Contains(gffText(m[1]), "基金份额净值") {
+				if v, e := gffNumber(gffText(m[2])); e == nil && v > 0 {
+					b.PrevNAV = &v
+				}
+			}
+		}
+	}
+	for _, m := range gffFieldRE.FindAllStringSubmatch(dayBody, -1) {
+		label, value := gffText(m[1]), gffText(m[2])
+		if strings.HasPrefix(label, "当日累计可申购的基金份额上限") {
+			if v, e := gffNumber(value); e == nil {
+				b.CreationLimit = &v
+			}
+		}
+		if strings.HasPrefix(label, "当日累计可赎回的基金份额上限") {
+			if v, e := gffNumber(value); e == nil {
+				b.RedemptionLimit = &v
+			}
+		}
+		if strings.Contains(label, "申购赎回的允许情况") {
+			yes, no := true, false
+			switch value {
+			case "申购和赎回皆允许":
+				b.CreationAllowed = &yes
+				b.RedemptionAllowed = &yes
+			case "申购和赎回皆不允许":
+				b.CreationAllowed = &no
+				b.RedemptionAllowed = &no
+			case "只允许申购":
+				b.CreationAllowed = &yes
+				b.RedemptionAllowed = &no
+			case "只允许赎回":
+				b.CreationAllowed = &no
+				b.RedemptionAllowed = &yes
+			}
+		}
+	}
 }

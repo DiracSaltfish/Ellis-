@@ -1,0 +1,48 @@
+{
+  "status": "deployed",
+  "backup": "/Users/ellis/Library/Application Support/MachomeHub/backups/minute-archive-20260914-140637",
+  "old_sina_pid": 15644,
+  "new_sina_pid": 5146,
+  "schedule": "/Users/ellis/Library/LaunchAgents/com.newnavnav.minute-archive-compression.plist",
+  "scripts": {
+    "minute_archive_compression.py": "5c99e02f7f457e82db761ae2e1cba343196b4a1b69b9f5de511f78d58ba0ce1e",
+    "intraday_minute_store.py": "afa12d9e5850247631bb8f2be3fdfb1188a128ed34d59809d7c5c34f21a492a7",
+    "sina_ws_uploader.py": "9595e52bdddd31627d47987c7b8379f414a6b0400775262b9e0b824d4d7d6f06",
+    "test_minute_archive_compression.py": "306ccbdbb28150fa76e8929ed3de637f263136ef447aeca6f8b02cf8c22011aa",
+    "test_intraday_minute_store.py": "6be0b50ad24f78dd6ca06ddc0e0f423d57f7e27a207289c74ff2c66c70c40977",
+    "test_ws_capture_timing.py": "8a423721d7beef727fb2eae2ee4b1c7bf55aac89f14b58dfff041d15602022f8"
+  },
+  "remote_tests": 27,
+  "previous_jobs": {
+    "website": 15643,
+    "sina": 15644,
+    "xop-family": 15645,
+    "basket-159605": 15646,
+    "silver": 15647,
+    "china-internet": 17015,
+    "india": 5066,
+    "nasdaq": 15650,
+    "sp500": 15651,
+    "nikkei225": 15652,
+    "germany": 15655,
+    "rebuild": 15657,
+    "health-monitor": null,
+    "anchor-backfill": null,
+    "india-final-nav": null,
+    "china-history": null
+  },
+  "post_deployment": {
+    "gzip_rows_read": 286315,
+    "gzip_bytes_each": 15778833,
+    "original_bytes_each": 79705032,
+    "pilot_roots": [
+      "/Users/ellis/NAVNAV/scripts/intraday_minute_store",
+      "/Users/ellis/Library/Application Support/MachomeHub/data/upload/business-run/scripts/intraday_minute_store"
+    ],
+    "csv_growth_verified_at": "2026-09-14T14:09:02+08:00",
+    "today_csv_bytes": 67551730,
+    "incremental_backfill": "2026-09-14T14:09:00+08:00 rows=133 accepted=72",
+    "scheduled_pending_days": 67,
+    "automatic_calendar_trigger_observed": false
+  }
+}

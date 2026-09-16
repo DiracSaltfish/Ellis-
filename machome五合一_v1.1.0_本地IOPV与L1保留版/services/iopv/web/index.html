@@ -1,11 +1,51 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>内网 IOPV · 估值工作台</title><meta name="description" content="本地PCF篮子实时估值、双汇率溢价和分钟档案"><link rel="stylesheet" href="/style.css"></head><body>
-<header><button id="toggle-funds" aria-controls="fund-sidebar" aria-expanded="false">☰ 展开标的</button><div class="brand"><span class="logo">N</span><b>内网 IOPV</b><span class="tag">独立估值</span></div><nav><a href="/" id="nav-market">估值工作台</a><a href="/manage" id="nav-manage">运行管理</a></nav><span id="connection">正在连接数据流</span></header>
-<div id="market" class="layout sidebar-collapsed"><aside id="fund-sidebar" hidden><div class="sidehead"><b>估值标的</b><span id="fund-count">120</span></div><input id="search" placeholder="搜索代码或名称" aria-label="搜索代码或名称"><div class="listhead"><span>基金 / 代码</span><span>中间价溢价</span></div><div id="funds"></div></aside><main>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>内网 IOPV · 估值工作台</title><meta name="description" content="本地PCF篮子实时估值、双汇率溢价和分钟档案"><link rel="stylesheet" href="/style.css?v=20260916"></head><body>
+<header><button id="toggle-funds" aria-controls="fund-sidebar" aria-expanded="false">☰ 展开标的</button><nav><a href="/" id="nav-market">估值工作台</a><a href="/ranking">每日模型排名</a><a href="/manage" id="nav-manage">运行管理</a><a href="/hk-connect-redemption">港股通申赎</a></nav><input id="search" placeholder="搜索代码或名称" aria-label="搜索代码或名称"><span id="connection">正在连接数据流</span></header>
+<div id="market" class="layout sidebar-collapsed"><aside id="fund-sidebar" hidden><div class="sidehead"><b>估值标的</b><span id="fund-count">120</span></div><div class="listhead"><span>基金 / 代码</span><span>中间价溢价</span></div><div id="funds"></div></aside><main>
 <section class="titlebar"><div><div class="fund-heading"><h1 id="fund-name">香港证券ETF</h1><span class="eyebrow" id="fund-code">513090.SH</span></div><div id="pcf" class="muted">正在加载当日 PCF</div></div><div class="datebar"><button id="previous" title="前一日">←</button><input type="date" id="date" aria-label="交易日期"><button id="next" title="后一日">→</button><button id="today">今日</button><div class="segmented"><button id="buy" class="selected">买入港股情景</button><button id="sell">卖出港股情景</button></div></div></section>
 
-<div class="marketgrid"><section class="chartpanel"><div class="panelhead"><h2 id="chart-title">分时估值</h2><button id="chart-mode" aria-pressed="false">切换溢价率图</button><div class="legend"><button class="legend-toggle" data-series="mid" aria-pressed="true"><i class="gold"></i>中间价 IOPV</button><button class="legend-toggle" data-series="settlement" aria-pressed="true"><i class="green"></i>预估结算 IOPV</button><button class="legend-toggle" data-series="etf" aria-pressed="true"><i class="blue"></i>ETF 实价</button></div></div><div class="chartwrap"><canvas id="navchart" aria-label="09:30至16:08三线分时估值图"></canvas><div class="tooltip" id="tooltip"></div></div></section>
-<section class="panel bookpanel"><div class="panelhead"><h2>五档价格与溢价</h2><span id="booktime" class="muted"></span></div><table><thead><tr><th>档位</th><th>价格</th><th>数量（手）</th><th>中间价溢价</th><th>结算溢价</th></tr></thead><tbody id="book"></tbody></table></section></div><div id="quality" class="quality">正在等待数据</div><section class="panel" id="component-issues-panel"><div class="panelhead"><h2>缺价与停牌成分</h2><span id="component-issues-time" class="muted"></span></div><div style="overflow-x:auto"><table><thead><tr><th>成分代码</th><th>名称</th><th>报价状态</th><th>停牌核实</th><th>最近报价</th><th>依据 / 查看</th></tr></thead><tbody id="component-issues"></tbody></table></div></section><section class="panel"><h2>估值依据</h2><dl id="evidence"></dl></section>
+<div id="daily-shares" class="daily-shares" role="status" aria-live="polite">所选日期份额变化：加载中…</div>
+<div class="marketgrid"><section class="chartpanel" id="valuation-chart"><div class="panelhead"><h2 id="chart-title">分时估值</h2><div class="segmented chart-ranges" role="group" aria-label="图表天数"><button data-days="1" class="selected" aria-pressed="true">当日</button><button data-days="3" aria-pressed="false">3日</button><button data-days="5" aria-pressed="false">5日</button></div><button id="chart-mode" aria-pressed="false">切换溢价率图</button><div class="legend"><button class="legend-toggle" data-series="mid" aria-pressed="true"><i class="gold"></i>中间价 IOPV</button><button class="legend-toggle" data-series="settlement" aria-pressed="true"><i class="green"></i>预估结算 IOPV</button><button class="legend-toggle" data-series="etf" aria-pressed="true"><i class="blue"></i>ETF 实价</button></div></div><p id="net-chart-legend" hidden><span class="net-purple">● 申购对价估值</span>　<span class="net-orange">● 赎回对价估值</span> · 所选日情景</p><p id="chart-status" class="muted" role="status"></p><div class="chartwrap"><canvas id="navchart" aria-label="09:30至16:08三线分时估值图"></canvas><div class="tooltip" id="tooltip"></div></div></section>
+<section class="panel bookpanel"><div class="panelhead"><h2>五档价格与溢价</h2><span id="booktime" class="muted"></span></div><table><thead><tr><th>档位</th><th>价格</th><th>数量（手）</th><th>中间价溢价</th><th>结算溢价</th></tr></thead><tbody id="book"></tbody></table></section></div><section class="panel" id="netting-panel">
+ <div class="panelhead net-heading"><h2>轧差对价计算</h2><span id="net-source" class="muted"></span></div>
+ <details class="net-adjust net-fee-settings"><summary>交易费率设置</summary><div class="net-fees">
+  <label>净买入交易费率（bp）<input id="net-buy-fee" type="number" value="12" min="0" max="9999" step="0.1"></label>
+  <label>净卖出交易费率（bp）<input id="net-sell-fee" type="number" value="12" min="0" max="9999" step="0.1"></label>
+ </div></details>
+ <details class="net-adjust"><summary>现金差额 / 额外费用调整</summary><p class="muted">每篮申购成本加上申购调整额；每篮赎回所得加上赎回调整额（扣款填负数）。不得重复包含上述净交易费用。</p><div class="net-fields">
+  <label>申购每篮调整（元）<input id="net-c-adjust" type="number" step="0.01" value="0"></label>
+  <label>赎回每篮调整（元）<input id="net-v-adjust" type="number" step="0.01" value="0"></label>
+ </div></details>
+ <div class="net-columns">
+ <div><h3>篮子数 → 预估对价</h3>
+  <form id="net-forward-form"><div class="net-fields">
+   <label>假设总申购（篮）<input id="net-s" type="number" min="0" max="1000000000" step="1" value="5" required></label>
+   <label>假设总赎回（篮）<input id="net-r" type="number" min="0" max="1000000000" step="1" value="1" required></label>
+  </div><div class="net-actions"><button type="submit">计算对价并叠加曲线</button><label><input id="net-overlay" type="checkbox">叠加分时估值</label></div></form>
+  <div id="net-forward-result" class="net-result" role="status"></div>
+
+ </div>
+ <div><h3>结算对价 → 估计篮子数</h3>
+  <form id="net-inverse-form"><div class="net-fields">
+   <label>申购单篮对价（元）<input id="net-c" type="number" min="0.01" step="any" required></label>
+   <label>赎回单篮对价（元）<input id="net-v" type="number" min="0.01" step="any" required></label>
+   <label>当日净份额变动（份，带正负）<input id="net-share-change" type="number" step="1" required></label>
+   <label>每侧金额容差（元/篮）<input id="net-tolerance" type="number" min="0" step="any" value="1" required></label>
+   <label>网页基准分钟（空白取最新）<input id="net-inverse-minute" type="time" step="60"></label>
+  </div><div class="net-actions"><button id="net-use-shares" type="button" disabled>填入已披露净份额</button><label><input type="checkbox" id="net-manual">使用手工结算基准</label></div>
+  <div id="net-manual-fields" hidden><p class="muted">输入完整单篮价值，包含公共现金项。B 已含交易费、D 已扣交易费，程序不会再次加减 bp；两侧额外调整仍按上方设置处理。</p><div class="net-fields">
+   <label>每篮份额 U（份）<input id="net-unit" type="number" step="1" min="1"></label>
+   <label>轧差单篮价值 M（元）<input id="net-m" type="number" step="any" min="0"></label>
+   <label>含费净买入单篮成本 B（元）<input id="net-b" type="number" step="any" min="0"></label>
+   <label>扣费净卖出单篮所得 D（元）<input id="net-d" type="number" step="any" min="0"></label>
+  </div><button id="net-fill-basis" type="button">从所选网页分钟填入基准</button></div>
+  <div class="net-actions"><button type="submit">反推篮子数</button></div></form>
+  <div id="net-inverse-result" class="net-result" role="status"></div>
+ </div></div>
+
+</section>
+
+<section class="panel" id="non-connect-panel"><div class="panelhead"><h2>非港股通成分 · 补券口径关注</h2></div><div id="non-connect-content">正在核对当前 PCF 与港股通名单…</div></section><div id="quality" class="quality">正在等待数据</div><section class="panel" id="component-issues-panel" hidden><div class="panelhead"><h2>缺价与停牌成分</h2><span id="component-issues-time" class="muted"></span></div><div style="overflow-x:auto"><table><thead><tr><th>成分代码</th><th>名称</th><th>报价状态</th><th>停牌核实</th><th>最近报价</th><th>依据 / 查看</th></tr></thead><tbody id="component-issues"></tbody></table></div></section><section class="panel"><h2>估值依据</h2><dl id="evidence"></dl></section>
 <section class="panel" id="ledger-panel"><div class="panelhead"><h2>标的验收台账</h2></div><div id="ledger-content">正在加载验收台账</div></section>
 </main></div>
 <main id="management" hidden><div class="titlebar"><div><div class="eyebrow">SERVICE CONTROL</div><h1>运行管理</h1><p class="muted">数据源、计算与落盘的独立运行状态</p></div><div class="actions"><button data-action="refresh">刷新 PCF</button><button data-action="reconnect">重连行情</button><button data-action="pause">暂停计算</button><button data-action="resume">恢复计算</button><button data-action="check">检查数据库</button></div></div><div id="manage-message" role="status"></div><section class="panel"><h2>拉涨模型最低溢价率</h2><p class="muted">买一价相对所选 IOPV 的溢价率，严格大于阈值才通过；保存后重置信号窗口。请在 A 主机管理页保存。</p><form id="signal-settings"><label>快速拉涨 % <input id="radar-threshold" type="number" min="-20" max="100" step="0.01" required></label> <label>普通拉涨 % <input id="pull-threshold" type="number" min="-20" max="100" step="0.01" required></label> <label>溢价拉升 % <input id="premium-threshold" type="number" min="-20" max="100" step="0.01" required></label> <button>保存阈值</button><span id="threshold-result"></span></form></section><div class="metrics" id="healthcards"></div><div class="bottomgrid"><section class="panel"><h2>服务状态</h2><dl id="healthdetails"></dl></section><section class="panel"><h2>需要关注</h2><div id="errors"></div></section></div><section class="panel"><h2>今日停牌核实与基金影响</h2><p class="muted">每天早间重新核实。缺行情仅标为待确认；今日确认不延用至下一交易日。确认停牌不自动补入昨日价格。</p><div id="suspension-summary"></div><table><thead><tr><th>成分券</th><th>今日状态</th><th>涉及基金</th><th>核实依据 / 操作</th></tr></thead><tbody id="suspension-rows"></tbody></table></section><section class="panel"><h2>逐基金覆盖情况</h2><table><thead><tr><th>代码</th><th>基金</th><th>已定价 / 成分</th><th>估值状态</th><th>缺失 / 陈旧成分</th></tr></thead><tbody id="coverage"></tbody></table></section></main>
-<script src="/app.js"></script></body></html>
+<script src="/chart-range.js"></script><script src="/netting.js?v=20260916"></script><script src="/netting-ui.js?v=20260916"></script><script src="/app.js?v=20260916"></script></body></html>

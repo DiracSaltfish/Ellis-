@@ -50,6 +50,10 @@ func (s *Service) rollDay(now time.Time) bool {
 	s.latest = map[string]Point{}
 	s.quotes = map[string]Quote{}
 	s.sinaQuotes = nil
+	s.sinaVerified = nil
+	s.sinaProbeCursor = 0
+	s.sinaDaily = SinaDailyPlan{}
+	s.sinaDiagnostics = nil
 	s.sinaLastAttempt = time.Time{}
 	s.fxRaw = nil
 	s.feedAt = time.Time{}

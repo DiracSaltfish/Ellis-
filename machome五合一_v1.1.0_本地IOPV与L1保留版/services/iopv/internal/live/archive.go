@@ -40,8 +40,8 @@ func packPoint(p Point) archivePoint {
 	a.Meta.SellPremium = nil
 	a.Meta.Book = nil
 	a.Meta.BookValues = nil
-	a.Meta.HKDAssets = nil
-	a.Meta.CNYAssets = nil
+	// Retain HKD exposure for fixed-FX intraday ranking.
+	// Preserve CNY assets so model revaluation does not subtract rounded NAVs.
 	return a
 }
 func unpackPoint(a archivePoint) Point {

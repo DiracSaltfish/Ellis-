@@ -23,6 +23,13 @@ func localRequest(r *http.Request) bool {
 func (s *Service) Handler(assets http.Handler) http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("/", assets)
+	mux.HandleFunc("GET /page-data/hk-connect-redemption", hkRedemptionHandler)
+	mux.HandleFunc("GET /api/v1/non-connect-components", s.connectHandler)
+	mux.HandleFunc("GET /api/v1/ranking", s.rankingHandler)
+	mux.HandleFunc("GET /api/v1/ranking-model", func(w http.ResponseWriter, r *http.Request) {
+		m := flowModels["1445"]
+		writeJSON(w, map[string]any{"version": "premium-model.v2", "primary_model": m.Version, "features": m.Features, "trees": len(m.Trees), "source_sha256": m.Hash, "comparison_model": flowModels["1430"].Version, "fx_basis": "T-day central parity and T-day predicted sell settlement for buying HK stocks", "calibrated": false, "lag_fx_fallback": false})
+	})
 	mux.HandleFunc("GET /api/v1/signal-settings", s.signalSettingsHandler)
 	mux.HandleFunc("POST /api/v1/manage/signal-settings", s.signalSettingsHandler)
 	mux.HandleFunc("GET /api/v1/suspensions", func(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +47,7 @@ func (s *Service) Handler(assets http.Handler) http.Handler {
 		s.mu.RUnlock()
 		writeJSON(w, map[string]any{"schema_version": "intranet-iopv.v1", "snapshots": s.Snapshots(), "signal_settings": settings})
 	})
+	mux.HandleFunc("GET /api/v1/daily-shares", s.dailySharesHandler)
 	mux.HandleFunc("GET /api/v1/minutes", func(w http.ResponseWriter, r *http.Request) {
 		symbol, date := r.URL.Query().Get("symbol"), r.URL.Query().Get("date")
 		if _, e := time.Parse("2006-01-02", date); e != nil {

@@ -1,4 +1,10 @@
 #include <QCoreApplication>
+#include <QSaveFile>
+#include <QLockFile>
+#include <QUuid>
+#include <QElapsedTimer>
+#include <memory>
+#include <cstring>
 #include <QCryptographicHash>
 #include <QDateTime>
 #include <QDir>
@@ -103,15 +109,23 @@ bool decodeRawCapture(const QJsonObject &capture, QJsonObject *payload,
     }
     const uchar *raw = reinterpret_cast<const uchar *>(data.constData());
     const quint32 rowCount = qFromBigEndian<quint32>(raw);
-    const quint32 rowSize = qFromBigEndian<quint32>(raw + 4);
-    if (rowCount != 1 || rowSize > 1024 * 1024
-        || 12ULL + static_cast<quint64>(rowCount) * rowSize != static_cast<quint64>(data.size())) {
-        if (error) *error = QStringLiteral("Wind 帧必须且只能包含一行");
+    const quint32 dataSize = qFromBigEndian<quint32>(raw + 4);
+    if (rowCount < 1 || rowCount > 256 || dataSize > 1024 * 1024
+        || dataSize % rowCount || 12ULL + dataSize != static_cast<quint64>(data.size())) {
+        if (error) *error = QStringLiteral("Wind 数据行数或长度无效");
         return false;
+    }
+    const quint32 rowSize = dataSize / rowCount;
+    // Some subscriptions return duplicate rows. Never choose between conflicting rows.
+    for (quint32 row = 1; row < rowCount; ++row) {
+        if (memcmp(raw + 12, raw + 12 + row * rowSize, rowSize) != 0) {
+            if (error) *error = QStringLiteral("Wind 多行数据冲突，拒绝覆盖");
+            return false;
+        }
     }
     QJsonObject values;
     for (const Field &field : descriptors) {
-        if (!require(12 + field.offset, field.width, data.size(), field.name)) return false;
+        if (!require(field.offset, field.width, rowSize, field.name)) return false;
         const uchar *value = raw + 12 + field.offset;
         if (field.type == 0x25 && field.width == 4) {
             values.insert(field.name, qFromLittleEndian<qint32>(value));
@@ -194,17 +208,24 @@ public:
           allowWindControl_(allowWindControl) {
         notifier_ = new QSocketNotifier(fileno(stdin), QSocketNotifier::Read, this);
         connect(notifier_, &QSocketNotifier::activated, this, [this] { readCommand(); });
-        // Match the standalone production service's
-        // refresh_interval_seconds=1.0.  Both the capture-file poll and the
-        // TBAPI subscription interval use the same 1000 ms cadence.
+        // File delivery cadence is independent of the native subscription latency.
         poll_.setInterval(1000);
-        connect(&poll_, &QTimer::timeout, this, [this] { pollCaptures(); });
+        connect(&poll_, &QTimer::timeout, this, [this] {
+            if(mode_=="live" && batchPid_>0 && !renewBatchLease()) fail("lease_write_failed","无法续约 Wind 订阅");
+            pollCaptures();
+        });
         poll_.start();
+        addTimer_.setInterval(500);
+        connect(&addTimer_, &QTimer::timeout, this, [this] { addNextSymbol(); });
+        addTimer_.start();
         output({{QStringLiteral("type"), QStringLiteral("hello")},
                 {QStringLiteral("protocol"), 1},
                 {QStringLiteral("service"), QStringLiteral("machome-wind-probe-helper")},
                 {QStringLiteral("mode"), mode_},
                 {QStringLiteral("poll_interval_ms"), poll_.interval()},
+                {QStringLiteral("subscription_mode"), QStringLiteral("in_process_batch_v1")},
+                {QStringLiteral("legacy_latency_ms"), 500},
+                {QStringLiteral("hk_latency_ms"), 5000},
                 {QStringLiteral("never_sigkill_wind"), true},
                 {QStringLiteral("legacy_dependency"), false}});
         publishStatus();
@@ -305,6 +326,13 @@ private:
             if (error) *error = QStringLiteral("包内探针与 ABI manifest 不匹配");
             return false;
         }
+        const QString batch=QDir(QCoreApplication::applicationDirPath()).filePath("libmachome_wind_batch_probe.dylib");
+        const QString tbapi="/Applications/WindPersonFree.app/Contents/Frameworks/libWind.Cosmos.TBAPI2.dylib";
+        if(QFileInfo(batch).isSymLink() || manifest.value("batch_probe_sha256").toString().size()!=64
+           || sha256(batch)!=manifest.value("batch_probe_sha256").toString()
+           || sha256(tbapi)!=manifest.value("tbapi_sha256").toString()) {
+            if(error)*error="批量探针或 TBAPI 与 ABI manifest 不匹配";return false;
+        }
         return true;
     }
 
@@ -391,137 +419,109 @@ private:
         return true;
     }
 
-    bool subscribeLive(const QStringList &symbols, QString *error) {
-        if (!liveBoundaryReady(error)) return false;
-        if (!sessions_.isEmpty() && !unsubscribeLive(error)) return false;
-        const qint64 pid = windPids().first();
-        QList<Session> stale;
-        const QDir raw(rawDirectory());
-        for (const QFileInfo &info : raw.entryInfoList(
-                 {QStringLiteral("libmachome_wind_*_%1_*.dylib").arg(pid)},
-                 QDir::Files | QDir::NoSymLinks, QDir::Name)) {
-            stale.append(Session{{}, pid, info.absoluteFilePath(), -1});
-        }
-        if (!stale.isEmpty()) {
-            if (!unsubscribePaths(pid, stale, error)) return false;
-            for (const Session &session : std::as_const(stale)) QFile::remove(session.dylibPath);
-        }
-        QStringList commands;
-        QList<Session> planned;
-        const QString outputDir = escapedLldbString(rawDirectory());
-        int index = 0;
-        for (const QString &symbol : symbols) {
-            static const QRegularExpression symbolPattern(QStringLiteral("^[0-9]{6}\\.S[ZH]$"));
-            if (!symbolPattern.match(symbol).hasMatch()) {
-                if (error) *error = QStringLiteral("不安全的 Wind 代码：%1").arg(symbol);
-                return false;
-            }
-            const QString safe = QString(symbol).replace(u'.', u'_');
-            QFile::remove(QDir(rawDirectory()).filePath(
-                QStringLiteral("wind_tbapi_live_%1_status.json").arg(safe)));
-            const QString copy = QDir(rawDirectory()).filePath(
-                QStringLiteral("libmachome_wind_%1_%2_%3.dylib")
-                    .arg(safe).arg(pid).arg(QDateTime::currentMSecsSinceEpoch() + index));
-            if (!QFile::copy(packagedProbePath(), copy)) {
-                if (error) *error = QStringLiteral("无法创建唯一的包内探针副本");
-                return false;
-            }
-            QFile::setPermissions(copy, QFileDevice::ReadOwner | QFileDevice::WriteOwner
-                                         | QFileDevice::ExeOwner);
-            const QString escapedPath = escapedLldbString(copy);
-            const QString escapedSymbol = escapedLldbString(symbol);
-            commands.append({
-                QStringLiteral("expr -- void *$mh%1 = (void *)dlopen(\"%2\", 0x6)").arg(index).arg(escapedPath),
-                QStringLiteral("expr -- void *$mo%1 = $mh%1 ? (void *)dlsym($mh%1, \"wind_tbapi_set_output_dir\") : (void *)0").arg(index),
-                QStringLiteral("expr -- long long $mov%1 = $mo%1 ? ((long long (*)(const char *))$mo%1)(\"%2\") : -9002").arg(index).arg(outputDir),
-                QStringLiteral("expr -- void *$mf%1 = $mh%1 ? (void *)dlsym($mh%1, \"wind_tbapi_subscribe\") : (void *)0").arg(index),
-                QStringLiteral("expr -- long long $mr%1 = $mf%1 ? ((long long (*)(const char *, int))$mf%1)(\"%2\", 1000) : -9002").arg(index).arg(escapedSymbol),
-                QStringLiteral("expr -- void *$mi%1 = $mh%1 ? (void *)dlsym($mh%1, \"wind_tbapi_subscription_id\") : (void *)0").arg(index),
-                QStringLiteral("expr -- long long $mid%1 = $mi%1 ? ((long long (*)(void))$mi%1)() : -9002").arg(index),
-                QStringLiteral("expr -- $mov%1").arg(index),
-                QStringLiteral("expr -- $mr%1").arg(index),
-                QStringLiteral("expr -- $mid%1").arg(index)});
-            planned.append(Session{symbol, pid, copy, -1});
-            ++index;
-        }
-        commands.append(QStringLiteral("process detach"));
-        const QString lldb = runLldb(pid, commands, error);
-        if (lldb.isEmpty()) return false;
-        bool allOk = true;
-        for (int i = 0; i < planned.size(); ++i) {
-            bool outputOk = false, callOk = false, idOk = false;
-            const qint64 outputResult = lldbInteger(lldb, QStringLiteral("$mov%1").arg(i), &outputOk);
-            const qint64 callResult = lldbInteger(lldb, QStringLiteral("$mr%1").arg(i), &callOk);
-            const qint64 id = lldbInteger(lldb, QStringLiteral("$mid%1").arg(i), &idOk);
-            const QString statusPath = QDir(rawDirectory()).filePath(
-                QStringLiteral("wind_tbapi_live_%1_status.json")
-                    .arg(QString(planned[i].symbol).replace(u'.', u'_')));
-            QFile statusFile(statusPath);
-            QJsonObject status;
-            if (statusFile.open(QIODevice::ReadOnly))
-                status = QJsonDocument::fromJson(statusFile.readAll()).object();
-            if (!outputOk || outputResult < 0 || !callOk || callResult < 0
-                || !idOk || id < 0
-                || !QStringList{QStringLiteral("modify_target"), QStringLiteral("subscribed")}
-                        .contains(status.value(QStringLiteral("status")).toString())
-                || status.value(QStringLiteral("code")).toInteger(-1) < 0) {
-                allOk = false;
-                continue;
-            }
-            planned[i].subId = id;
-            sessions_.insert(planned[i].symbol, planned[i]);
-        }
-        if (!allOk) {
-            QString stopError;
-            if (unsubscribePaths(pid, planned, &stopError)) {
-                for (const Session &session : std::as_const(planned))
-                    QFile::remove(session.dylibPath);
-            }
-            sessions_.clear();
-            if (error) *error = QStringLiteral("至少一个 TBAPI2 订阅未通过原生状态校验");
-            return false;
-        }
-        subscribed_ = true;
-        return true;
+    QString batchDirectory() const {
+        return QDir(rawDirectory()).filePath(QStringLiteral("batch-v1-%1").arg(batchPid_));
     }
-
-    bool unsubscribePaths(qint64 pid, const QList<Session> &sessions, QString *error) {
-        if (sessions.isEmpty()) return true;
-        if (!windPids().contains(pid)) return true; // A restarted Wind cannot retain old images.
-        QStringList commands;
-        for (int i = 0; i < sessions.size(); ++i) {
-            const QString path = escapedLldbString(sessions[i].dylibPath);
-            commands.append({
-                QStringLiteral("expr -- void *$sh%1 = (void *)dlopen(\"%2\", 0x6)").arg(i).arg(path),
-                QStringLiteral("expr -- void *$sf%1 = $sh%1 ? (void *)dlsym($sh%1, \"wind_tbapi_stop\") : (void *)0").arg(i),
-                QStringLiteral("expr -- long long $sr%1 = $sf%1 ? ((long long (*)(void))$sf%1)() : -9002").arg(i),
-                QStringLiteral("expr -- $sr%1").arg(i)});
-        }
-        commands.append(QStringLiteral("process detach"));
-        const QString result = runLldb(pid, commands, error);
-        if (result.isEmpty()) return false;
-        for (int i = 0; i < sessions.size(); ++i) {
-            bool ok = false;
-            if (lldbInteger(result, QStringLiteral("$sr%1").arg(i), &ok) < 0 || !ok) {
-                if (error) *error = QStringLiteral("TBAPI2 停订未确认");
-                return false;
-            }
+    QJsonObject batchState() const {
+        QFile f(QDir(batchDirectory()).filePath("state.json"));
+        if (!f.open(QIODevice::ReadOnly)) return {};
+        auto s=QJsonDocument::fromJson(f.readAll()).object();
+        if (s.value("pid").toInteger()!=batchPid_ || s.value("protocol").toInt()!=1
+            || QDateTime::currentMSecsSinceEpoch()/1000.0-s.value("time").toDouble()>5) return {};
+        return s;
+    }
+    bool renewBatchLease() const {
+        if (batchPid_<0) return true;
+        QSaveFile f(QDir(batchDirectory()).filePath("lease"));
+        return f.open(QIODevice::WriteOnly) && f.write("alive")==5 && f.commit();
+    }
+    bool batchCommand(const QStringList &symbols, QString *id, QString *error) {
+        *id=QUuid::createUuid().toString(QUuid::WithoutBraces);
+        QJsonObject intervals;
+        for (const auto &s:symbols) intervals.insert(s,poolSymbols_.contains(s)?5000:500);
+        QSaveFile f(QDir(batchDirectory()).filePath("command.json"));
+        auto bytes=QJsonDocument(QJsonObject{{"id",*id},{"symbols",QJsonArray::fromStringList(symbols)}, {"intervals",intervals}}).toJson(QJsonDocument::Compact);
+        if (!renewBatchLease() || !f.open(QIODevice::WriteOnly) || f.write(bytes)!=bytes.size() || !f.commit()) {
+            if(error)*error="无法提交批量订阅命令"; return false;
         }
         return true;
     }
-
+    bool waitBatch(const QStringList &symbols,const QString &id,QString *error) {
+        QElapsedTimer timer;timer.start();
+        while(timer.elapsed()<45000) {
+            if(!renewBatchLease()){if(error)*error="订阅租约写入失败";return false;}
+            const auto s=batchState();
+            if(s.value("command").toString()==id) {
+                if(!s.value("error").toString().isEmpty()){if(error)*error=s.value("error").toString();return false;}
+                QHash<QString,Session> found;
+                for(const auto &v:s.value("items").toArray()) {
+                    const auto row=v.toObject();const auto code=row.value("symbol").toString();
+                    if(symbols.contains(code) && row.value("sub_id").toInteger(-1)>=0)
+                        found.insert(code,Session{code,batchPid_,{},row.value("sub_id").toInteger()});
+                }
+                if(found.size()==symbols.size() && s.value("items").toArray().size()==symbols.size()) {
+                    sessions_=found;batchInstance_=s.value("instance").toString();return true;
+                }
+            }
+            QThread::msleep(50);
+        }
+        if(error)*error="进程内订阅命令 45 秒未确认；保留状态以便退订";
+        return false;
+    }
+    bool ensureBatch(QString *error) {
+        if(batchPid_>0 && !batchInstance_.isEmpty() && !batchState().isEmpty())return true;
+        if(!liveBoundaryReady(error))return false;
+        const auto pids=windPids();if(pids.size()!=1){if(error)*error="Wind 进程数必须为一";return false;}
+        if(!batchLock_) {
+            batchLock_=std::make_unique<QLockFile>(QDir(rawDirectory()).filePath("batch-controller.lock"));
+            batchLock_->setStaleLockTime(0);
+            if(!batchLock_->tryLock()){batchLock_.reset();if(error)*error="已有批量订阅控制器运行";return false;}
+        }
+        if(batchPid_!=pids.first()){batchPid_=pids.first();sessions_.clear();batchInstance_.clear();}
+        const QString directory=batchDirectory();
+        if(QFileInfo(directory).isSymLink() || !QDir().mkpath(directory)){if(error)*error="批量订阅目录不可用";return false;}
+        QFile::setPermissions(directory,QFileDevice::ReadOwner|QFileDevice::WriteOwner|QFileDevice::ExeOwner);
+        const QString packaged=QDir(QCoreApplication::applicationDirPath()).filePath("libmachome_wind_batch_probe.dylib");
+        const QString copy=QDir(directory).filePath("probe.dylib");
+        QFile metadata(QDir(directory).filePath("probe.sha256"));QString recorded;
+        if(metadata.open(QIODevice::ReadOnly))recorded=QString::fromUtf8(metadata.readAll()).trimmed();
+        auto state=batchState();
+        if(!state.isEmpty()) {
+            if(recorded!=sha256(packaged)){if(error)*error="Wind 已载入其他版本，请先正常重启 Wind";return false;}
+            batchInstance_=state.value("instance").toString();return true;
+        }
+        // Never load a second actor into a process after an uncertain initialization.
+        if(QFileInfo::exists(copy)){if(error)*error="已有批量探针但心跳不可用，请正常重启 Wind 后重试";return false;}
+        if(!QFile::copy(packaged,copy)){if(error)*error="批量探针复制失败";return false;}
+        QSaveFile m(metadata.fileName());if(!m.open(QIODevice::WriteOnly)||m.write(sha256(packaged).toUtf8())!=64||!m.commit()){if(error)*error="探针校验记录失败";return false;}
+        QString commandId;
+        if(!batchCommand({},&commandId,error))return false;
+        const auto result=runLldb(batchPid_,{
+            "thread select 1",
+            QStringLiteral("expr -- void *$mb = (void *)dlopen(\"%1\", 0x6)").arg(escapedLldbString(copy)),
+            "expr -- void *$mbf = $mb ? (void *)dlsym($mb, \"machome_batch_start\") : (void *)0",
+            QStringLiteral("expr -- int $mbr = $mbf ? ((int (*)(const char *))$mbf)(\"%1\") : -9002").arg(escapedLldbString(directory)),
+            "expr -- $mbr","process detach"},error);
+        bool ok=false;if(lldbInteger(result,"$mbr",&ok)!=0||!ok){if(error && error->isEmpty())*error="批量探针初始化失败";return false;}
+        return waitBatch({},commandId,error);
+    }
+    bool subscribeLive(const QStringList &symbols,QString *error,bool additive=false) {
+        static const QRegularExpression safe("^[0-9]{6}\\.S[ZH]$");
+        for(const auto &s:symbols)if(!safe.match(s).hasMatch()){if(error)*error="不安全的 Wind 代码";return false;}
+        if(!ensureBatch(error))return false;
+        QStringList target=additive?sessions_.keys():QStringList{};
+        for(const auto &s:symbols)if(!target.contains(s))target.append(s);
+        if(target.size()>256){if(error)*error="订阅数超过上限";return false;}
+        QString id;
+        if(!batchCommand(target,&id,error)||!waitBatch(target,id,error))return false;
+        subscribed_=true;return true;
+    }
     bool unsubscribeLive(QString *error) {
-        if (sessions_.isEmpty()) { subscribed_ = false; return true; }
-        QHash<qint64, QList<Session>> grouped;
-        for (const Session &session : std::as_const(sessions_))
-            grouped[session.pid].append(session);
-        for (auto it = grouped.constBegin(); it != grouped.constEnd(); ++it) {
-            if (!unsubscribePaths(it.key(), it.value(), error)) return false;
-        }
-        for (const Session &session : std::as_const(sessions_)) QFile::remove(session.dylibPath);
-        sessions_.clear();
-        subscribed_ = false;
-        return true;
+        pendingAdds_.clear();
+        if(batchPid_<0 || !windPids().contains(batchPid_)){sessions_.clear();subscribed_=false;return true;}
+        QString id;
+        if(!batchCommand({},&id,error)||!waitBatch({},id,error))return false;
+        subscribed_=false;seenMtime_.clear();return true;
     }
 
     void publishStatus() {
@@ -660,7 +660,18 @@ private:
                                    {QStringLiteral("symbol"), symbols.first()}});
                 }
             } else fail(QStringLiteral("helper_disabled"), QStringLiteral("Wind helper 未启用"), command);
+        } else if (action == QStringLiteral("subscribe_add")) {
+            const auto values=command.value("symbols").toArray();
+            if (!subscribed_ || values.size()>150) return;
+            for (const auto &v:values) {
+                const QString s=v.toString().trimmed().toUpper();
+                static const QRegularExpression safe(QStringLiteral("^1[0-9]{5}\\.SZ$"));
+                if (!safe.match(s).hasMatch()) { output({{"type","pool_subscription"},{"symbol",s},{"ok",false},{"error","Invalid SZ ETF code"}}); continue; }
+                if (!poolSymbols_.contains(s)) poolSymbols_.append(s);
+                if (!pendingAdds_.contains(s)) pendingAdds_.append(s);
+            }
         } else if (action == QStringLiteral("subscribe")) {
+            pendingAdds_.clear();
             if (mode_ == QStringLiteral("fixture")) {
                 subscribed_ = true;
                 output({{QStringLiteral("type"), QStringLiteral("status")},
@@ -684,6 +695,7 @@ private:
                              {QStringLiteral("abi_verified"), true}});
             } else fail(QStringLiteral("helper_disabled"), QStringLiteral("Wind helper 未启用"));
         } else if (action == QStringLiteral("unsubscribe")) {
+            pendingAdds_.clear();
             QString error;
             if (mode_ == QStringLiteral("live") && !unsubscribeLive(&error)) {
                 fail(QStringLiteral("unsubscribe_unconfirmed"), error, command);
@@ -701,13 +713,22 @@ private:
         }
     }
 
+    void addNextSymbol() {
+        if(!subscribed_ || pendingAdds_.isEmpty())return;
+        const QStringList added=pendingAdds_;pendingAdds_.clear();
+        QString error;const bool ok=mode_=="fixture" || subscribeLive(added,&error,true);
+        for(const auto &symbol:added)output({{"type","pool_subscription"},{"symbol",symbol},{"ok",ok},
+            {"sub_id",ok?(mode_=="fixture"?qint64(1):sessions_.value(symbol).subId):qint64(-1)}, {"error",error.left(2000)}});
+        pollCaptures();
+    }
+
     void pollCaptures() {
         if (!subscribed_) return;
         const bool live = mode_ == QStringLiteral("live");
-        const QDir directory(live ? rawDirectory()
+        const QDir directory(live ? batchDirectory()
                                   : QDir(dataRoot_).filePath(QStringLiteral("captures")));
         for (const QFileInfo &info : directory.entryInfoList(
-                 {live ? QStringLiteral("wind_tbapi_live_[0-9]*_S?.json")
+                 {live ? QStringLiteral("capture_*.json")
                        : QStringLiteral("*.json")}, QDir::Files | QDir::NoSymLinks,
                  QDir::Name)) {
             if (seenMtime_.value(info.absoluteFilePath()) >= info.lastModified().toMSecsSinceEpoch()) continue;
@@ -721,10 +742,18 @@ private:
             }
             QJsonObject payload = document.object();
             if (live) {
+                const QString code=payload.value("requested_windcode").toString();
+                if (payload.value("instance").toString()!=batchInstance_ || !sessions_.contains(code) || sessions_[code].pid!=payload.value("source_pid").toInteger()
+                    || sessions_[code].subId!=payload.value("sub_id").toInteger(-1)) continue;
+                // decodeRawCapture provides the canonical symbol; source checks also happen there.
+            }
+            if (live) {
                 QString error;
                 QJsonObject decoded;
                 if (!decodeRawCapture(payload, &decoded, &error)) {
-                    fail(QStringLiteral("capture_decode_failed"), error);
+                    const QString code=payload.value("requested_windcode").toString();
+                    if (poolSymbols_.contains(code)) output({{"type","pool_capture_error"},{"symbol",code},{"error",error}});
+                    else fail(QStringLiteral("capture_decode_failed"), error);
                     continue;
                 }
                 payload = decoded;
@@ -742,6 +771,9 @@ private:
         }
     }
 
+    qint64 batchPid_=-1;
+    QString batchInstance_;
+    std::unique_ptr<QLockFile> batchLock_;
     QString mode_;
     QString dataRoot_;
     bool allowWindControl_ = false;
@@ -751,6 +783,9 @@ private:
     QByteArray commandBuffer_;
     QSocketNotifier *notifier_ = nullptr;
     QTimer poll_;
+    QTimer addTimer_;
+    QStringList pendingAdds_;
+    QStringList poolSymbols_;
 };
 
 } // namespace

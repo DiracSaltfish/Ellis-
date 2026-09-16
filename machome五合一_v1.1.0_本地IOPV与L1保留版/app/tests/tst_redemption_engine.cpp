@@ -49,6 +49,92 @@ hub::ModuleContext context(const QString &root) {
 class RedemptionEngineTest final : public QObject {
     Q_OBJECT
 private slots:
+    void hkPoolIsPrivateAndComputesRatios() {
+        QTemporaryDir root; auto ctx=context(root.path());
+        ctx.settings.insert("hk_connect_pool",QJsonObject{{"enabled",true},{"symbols",QJsonArray{
+            QJsonObject{{"symbol","158000.SZ"},{"name","港股通金融ETF"}}}}});
+        RedemptionEngine engine; engine.setNowForTest(shanghai(10,0)); engine.initialize(ctx);
+        QCOMPARE(engine.snapshot()["items"].toArray().size(),7);
+        QCOMPARE(engine.hkSnapshot()["items"].toArray().size(),1);
+        auto cap=fixture()["baseline"].toObject();cap["windcode"]="158000.SZ";
+        QString error; QVERIFY2(engine.ingestCaptureForTest(cap,&error),qPrintable(error));
+        auto pcf=fixture()["pcf"].toObject();pcf["symbol"]="158000";
+        QVERIFY2(engine.installPcfForTest("158000",pcf,&error),qPrintable(error));
+        QSignalSpy events(&engine,&hub::IModuleEngine::eventReady);
+        cap["observed_at"]="2026-09-04T09:31:00+08:00";
+        cap["values"]=QJsonObject{{"etfbuynumber",2},{"etfbuyamount",5000000},{"etfsellnumber",1},{"etfsellamount",1000000}};
+        QVERIFY(engine.ingestCaptureForTest(cap,&error));
+        QCOMPARE(events.size(),0); // no legacy changes or notification decisions
+        const auto flow=engine.hkSnapshot()["items"].toArray()[0].toObject()["flow"].toObject();
+        QCOMPARE(flow["buy_baskets"].toDouble(),5.0);QCOMPARE(flow["sell_baskets"].toDouble(),1.0);
+        QCOMPARE(flow["net_baskets"].toDouble(),4.0);QCOMPARE(flow["ratio"].toDouble(),5.0);
+        QVERIFY(!flow["alerts_enabled"].toBool());
+        QVERIFY(!QJsonDocument(engine.snapshot()).toJson().contains("158000"));
+        engine.setNowForTest(shanghai(10,0,0,2026,9,7));
+        QVERIFY(engine.hkSnapshot()["items"].toArray()[0].toObject()["values"].toObject().isEmpty());
+    }
+    void hkPartialFailureKeepsLegacyAndHistoryPrivate() {
+        QTemporaryDir root; QFile helper(root.filePath("pool-helper.py")); QVERIFY(helper.open(QIODevice::WriteOnly));
+        helper.write(R"PY(#!/usr/bin/env python3
+import sys,json
+def emit(m):print(json.dumps(m),flush=True)
+emit({'type':'hello','protocol':1});emit({'type':'status','state':'ready','wind_running':True,'tbapi_loaded':True})
+for line in sys.stdin:
+ c=json.loads(line);a=c['action']
+ if a=='quit':break
+ if a=='warmup':emit({'type':'command_result','action':a,'ok':True,'details':{'warmup_completed':True,'unsubscribe_confirmed':True}})
+ if a=='subscribe':emit({'type':'status','state':'subscribed','wind_running':True,'tbapi_loaded':True})
+ if a=='subscribe_add':
+  emit({'type':'pool_subscription','symbol':'158000.SZ','ok':True,'sub_id':123})
+  emit({'type':'pool_subscription','symbol':'158003.SZ','ok':False,'error':'simulated unsupported field'})
+  for minute,buy in [(30,1000000),(31,5000000)]:
+   emit({'type':'capture','payload':{'windcode':'158000.SZ','observed_at':f'2026-09-04T09:{minute}:00+08:00','sub_id':123,'values':{'etfbuynumber':1,'etfbuyamount':buy,'etfsellnumber':1,'etfsellamount':1000000}}})
+ if a=='unsubscribe':emit({'type':'status','state':'ready','unsubscribed':True})
+)PY");
+        helper.close();helper.setPermissions(QFile::ReadOwner|QFile::WriteOwner|QFile::ExeOwner);
+        auto ctx=context(root.path());ctx.settings["wind_helper_mode"]="fixture";ctx.settings["wind_helper_path"]=helper.fileName();
+        ctx.settings["compatibility_api_enabled"]=true;ctx.settings["compatibility_port"]=0;
+        ctx.settings["hk_connect_pool"]=QJsonObject{{"enabled",true},{"symbols",QJsonArray{
+          QJsonObject{{"symbol","158000.SZ"}},QJsonObject{{"symbol","158003.SZ"}}}}};
+        RedemptionEngine engine;engine.setNowForTest(shanghai(9,15,5));engine.initialize(ctx);
+        QSignalSpy events(&engine,&hub::IModuleEngine::eventReady);engine.start();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.snapshot()["wind"].toObject()["state"].toString(),QString("ready"),3000);
+        engine.setNowForTest(shanghai(10,0));engine.evaluateScheduleForTest();
+        QTRY_COMPARE_WITH_TIMEOUT(engine.hkSnapshot()["items"].toArray()[0].toObject()["values"].toObject()["etfbuyamount"].toDouble(),5000000.0,6000);
+        QVERIFY(engine.snapshot()["monitoring"].toBool());QCOMPARE(engine.snapshot()["wind"].toObject()["state"].toString(),QString("subscribed"));
+        QVERIFY(!engine.hkSnapshot()["items"].toArray()[1].toObject()["error"].toString().isEmpty());
+        for(const auto &e:events) QVERIFY(e[0].toString()!="redemption.change");
+        auto pcf=fixture()["pcf"].toObject();pcf["symbol"]="158000";QString error;QVERIFY(engine.installPcfForTest("158000",pcf,&error));
+        for(const auto &path:QStringList{"/api/v1/snapshot","/api/v1/watchlist","/api/v1/history?date=2026-09-04","/api/v1/pcf","/api/v1/pcf/158000"}) {
+            QTcpSocket socket;socket.connectToHost(QHostAddress::LocalHost,engine.compatibilityPortForTest());
+            QTRY_COMPARE(socket.state(),QAbstractSocket::ConnectedState);
+            socket.write("GET "+path.toUtf8()+" HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n");socket.flush();
+            QTRY_COMPARE(socket.state(),QAbstractSocket::UnconnectedState);const auto reply=socket.readAll();
+            QVERIFY(!reply.contains("158000"));
+            if(path.endsWith("158000"))QVERIFY(reply.startsWith("HTTP/1.1 404"));
+        }
+        engine.stop();QFile snapshot(root.filePath("hk-connect-snapshot.json"));QVERIFY(snapshot.open(QIODevice::ReadOnly));
+        QVERIFY(!QJsonDocument::fromJson(snapshot.readAll()).object()["monitoring"].toBool());
+    }
+
+    void hkRatioHandlesZeroMissingAndStalePcf() {
+        auto pcf=fixture()["pcf"].toObject(); auto day=QDate(2026,9,4);
+        auto flow=RedemptionCore::flowRatio({},pcf,day);QVERIFY(flow["ratio"].isNull());
+        flow=RedemptionCore::flowRatio({{"etfbuyamount",0},{"etfsellamount",0}},pcf,day);
+        QCOMPARE(flow["ratio_label"].toString(),QString("无申赎"));QVERIFY(flow["ratio"].isNull());
+        flow=RedemptionCore::flowRatio({{"etfbuyamount",5000000},{"etfsellamount",0}},pcf,day);
+        QCOMPARE(flow["ratio_label"].toString(),QString("仅申购"));QVERIFY(flow["ratio"].isNull());
+        flow=RedemptionCore::flowRatio({{"etfbuyamount",0},{"etfsellamount",1000000}},pcf,day);
+        QCOMPARE(flow["ratio_label"].toString(),QString("仅赎回"));
+        flow=RedemptionCore::flowRatio({{"etfbuyamount",5000000},{"etfsellamount",1000000}},pcf,day.addDays(1));
+        QVERIFY(flow["buy_baskets"].isNull());QCOMPARE(flow["ratio"].toDouble(),5.0);
+    }
+    void invalidHkPoolDoesNotBreakLegacy() {
+        QTemporaryDir root;auto ctx=context(root.path());ctx.settings["hk_connect_pool"]=QJsonObject{{"enabled",true},
+          {"symbols",QJsonArray{QJsonObject{{"symbol","513000.SH"}}}}};
+        RedemptionEngine engine;engine.initialize(ctx);QCOMPARE(engine.snapshot()["items"].toArray().size(),7);
+        QVERIFY(!engine.hkSnapshot()["error"].toString().isEmpty());QVERIFY(engine.hkSnapshot()["items"].toArray().isEmpty());
+    }
     void windLifecycleChecksRealStatusAcrossIdleAndLaunchWindows() {
         QTemporaryDir root;
         QFile helper(root.filePath("lifecycle.py")); QVERIFY(helper.open(QIODevice::WriteOnly));

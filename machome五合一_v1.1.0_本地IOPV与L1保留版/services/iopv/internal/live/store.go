@@ -22,7 +22,7 @@ func OpenStore(path string) (*Store, error) {
 		return nil, e
 	}
 	db.SetMaxOpenConns(1)
-	_, e = db.Exec(`CREATE TABLE IF NOT EXISTS fx_blocks(bucket TEXT PRIMARY KEY,trade_date TEXT NOT NULL,payload BLOB NOT NULL,point_count INTEGER NOT NULL) WITHOUT ROWID; CREATE TABLE IF NOT EXISTS minute_blocks(symbol TEXT NOT NULL,trade_date TEXT NOT NULL,payload BLOB NOT NULL,point_count INTEGER NOT NULL,PRIMARY KEY(symbol,trade_date)) WITHOUT ROWID; CREATE TABLE IF NOT EXISTS minutes(symbol TEXT NOT NULL,trade_date TEXT NOT NULL,minute TEXT NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(symbol,trade_date,minute)); CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY,at TEXT NOT NULL,kind TEXT NOT NULL,message TEXT NOT NULL); CREATE TABLE IF NOT EXISTS pcf(symbol TEXT NOT NULL,trade_date TEXT NOT NULL,hash TEXT NOT NULL,raw BLOB NOT NULL,fetched_at TEXT NOT NULL,PRIMARY KEY(symbol,trade_date,hash)); CREATE TABLE IF NOT EXISTS suspensions(trade_date TEXT NOT NULL,symbol TEXT NOT NULL,status TEXT NOT NULL,note TEXT NOT NULL,confirmed_at TEXT NOT NULL,PRIMARY KEY(trade_date,symbol)); CREATE TABLE IF NOT EXISTS fx(at TEXT PRIMARY KEY,trade_date TEXT NOT NULL,payload BLOB NOT NULL);`)
+	_, e = db.Exec(`CREATE TABLE IF NOT EXISTS ranking_snapshots(trade_date TEXT NOT NULL,slot TEXT NOT NULL CHECK(slot IN ('14:00','14:30','15:00')),payload TEXT NOT NULL,PRIMARY KEY(trade_date,slot)) WITHOUT ROWID; CREATE TABLE IF NOT EXISTS daily_shares(symbol TEXT NOT NULL,trade_date TEXT NOT NULL,shares_10k REAL,share_change_10k REAL,source TEXT NOT NULL,source_updated_at TEXT NOT NULL,PRIMARY KEY(symbol,trade_date)) WITHOUT ROWID; CREATE TABLE IF NOT EXISTS fx_blocks(bucket TEXT PRIMARY KEY,trade_date TEXT NOT NULL,payload BLOB NOT NULL,point_count INTEGER NOT NULL) WITHOUT ROWID; CREATE TABLE IF NOT EXISTS minute_blocks(symbol TEXT NOT NULL,trade_date TEXT NOT NULL,payload BLOB NOT NULL,point_count INTEGER NOT NULL,PRIMARY KEY(symbol,trade_date)) WITHOUT ROWID; CREATE TABLE IF NOT EXISTS minutes(symbol TEXT NOT NULL,trade_date TEXT NOT NULL,minute TEXT NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(symbol,trade_date,minute)); CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY,at TEXT NOT NULL,kind TEXT NOT NULL,message TEXT NOT NULL); CREATE TABLE IF NOT EXISTS pcf(symbol TEXT NOT NULL,trade_date TEXT NOT NULL,hash TEXT NOT NULL,raw BLOB NOT NULL,fetched_at TEXT NOT NULL,PRIMARY KEY(symbol,trade_date,hash)); CREATE TABLE IF NOT EXISTS suspensions(trade_date TEXT NOT NULL,symbol TEXT NOT NULL,status TEXT NOT NULL,note TEXT NOT NULL,confirmed_at TEXT NOT NULL,PRIMARY KEY(trade_date,symbol)); CREATE TABLE IF NOT EXISTS fx(at TEXT PRIMARY KEY,trade_date TEXT NOT NULL,payload BLOB NOT NULL);`)
 	if e != nil {
 		db.Close()
 		return nil, e
@@ -85,7 +85,7 @@ func (s *Store) History(symbol, date string) ([]Point, error) {
 	return out, nil
 }
 func (s *Store) Dates(symbol string) ([]string, error) {
-	r, e := s.DB.Query("SELECT trade_date FROM minutes WHERE symbol=? UNION SELECT trade_date FROM minute_blocks WHERE symbol=? ORDER BY trade_date DESC LIMIT 120", symbol, symbol)
+	r, e := s.DB.Query("SELECT trade_date FROM minutes WHERE symbol=? UNION SELECT trade_date FROM minute_blocks WHERE symbol=? ORDER BY trade_date DESC", symbol, symbol)
 	if e != nil {
 		return nil, e
 	}

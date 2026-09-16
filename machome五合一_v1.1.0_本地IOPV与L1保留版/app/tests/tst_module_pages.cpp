@@ -30,6 +30,19 @@ class ModulePagesTests final : public QObject {
     Q_OBJECT
 
 private slots:
+    void hkPoolRendersWithoutLegacyAlerts() {
+        hub::ModuleConfig config; config.id="redemption";config.adapter="realtime";config.engine="native";
+        hub::RealtimePage page(config); QSignalSpy alerts(&page,&hub::ModulePage::alertRequested);
+        QJsonObject row{{"symbol","158000"},{"name","港股通金融ETF"},{"values",QJsonObject{}},
+            {"flow",QJsonObject{{"ratio_label","等待数据"}}},{"status","等待首帧"}};
+        QJsonObject hk{{"trading_day","2026-09-15"},{"items",QJsonArray{row}}};
+        page.applySnapshot({{"payload",QJsonObject{{"telemetry",QJsonObject{{"snapshot",QJsonObject{{"hk_connect",hk}}}}}}}});
+        auto *table=page.findChild<QTableWidget *>("hkConnectRedemptionTable");QVERIFY(table);
+        QCOMPARE(table->rowCount(),1);QCOMPARE(table->item(0,0)->text(),QString("158000"));
+        QCOMPARE(table->item(0,2)->text(),QString("—"));
+        page.applyEvent({{"event_kind","redemption.hk_change"},{"payload",QJsonObject{{"items",QJsonArray{row}}}}});
+        QVERIFY(alerts.isEmpty());
+    }
     void viewSortingPreservesSourceRowsAndDetailIdentity() {
         auto *source=hub::ui::jsonTable({"代码","价格"});source->setRowCount(2);
         source->setItem(0,0,new QTableWidgetItem("AAA"));source->setItem(0,1,new QTableWidgetItem("10.5"));

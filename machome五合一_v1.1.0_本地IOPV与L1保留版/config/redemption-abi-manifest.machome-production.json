@@ -2,8 +2,13 @@
   "schema_version": 1,
   "approved": true,
   "wind_executable_sha256": "c272d3ec569473ed0d9b7f79942546b263f9301046219b818497daee7c79b419",
-  "probe_sha256": "aac0136589b57e1777a36824d5c66c7bf1890816c2a4dee01ca09d168a461b9d",
-  "approved_host": "EllisdeMac-mini.local",
-  "approved_at": "2026-09-04T22:43:57+08:00",
-  "scope": "read-only Wind TBAPI2 canary for MachomeHub native RedemptionEngine"
+  "probe_sha256": "6b23796ec474313a5cc9a633495de6b789a296b667468fc5b7fab0d15652a167",
+  "scope": "2026-09-07 user-authorized real-market read-only monitor cutover; no order APIs",
+  "basis": "Reviewed CJAVA subscription-only ABI matching original working probe: module size 0x28, global offset 0xB0568; runtime callback verification required",
+  "revalidation": {
+    "date": "2026-09-11",
+    "reason": "Installed probe compared with previously approved candidate. All unsigned bytes identical except __LINKEDIT vmsize (16384 -> 32768); code/data sections identical. Wind executable hash unchanged. Refresh signed-file hash after deployment signing."
+  },
+  "batch_probe_sha256": "ce70102d74dc152b1552bba6f0e4c42b31ca5be9a503bd0d532928b888dbfd0c",
+  "tbapi_sha256": "8341e1e06fe1370ccb1794528db5937edca0d277c862bded307d1a3040f88a7b"
 }

@@ -30,7 +30,13 @@ type Config struct {
 	Universe            string   `json:"universe_file"`
 }
 type Service struct {
+	connect         connectSnapshot
+	ranking         rankingCache
+	sinaDaily       SinaDailyPlan
+	sinaDiagnostics map[string]SinaDiagnostic
 	sinaQuotes      map[string]Quote
+	sinaVerified    map[string]bool
+	sinaProbeCursor int
 	sinaLastAttempt time.Time
 	nowForSchedule  func() time.Time
 	signalSettings  SignalSettings
@@ -75,11 +81,18 @@ func New(cfg Config) (*Service, error) {
 	if e = json.Unmarshal(raw, &u); e != nil {
 		return nil, e
 	}
+	for i := range u.Candidates {
+		if u.Candidates[i].QC == "WATCHLIST_PENDING_QC" {
+			u.Candidates[i].Name += "（估值待核验）"
+		}
+	}
 	st, e := OpenStore(filepath.Join(cfg.DataDir, "iopv.sqlite"))
 	if e != nil {
 		return nil, e
 	}
 	s := &Service{cfg: cfg, store: st, candidates: u.Candidates, baskets: map[string]iopv.Basket{}, quotes: map[string]Quote{}, latest: map[string]Point{}, pending: map[string]map[string]Point{}, errors: map[string]string{}, feedState: "starting", refresh: make(chan struct{}, 1), restart: make(chan struct{}, 1), runID: fmt.Sprint(time.Now().UnixNano()), started: time.Now(), activeDay: Day(time.Now())}
+	s.loadSinaPlan(time.Now())
+	s.loadConnect()
 	s.signalSettings = defaultSignalSettings()
 	if raw, e := os.ReadFile(filepath.Join(cfg.DataDir, "signal-settings.json")); e == nil {
 		var v SignalSettings
@@ -208,6 +221,7 @@ func (s *Service) RefreshPCF(ctx context.Context) {
 }
 func (s *Service) RefreshFX(ctx context.Context) {
 	req, _ := http.NewRequestWithContext(ctx, "GET", "https://1navs.com/api/v1/private/hk-connect-fx", nil)
+	req.Header.Set("User-Agent", "Mozilla/5.0 MachomeIOPV/1.1")
 	resp, e := (&http.Client{Timeout: 15 * time.Second}).Do(req)
 	if e != nil {
 		s.setError("fx", fmt.Errorf("FX network unavailable"))
@@ -238,6 +252,9 @@ func (s *Service) RefreshFX(ctx context.Context) {
 	s.setError("fx_storage", e)
 }
 func (s *Service) Run(ctx context.Context) {
+	go s.connectLoop(ctx)
+	go s.rankingLoop(ctx)
+	go s.modelSharesLoop(ctx)
 	go s.feedLoop(ctx)
 	go s.sinaLoop(ctx)
 	go func() {
@@ -468,7 +485,7 @@ func (s *Service) calculateGroup(now time.Time, g int) {
 				if p.Oldest.IsZero() || q.Observed.Before(p.Oldest) {
 					p.Oldest = q.Observed
 				}
-				if now.Sub(q.Observed) > 120*time.Second || now.Sub(q.Received) > 120*time.Second {
+				if !hkLastTradeUsable(q, now) && (now.Sub(q.Observed) > 120*time.Second || now.Sub(q.Received) > 120*time.Second) {
 					p.Stale = append(p.Stale, c.Symbol)
 				}
 			} else {
@@ -499,7 +516,7 @@ func (s *Service) calculateGroup(now time.Time, g int) {
 				status = "available"
 			}
 			q, _ := s.componentQuote(c.Symbol, now)
-			p.ComponentIssues = append(p.ComponentIssues, ComponentIssue{Symbol: c.Symbol, Name: c.Name, QuoteStatus: status, SuspensionStatus: state.Status, Note: state.Note, Observed: q.Observed, Source: q.Source})
+			p.ComponentIssues = append(p.ComponentIssues, ComponentIssue{Symbol: c.Symbol, Name: c.Name, QuoteStatus: status, SuspensionStatus: state.Status, Note: state.Note, Observed: q.Observed, Source: q.Source, Received: q.Received, Price: q.Price})
 		}
 		if len(p.Suspended) > 0 {
 			p.Reasons = append(p.Reasons, "SUSPENDED_COMPONENT")
@@ -658,5 +675,5 @@ func (s *Service) Health() map[string]any {
 	for k, v := range s.errors {
 		errs[k] = v
 	}
-	return map[string]any{"sina_fallback_symbols": s.sinaSymbols(), "sina_quote_count": len(s.sinaQuotes), "sina_last_attempt": s.sinaLastAttempt, "quote_window_open": quoteWindow(time.Now()), "fx_polling": fxPolling(time.Now()), "active_subscriptions": len(subscriptionSymbols(s.plan.Subscriptions, time.Now())), "subscription_schedule": "09:15–15:01 CN (close buffer); 09:15–16:10 HK", "active_date": s.activeDay, "pcf_schedule": "08:40 Asia/Shanghai weekdays; retry missing every 5m until 16:08", "pcf_last_attempt": s.pcfLastAttempt, "pcf_complete_date": s.pcfCompleteDate, "pcf_next_attempt": nextPCFAttempt(time.Now(), s.pcfLastAttempt, s.pcfCompleteDate), "signal_basis": s.cfg.SignalBasis, "shared_l1": s.cfg.L1Address != "", "schema_version": "intranet-iopv.v1", "mode": "live", "now": time.Now().In(Zone), "started_at": s.started, "run_id": s.runID, "feed_state": s.feedState, "feed_at": s.feedAt, "session": s.session, "frames": s.frames, "rejected_frames": s.rejected, "pcf_ready": len(s.baskets), "candidates": len(s.candidates), "subscriptions": len(s.plan.Subscriptions), "quote_count": len(s.quotes), "group_loads": s.plan.Loads, "sequence": s.sequence, "paused": s.paused, "last_write_at": s.lastWrite, "written_rows": s.written, "errors": errs}
+	return map[string]any{"sina_daily_plan": s.sinaDaily, "sina_diagnostics": s.sinaDiagnosticsCopy(), "sina_fallback_symbols": s.sinaSymbols(), "sina_quote_count": len(s.sinaQuotes), "sina_last_attempt": s.sinaLastAttempt, "quote_window_open": quoteWindow(time.Now()), "fx_polling": fxPolling(time.Now()), "active_subscriptions": len(subscriptionSymbols(s.plan.Subscriptions, time.Now())), "subscription_schedule": "09:15–15:01 CN (close buffer); 09:15–16:10 HK", "active_date": s.activeDay, "pcf_schedule": "08:40 Asia/Shanghai weekdays; retry missing every 5m until 16:08", "pcf_last_attempt": s.pcfLastAttempt, "pcf_complete_date": s.pcfCompleteDate, "pcf_next_attempt": nextPCFAttempt(time.Now(), s.pcfLastAttempt, s.pcfCompleteDate), "signal_basis": s.cfg.SignalBasis, "shared_l1": s.cfg.L1Address != "", "schema_version": "intranet-iopv.v1", "mode": "live", "now": time.Now().In(Zone), "started_at": s.started, "run_id": s.runID, "feed_state": s.feedState, "feed_at": s.feedAt, "session": s.session, "frames": s.frames, "rejected_frames": s.rejected, "pcf_ready": len(s.baskets), "candidates": len(s.candidates), "subscriptions": len(s.plan.Subscriptions), "quote_count": len(s.quotes), "group_loads": s.plan.Loads, "sequence": s.sequence, "paused": s.paused, "last_write_at": s.lastWrite, "written_rows": s.written, "errors": errs}
 }

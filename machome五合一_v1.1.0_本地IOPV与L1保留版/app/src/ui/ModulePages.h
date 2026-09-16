@@ -216,6 +216,9 @@ private:
     void openPcfForRow(int row);
 
     QTableWidget *snapshotTable_ = nullptr;
+    QTableWidget *hkTable_ = nullptr;
+    QLabel *hkStatus_ = nullptr;
+    void updateHkPool(const QJsonObject &pool);
     QTableWidget *historyTable_ = nullptr;
     QTreeWidget *runtimeTree_ = nullptr;
     QPlainTextEdit *watchlistEdit_ = nullptr;

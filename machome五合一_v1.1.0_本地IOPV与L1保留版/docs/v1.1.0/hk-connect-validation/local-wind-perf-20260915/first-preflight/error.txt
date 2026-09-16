@@ -1,0 +1,19 @@
+LLDB failed: 
+* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP
+       frame #0: 0x0000000196d68c20 libsystem_kernel.dylib`mach_msg2_trap + 8
+libsystem_kernel.dylib`mach_msg2_trap:
+->  0x196d68c20 <+8>: ret    
+
+libsystem_kernel.dylib`macx_swapon:
+    0x196d68c24 <+0>: mov    x16, #-0x30               ; =-48 
+    0x196d68c28 <+4>: svc    #0x80
+    0x196d68c2c <+8>: ret    
+Target 0: (WindPersonFree) stopped.
+Executable binary set to "/Applications/WindPersonFree.app/Contents/MacOS/WindPersonFree".
+Architecture set to: arm64-apple-macosx-.
+(lldb) expr -- void *$hp0 = (void *)dlopen("/Users/ellis/Library/Containers/com.windin.mac.free/Data/tmp/machome-hk-perf-20260915/perf_500_0.dylib", 0x6)
+(lldb) expr -- long long $out0 = ((long long (*)(const char *))dlsym($hp0, "wind_tbapi_set_output_dir"))("/Users/ellis/Library/Containers/com.windin.mac.free/Data/tmp/machome-hk-perf-20260915")
+(lldb) expr -- long long $sub0 = ((long long (*)(const char *, int))dlsym($hp0, "wind_tbapi_subscribe"))("159120.SZ", 500)
+               
+error: Expression execution was interrupted: EXC_BAD_ACCESS (code=1, address=0x0).
+The process has been returned to the state before expression evaluation.
